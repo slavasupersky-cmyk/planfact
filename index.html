@@ -4,24 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>ТоПФ — Прототипы</title>
 <style>
 :root{
   color-scheme:light dark;
-  --ink:#101112; --ink-2:#3A3D42; --mute:#8C9199;
+  --ink:#101112; --ink-2:#33363B; --mute:#6E747B;
   --line:#DCDCD6; --paper:#F3F3EF; --card:#FFFFFF;
   --surface-2:#EAEAE4; --dot:#8CCC00; --on-dot:#12160A; --star:#B97400;
 }
 @media (prefers-color-scheme:dark){
-  :root{--ink:#F1F2ED;--ink-2:#BEC2B9;--mute:#868B80;--line:#2E322B;--paper:#121410;--card:#1A1D17;--surface-2:#282D22;--star:#D9A03A}
+  :root{--ink:#F1F2ED;--ink-2:#BEC2B9;--mute:#9BA294;--line:#2E322B;--paper:#121410;--card:#1A1D17;--surface-2:#282D22;--star:#D9A03A}
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--paper);color:var(--ink);
-  font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;line-height:1.45}
+  font-family:system-ui,-apple-system,"Segoe UI Variable","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.5}
 .wrap{max-width:520px;margin:0 auto;padding:40px 16px 60px}
 .mark{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1}
 .mark i{font-style:normal;color:var(--dot)}
-.sub{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin:7px 0 26px}
+.sub{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin:7px 0 26px}
 h1{font-size:24px;letter-spacing:-.025em;margin:0 0 6px;font-weight:800}
 .lede{color:var(--ink-2);font-size:14.5px;margin:0 0 24px}
 a.card{display:flex;gap:13px;align-items:center;text-decoration:none;color:inherit;
@@ -30,8 +33,8 @@ a.card.off{opacity:.55;pointer-events:none}
 .ic{width:42px;height:42px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:20px}
 .tx{flex:1;min-width:0}
 .tx b{display:block;font-size:16.5px;letter-spacing:-.01em}
-.tx span{font-size:13px;color:var(--ink-2)}
-.tag{font-family:ui-monospace,Menlo,monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+.tx span{font-size:13.5px;color:var(--ink-2)}
+.tag{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
   background:var(--dot);color:var(--on-dot);border-radius:6px;padding:3px 7px;flex:none;font-weight:700}
 .tag.soon{background:var(--surface-2);color:var(--mute);font-weight:400}
 .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--star);border-radius:14px;padding:15px;margin-top:22px;font-size:13.5px;color:var(--ink-2)}
