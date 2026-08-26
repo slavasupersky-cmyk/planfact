@@ -45,6 +45,11 @@ button{font-family:inherit}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .grid4 div,.grid3 div{background:var(--surface);border-radius:10px;padding:8px 5px;text-align:center}
+.grid4 button{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 5px;text-align:center;color:inherit;width:100%}
+.grid4 button:active{background:var(--surface-2)}
+.tabs.sub button{padding:10px 6px;font-size:13px;font-weight:500}
+.tabs.sub button.on{background:var(--surface-2);color:var(--ink);border-color:var(--line);font-weight:700}
+.dayrow .rt{font-size:13px}
 .grid4 b,.grid3 b{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em}
 b.good{color:var(--dot)} b.bad{color:var(--red)}
 .grid4 span,.grid3 span{font-family:ui-monospace,Menlo,monospace;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
@@ -142,6 +147,7 @@ function T(k){ for(var i=0;i<TYPES.length;i++) if(TYPES[i].k===k) return TYPES[i
 /* ================= начальные данные ================= */
 function seed(){
   var d=new Date(), y=new Date(Date.now()-864e5);
+  function plus(n){ return new Date(Date.now()+n*864e5).toISOString().slice(0,10); }
   return {
     user:null, date:d.toISOString().slice(0,10), dateY:y.toISOString().slice(0,10),
     submitted:false, seconds:0, seq:100,
@@ -157,6 +163,21 @@ function seed(){
       {id:12,type:'ocenka',obj:'Тепличная 4',  cl:'Маргарита', time:'16:00'}
     ],
     fromRop:'Разобрать портфель — до пятницы',
+    week:[
+      {type:'pokaz', obj:'Мира 6',        day:'Пн'},
+      {type:'pokaz', obj:'Попова 72',     day:'Пн'},
+      {type:'pokaz', obj:'Тепличная 4',   day:'Вт'},
+      {type:'ocenka',obj:'Ладожская 146', day:'Вт'},
+      {type:'pokaz', obj:'Онежская 19',   day:'Ср'},
+      {type:'rekl',  obj:'Мира 42',       day:'Ср'}
+    ],
+    weekDay:4, weekOf:6,
+    past:[
+      {day:'Вчера',    plan:5, fact:4, sent:true,  items:['Показ · Строителей 11 ✓','Показ · Попова 72 ✓','Оценка · Ладожская 35 ✓','Оценка · Ген. Глазунова 6 ↩','В рекламу · Мира 45 ↩']},
+      {day:'Позавчера',plan:6, fact:6, sent:true,  items:['Показ · Онежская 19 ✓','Показ · Норвуд ✓','Оценка · Ладожская 146 ✓','В рекламу · Мира 42 ✓','Встреча · офис ✓','Показ · Тепличная 4 ✓']},
+      {day:'Вт',       plan:5, fact:3, sent:true,  items:['Показ · Тепличная 4 ✓','Оценка · Ладожская 146 ✓','Показ · Мира 6 ✕ отмена','ПД · Строителей 15 ↩','Встреча ↩']},
+      {day:'Пн',       plan:6, fact:5, sent:false, items:['Показ · Мира 6 ✓','Показ · Попова 72 ✓','Оценка ✓','В рекламу ✓','Показ ✓','ПД ⊘ не назначено']}
+    ],
     leads:[
       {id:21,obj:'Мира 6',        src:'Реклама',    st:null},
       {id:22,obj:'Онежская 19',   src:'Чат агентов',st:null},
@@ -170,6 +191,11 @@ function seed(){
       {id:32,obj:'Норвуд',       cl:'Юлия',    sum:95000, p:'средняя'}
     ],
     fcSent:false, fcLast:{was:3,hit:1},
+    future:[
+      {id:41,type:'pokaz', obj:'Строителей 11',   cl:'Кондрева',  time:'18:00', date:plus(1)},
+      {id:42,type:'ocenka',obj:'Ген. Глазунова 6',cl:'',          time:'11:00', date:plus(2)},
+      {id:43,type:'pd',    obj:'Тепличная 4',     cl:'Маргарита', time:'15:00', date:plus(3), sum:105000}
+    ],
     month:{done:320000,norm:500000,pd:2,pdNorm:4,place:4,of:10,
            pokaz:41,ocenka:12,rekl:9,leads:58,leadShow:11}
   };
@@ -245,15 +271,35 @@ function doLogin(){
 }
 
 /* ================= A1 · день ================= */
-function dayHTML(){
-  var pok=0,oc=0,rk=0,zd=0,left=0;
+function NORM(){ return {pd:1,pokaz:15,ocenka:4,rekl:4}; }
+function NAMES(){ return {pd:'Задаток',pokaz:'Показы',ocenka:'Оценки',rekl:'В рекламу'}; }
+function weekItems(k){
+  var out=[];
+  for(var i=0;i<state.week.length;i++) if(state.week[i].type===k) out.push({obj:state.week[i].obj,day:state.week[i].day});
   for(var j=0;j<state.yest.length;j++){ var y=state.yest[j];
-    if(!y.status) left++;
-    if(y.status==='ok'){ if(y.type==='pokaz')pok++; if(y.type==='ocenka')oc++; if(y.type==='rekl')rk++; if(y.type==='pd')zd++; } }
+    if(y.status==='ok'&&y.type===k) out.push({obj:y.obj,day:'Вчера'}); }
+  return out;
+}
+function dayHTML(){
+  var left=0; for(var j=0;j<state.yest.length;j++) if(!state.yest[j].status) left++;
+  var N=NORM(), NM=NAMES(), h='';
+  h+='<div class="card"><div class="t">Норма недели · день '+state.weekDay+' из '+state.weekOf+'</div><div class="grid4">';
+  var keys=['pd','pokaz','ocenka','rekl'];
+  for(var q=0;q<keys.length;q++){ var kk=keys[q], done=weekItems(kk).length;
+    h+='<button onclick="openNormSheet(\''+kk+'\')"><b class="'+(done>=N[kk]?'good':'')+'">'+done+'/'+N[kk]+'</b>'+
+       '<span>'+(kk==='pd'?'задаток':(kk==='pokaz'?'показы':(kk==='ocenka'?'оценки':'реклама')))+'</span></button>';
+  }
+  h+='</div><div class="hint" style="margin:9px 0 0">Тап по цифре — что уже засчитано и сколько осталось.</div></div>';
 
-  var h='<div class="card"><div class="t">Норма недели</div><div class="grid4">'+
-    cell(zd+'/1',zd>=1,'задаток')+cell(pok+'/15',pok>=15,'показы')+
-    cell(oc+'/4',oc>=4,'оценки')+cell(rk+'/4',rk>=4,'реклама')+'</div></div>';
+  h+='<div class="tabs">'+
+     '<button class="'+(tab==='f'?'on':'')+'" onclick="setTab(\'f\')">Факт вчера<span class="c">'+(left?left+' без отметки':'готово')+'</span></button>'+
+     '<button class="'+(tab==='p'?'on':'')+'" onclick="setTab(\'p\')">План сегодня<span class="c">'+planCount()+' дел</span></button></div>';
+  h+='<div class="tabs sub">'+
+     '<button class="'+(tab==='past'?'on':'')+'" onclick="setTab(\'past\')">Прошлое</button>'+
+     '<button class="'+(tab==='fut'?'on':'')+'" onclick="setTab(\'fut\')">Будущее<span class="c">'+state.future.length+'</span></button></div>';
+
+  if(tab==='past') return h+pastHTML();
+  if(tab==='fut')  return h+futHTML();
 
   if(state.submitted){
     h+='<div class="done-card"><div class="big">'+fmt(state.seconds)+'</div><div class="lb">заняла сдача</div>'+
@@ -261,10 +307,6 @@ function dayHTML(){
        '<div class="hint" style="margin-top:12px">Дела можно продолжать отмечать в течение дня — тогда завтра утром сдача займёт секунды.</div>';
     return h;
   }
-  h+='<div class="tabs">'+
-     '<button class="'+(tab==='f'?'on':'')+'" onclick="setTab(\'f\')">Факт вчера<span class="c">'+(left?left+' без отметки':'готово')+'</span></button>'+
-     '<button class="'+(tab==='p'?'on':'')+'" onclick="setTab(\'p\')">План сегодня<span class="c">'+state.today.length+' дел</span></button></div>';
-
   if(tab==='f'){
     h+='<div class="sec">Вчера было запланировано · '+ru(state.dateY)+'</div>';
     for(var a=0;a<state.yest.length;a++) h+=itemHTML(state.yest[a],'y');
@@ -277,11 +319,78 @@ function dayHTML(){
     for(var b=0;b<state.yest.length;b++){ var it=state.yest[b];
       if(it.status==='move'&&it.moveTo===state.date) moved.push(it); }
     for(var m=0;m<moved.length;m++) h+=itemHTML(moved[m],'m');
+    for(var f=0;f<state.future.length;f++) if(state.future[f].date===state.date) h+=itemHTML(state.future[f],'t');
     for(var c=0;c<state.today.length;c++) h+=itemHTML(state.today[c],'t');
     h+='<button class="add" onclick="openAdd(\'t\')">+ Добавить дело</button>';
-    if(!state.today.length&&!moved.length) h+='<div class="hint">Пустой день. Норма — 6 дел.</div>';
+    if(!planCount()) h+='<div class="hint">Пустой день. Норма — 6 дел.</div>';
   }
   return h;
+}
+function planCount(){
+  var n=state.today.length;
+  for(var b=0;b<state.yest.length;b++) if(state.yest[b].status==='move'&&state.yest[b].moveTo===state.date) n++;
+  for(var f=0;f<state.future.length;f++) if(state.future[f].date===state.date) n++;
+  return n;
+}
+function pastHTML(){
+  var h='<div class="sec">Последние дни · только просмотр</div>';
+  for(var i=0;i<state.past.length;i++){ var d=state.past[i];
+    var pct=Math.round(d.fact/d.plan*100);
+    h+='<button class="item dayrow" onclick="openPast('+i+')"><div class="ic">'+(d.sent?'✓':'!')+'</div><div class="tx">'+
+       '<div class="tp">'+(d.sent?'сдан вовремя':'сдан с опозданием')+'</div>'+
+       '<div class="nm">'+d.day+'</div><div class="sub">план '+d.plan+' · факт '+d.fact+'</div></div>'+
+       '<span class="rt '+(pct>=100?'ok':(pct>=70?'mv':'no'))+'">'+pct+'%</span></button>';
+  }
+  h+='<div class="hint">Прошлые дни правке не подлежат. Дополнить можно только вчерашний — и это остаётся в журнале.</div>';
+  return h;
+}
+function openPast(i){
+  var d=state.past[i], h='<h3>'+d.day+'</h3><div class="sh">план '+d.plan+' · факт '+d.fact+'</div>';
+  for(var j=0;j<d.items.length;j++)
+    h+='<div class="item"><div class="tx"><div class="nm" style="font-size:13.5px;font-weight:500;white-space:normal">'+esc(d.items[j])+'</div></div></div>';
+  h+='<div class="hint" style="margin-top:12px">Правка закрыта.</div>'+
+     '<div class="sbtn"><button onclick="closeSheet()">Закрыть</button></div>';
+  document.getElementById('sheet').innerHTML=h;
+  document.getElementById('ovl').classList.add('on');
+}
+function futHTML(){
+  var h='<div class="sec">Уже назначено вперёд</div>';
+  var list=state.future.slice().sort(function(a,b){ return a.date<b.date?-1:1; });
+  var cur='';
+  for(var i=0;i<list.length;i++){ var f=list[i];
+    if(f.date===state.date) continue;
+    if(f.date!==cur){ cur=f.date; h+='<div class="sec">'+ru(f.date)+'</div>'; }
+    h+=itemHTML(f,'fut');
+  }
+  if(!list.length) h+='<div class="hint">Пока ничего не назначено вперёд.</div>';
+  h+='<button class="add" onclick="openAdd(\'fut\')">+ Назначить на дату</button>';
+  h+='<div class="hint">Договорились о показе на четверг — записали сразу. В четверг утром это само окажется в плане дня.</div>';
+  return h;
+}
+function openNormSheet(kk){
+  var N=NORM(), NM=NAMES(), items=weekItems(kk), done=items.length, need=N[kk]-done;
+  var leftDays=state.weekOf-state.weekDay;
+  var h='<h3>'+NM[kk]+'</h3><div class="sh">неделя · день '+state.weekDay+' из '+state.weekOf+'</div>';
+  h+='<div class="card"><div class="kv"><span>Сделано</span><b>'+done+' из '+N[kk]+'</b></div>'+
+     '<div class="bar"><i style="width:'+Math.min(Math.round(done/N[kk]*100),100)+'%"></i></div>'+
+     '<div class="kv"><span>Осталось</span><b class="'+(need<=0?'':'')+'">'+(need<=0?'норма закрыта':need)+'</b></div>'+
+     '<div class="kv"><span>Дней до конца недели</span><b>'+leftDays+'</b></div>'+
+     (need>0&&leftDays>0?'<div class="kv"><span>Темп</span><b>'+(need/leftDays).toFixed(1)+' в день</b></div>':'')+
+     '</div>';
+  if(kk==='pd'&&state.fc.length){
+    h+='<div class="sec">В прогнозе на неделю</div>';
+    for(var q=0;q<state.fc.length;q++)
+      h+='<div class="item"><div class="ic">🎯</div><div class="tx"><div class="tp">'+state.fc[q].p+'</div>'+
+         '<div class="nm">'+esc(state.fc[q].obj)+'</div></div><span class="rt ok">'+money(state.fc[q].sum)+'</span></div>';
+  }
+  h+='<div class="sec">Засчитано на этой неделе</div>';
+  if(!items.length) h+='<div class="hint">Пока ничего.</div>';
+  for(var i=0;i<items.length;i++)
+    h+='<div class="item"><div class="ic">✓</div><div class="tx"><div class="tp">'+items[i].day+'</div>'+
+       '<div class="nm">'+esc(items[i].obj)+'</div></div></div>';
+  h+='<div class="sbtn"><button onclick="closeSheet()">Закрыть</button></div>';
+  document.getElementById('sheet').innerHTML=h;
+  document.getElementById('ovl').classList.add('on');
 }
 function cell(v,g,l){ return '<div><b class="'+(g?'good':'')+'">'+v+'</b><span>'+l+'</span></div>'; }
 function setTab(t){ tab=t; render(); }
@@ -298,8 +407,11 @@ function itemHTML(it,src){
   var t=T(it.type), sub=[];
   if(it.cl) sub.push(it.cl); if(it.time) sub.push(it.time);
   if(it.sum) sub.push(money(it.sum)); if(it.note) sub.push(it.note);
-  var right = src==='y' ? statusView(it) : (src==='m'? '<span class="rt mv">↩ перенос</span>' : '<span class="rt wait">'+(it.time||'—')+'</span>');
-  var click = src==='y' ? 'openStatus('+it.id+')' : (src==='t'?'openEdit('+it.id+')':'');
+  var right = src==='y' ? statusView(it)
+            : src==='m' ? '<span class="rt mv">↩ перенос</span>'
+            : src==='fut' ? '<span class="rt wait">'+(it.time||'—')+'</span>'
+            : '<span class="rt wait">'+(it.time||'—')+'</span>';
+  var click = src==='y' ? 'openStatus('+it.id+')' : (src==='t'?'openEdit('+it.id+')':(src==='fut'?'delFuture('+it.id+')':''));
   return '<button class="item'+(src==='y'&&it.status?' done':'')+'" onclick="'+click+'"><div class="ic">'+t.ic+'</div><div class="tx">'+
     '<div class="tp">'+t.n+(it.star?' <span class="star">★ вне плана</span>':'')+'</div>'+
     '<div class="nm">'+esc(it.obj||'—')+'</div>'+
@@ -349,7 +461,7 @@ function saveStatus(){
 var addTo='t', form={};
 function openAdd(where,keep){
   addTo=where;
-  form = keep? {type:form.type, cl:form.cl, obj:'', time:'', sum:'', note:''} : {type:'pokaz',obj:'',cl:'',time:'',sum:'',note:''};
+  form = keep? {type:form.type, cl:form.cl, obj:'', time:'', sum:'', note:'', date:form.date} : {type:'pokaz',obj:'',cl:'',time:'',sum:'',note:'',date:''};
   drawAdd(); document.getElementById('ovl').classList.add('on');
 }
 function openEdit(id){
@@ -360,11 +472,13 @@ function openEdit(id){
 }
 function drawAdd(){
   var t=T(form.type);
-  var h='<h3>'+(addTo==='edit'?'Дело':(addTo==='y'?'Дело вне плана ★':'Новое дело'))+'</h3>'+
-        '<div class="sh">'+(addTo==='y'?ru(state.dateY):ru(state.date))+'</div><div class="lbl">Тип</div><div class="chips">';
+  var h='<h3>'+(addTo==='edit'?'Дело':(addTo==='y'?'Дело вне плана ★':(addTo==='fut'?'Назначить вперёд':'Новое дело')))+'</h3>'+
+        '<div class="sh">'+(addTo==='y'?ru(state.dateY):(addTo==='fut'?'выберите дату':ru(state.date)))+'</div><div class="lbl">Тип</div><div class="chips">';
   for(var i=0;i<TYPES.length;i++)
     h+='<button class="chip'+(form.type===TYPES[i].k?' on':'')+'" onclick="form.type=\''+TYPES[i].k+'\';grab();drawAdd()">'+TYPES[i].ic+' '+TYPES[i].n+'</button>';
-  h+='</div><div class="lbl">'+t.obj+'</div><input id="aObj" value="'+esc(form.obj)+'" placeholder="Строителей 11">';
+  h+='</div>';
+  if(addTo==='fut') h+='<div class="lbl">Дата</div><input type="date" id="aDate" value="'+(form.date||'')+'" min="'+state.date+'">';
+  h+='<div class="lbl">'+t.obj+'</div><input id="aObj" value="'+esc(form.obj)+'" placeholder="Строителей 11">';
   if(t.cl) h+='<div class="lbl">'+t.cl+' · имя без фамилии</div><input id="aCl" value="'+esc(form.cl)+'" placeholder="Кондрева">';
   h+='<div class="row2"><div><div class="lbl">Время</div><input type="time" id="aTime" value="'+(form.time||'')+'"></div>';
   h+= t.money? '<div><div class="lbl">Комиссия ₽</div><input type="number" inputmode="numeric" id="aSum" value="'+(form.sum||'')+'" placeholder="105000"></div>' : '<div></div>';
@@ -375,8 +489,9 @@ function drawAdd(){
   setTimeout(function(){ var o=document.getElementById('aObj'); if(o&&!form.obj) o.focus(); },50);
 }
 function grab(){
-  var o=document.getElementById('aObj'),c=document.getElementById('aCl'),m=document.getElementById('aTime'),s=document.getElementById('aSum');
-  if(o)form.obj=o.value; if(c)form.cl=c.value; if(m)form.time=m.value; if(s)form.sum=s.value;
+  var o=document.getElementById('aObj'),c=document.getElementById('aCl'),m=document.getElementById('aTime'),
+      s=document.getElementById('aSum'),dd=document.getElementById('aDate');
+  if(o)form.obj=o.value; if(c)form.cl=c.value; if(m)form.time=m.value; if(s)form.sum=s.value; if(dd)form.date=dd.value;
 }
 function saveAdd(again){
   grab();
@@ -388,11 +503,24 @@ function saveAdd(again){
       state.today[i].time=form.time; state.today[i].sum=form.sum; }
   } else {
     var it={id:++state.seq,type:form.type,obj:form.obj,cl:form.cl,time:form.time,sum:form.sum};
-    if(addTo==='y'){ it.status='ok'; it.star=true; state.yest.push(it); } else state.today.push(it);
+    if(addTo==='y'){ it.status='ok'; it.star=true; state.yest.push(it); }
+    else if(addTo==='fut'){
+      if(!form.date){ alert('Выберите дату'); return; }
+      it.date=form.date;
+      if(it.date===state.date) state.today.push(it); else state.future.push(it);
+    }
+    else state.today.push(it);
   }
   save();
   if(again){ openAdd(addTo,true); render(); return; }
   closeSheet(); render();
+}
+function delFuture(id){
+  var it=null; for(var i=0;i<state.future.length;i++) if(state.future[i].id===id) it=state.future[i];
+  if(!it) return;
+  if(!confirm('Убрать «'+it.obj+'» из назначенного?')) return;
+  var n=[]; for(var j=0;j<state.future.length;j++) if(state.future[j].id!==id) n.push(state.future[j]);
+  state.future=n; save(); render();
 }
 function delItem(){
   var n=[]; for(var i=0;i<state.today.length;i++) if(state.today[i].id!==form.id) n.push(state.today[i]);
