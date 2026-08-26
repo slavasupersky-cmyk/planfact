@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<title>ТОЧНО. — Кабинет агента</title>
+<title>ТоПФ — Кабинет агента</title>
 <style>
 :root{
   color-scheme:light dark;
@@ -123,7 +123,7 @@ textarea{min-height:70px;resize:vertical}
 
 <script>
 /* ================= хранилище ================= */
-var KEY='tochno-agent-v2', mem=null;
+var KEY='topf-agent-v3', mem=null;
 function save(){ var s=JSON.stringify(state); try{ localStorage.setItem(KEY,s); }catch(e){ mem=s; } }
 function load(){ var s=null; try{ s=localStorage.getItem(KEY); }catch(e){ s=mem; } if(!s)s=mem;
   if(!s) return null; try{ return JSON.parse(s); }catch(e){ return null; } }
@@ -201,7 +201,12 @@ function seed(){
   };
 }
 var state=load()||seed();
-if(state.date!==new Date().toISOString().slice(0,10)){ var u=state.user; state=seed(); state.user=u; save(); }
+(function migrate(){
+  var d=seed();
+  for(var k in d){ if(typeof state[k]==='undefined') state[k]=d[k]; }
+  if(state.date!==new Date().toISOString().slice(0,10)){ var u=state.user; state=seed(); state.user=u; }
+  save();
+})();
 
 /* ================= таймер ================= */
 var t0=Date.now(), tick=null;
@@ -215,6 +220,16 @@ var nav='day', tab='f', pickName=null;
 
 /* ================= общий рендер ================= */
 function render(){
+  try{ draw(); }catch(e){
+    document.getElementById('root').innerHTML=
+      '<div class="app"><div class="card"><div class="t">Что-то пошло не так</div>'+
+      '<p style="font-size:14px;margin:0 0 12px">Скорее всего сохранились данные прошлой версии.</p>'+
+      '<button class="add" onclick="hardReset()">Очистить и открыть заново</button>'+
+      '<div class="hint" style="margin-top:8px">'+esc(e.message)+'</div></div></div>';
+  }
+}
+function hardReset(){ try{ localStorage.removeItem(KEY); }catch(e){} mem=null; state=seed(); save(); location.reload(); }
+function draw(){
   var r=document.getElementById('root');
   if(!state.user){ r.innerHTML=loginHTML(); return; }
   var body='';
@@ -224,10 +239,10 @@ function render(){
   if(nav==='me')    body=meHTML();
   r.innerHTML=
     '<div class="app">'+
-      '<div class="hdr"><div class="mark">ТОЧНО<i>.</i><small>План и факт</small></div>'+
+      '<div class="hdr"><div class="mark">ТоПФ<i>.</i><small>Кабинет агента · v0.3</small></div>'+
       '<div class="who"><b>'+esc(state.user)+'</b><span>'+ru(state.date)+'</span></div></div>'+
       body+
-      '<div class="foot">Прототип. Данные сохраняются только на этом устройстве.<br>'+
+      '<div class="foot">ТоПФ · кабинет агента v0.3 · прототип.<br>Данные сохраняются только на этом устройстве.<br>'+
       '<button onclick="resetAll()">сбросить и начать заново</button></div>'+
     '</div>'+ bottomHTML();
   startTimer();
@@ -254,7 +269,7 @@ function money(n){ return Number(n).toLocaleString('ru-RU')+' ₽'; }
 
 /* ================= A0 · вход ================= */
 function loginHTML(){
-  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">План и факт</div>'+
+  var h='<div class="login"><div class="mark">ТоПФ<i>.</i></div><div class="sub">Кабинет агента · v0.3</div>'+
     '<h2>Вход в кабинет</h2>';
   for(var i=0;i<STAFF.length;i++)
     h+='<button class="pick'+(pickName===STAFF[i]?' on':'')+'" onclick="pickName=\''+STAFF[i]+'\';render()">'+STAFF[i]+'</button>';
