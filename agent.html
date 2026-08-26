@@ -70,7 +70,7 @@ b.good{color:var(--dot)} b.bad{color:var(--red)}
 
 .sec{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:16px 2px 8px}
 .item{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:2px;padding:12px 13px;margin-bottom:8px;display:flex;gap:11px;align-items:center;color:inherit}
-.item .ic{width:30px;height:30px;flex:none;border-radius:2px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--ink-2)}
+.item .ic{width:44px;height:44px;flex:none;border-radius:2px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--dot)}
 .item .tx{flex:1;min-width:0}
 .item .tp{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
 .item .nm{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -91,7 +91,7 @@ b.good{color:var(--dot)} b.bad{color:var(--red)}
 .nav{display:flex;gap:2px;margin-top:8px}
 .nav button{flex:1;background:none;border:0;color:var(--mute);font-size:11.5px;padding:6px 2px;border-radius:2px}
 .nav button b{display:flex;justify-content:center;margin-bottom:3px;font-weight:400}
-.nav button.on{color:var(--ink);font-weight:700}
+.nav button.on{color:var(--dot);font-weight:600}
 
 .ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:20}
 .ovl.on{display:flex}
@@ -156,7 +156,7 @@ edit:'<path d="M4 20h4.2L20 8.2 15.8 4 4 15.8z"/><path d="M14 6.2 17.8 10"/>',
 ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
 arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>'
 };
-function ic(n,s){ s=s||18; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
+function ic(n,s){ s=s||26; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
 
 /* ================= хранилище ================= */
 var KEY='topf-agent-v3', mem=null;
@@ -296,7 +296,7 @@ function bottomHTML(){
       nb('day','list','День')+nb('leads','phone','Заявки')+nb('fc','target','Прогноз')+nb('me','chart','Моё')+
     '</div></div></div>';
 }
-function nb(k,i,n){ return '<button class="'+(nav===k?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,21)+'</b>'+n+'</button>'; }
+function nb(k,i,n){ return '<button class="'+(nav===k?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,26)+'</b>'+n+'</button>'; }
 function go(k){ nav=k; render(); }
 function esc(s){ return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
 function ru(d){ var p=d.split('-'); var M=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
@@ -526,7 +526,7 @@ function drawAdd(){
   var h='<h3>'+(addTo==='edit'?'Дело':(addTo==='y'?'Дело вне плана ★':(addTo==='fut'?'Назначить вперёд':'Новое дело')))+'</h3>'+
         '<div class="sh">'+(addTo==='y'?ru(state.dateY):(addTo==='fut'?'выберите дату':ru(state.date)))+'</div><div class="lbl">Тип</div><div class="chips">';
   for(var i=0;i<TYPES.length;i++)
-    h+='<button class="chip'+(form.type===TYPES[i].k?' on':'')+'" onclick="form.type=\''+TYPES[i].k+'\';grab();drawAdd()">'+ic(TYPES[i].ic,16)+'<span style="margin-left:7px">'+TYPES[i].n+'</span></button>';
+    h+='<button class="chip'+(form.type===TYPES[i].k?' on':'')+'" onclick="form.type=\''+TYPES[i].k+'\';grab();drawAdd()">'+ic(TYPES[i].ic,20)+'<span style="margin-left:7px">'+TYPES[i].n+'</span></button>';
   h+='</div>';
   if(addTo==='fut') h+='<div class="lbl">Дата</div><input type="date" id="aDate" value="'+(form.date||'')+'" min="'+state.date+'">';
   h+='<div class="lbl">'+t.obj+'</div><input id="aObj" value="'+esc(form.obj)+'" placeholder="Строителей 11">';
