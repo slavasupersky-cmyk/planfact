@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>ТОЧНО. — Кабинет агента</title>
+<style>
+:root{
+  color-scheme:light dark;
+  --ink:#101112; --ink-2:#3A3D42; --mute:#8C9199;
+  --line:#DCDCD6; --paper:#F3F3EF; --card:#FFFFFF;
+  --surface:#F7F7F4; --surface-2:#EAEAE4;
+  --dot:#8CCC00; --on-dot:#12160A; --star:#B97400; --red:#C8452F;
+}
+@media (prefers-color-scheme:dark){
+  :root{--ink:#F1F2ED;--ink-2:#BEC2B9;--mute:#868B80;--line:#2E322B;--paper:#121410;--card:#1A1D17;--surface:#1F231B;--surface-2:#282D22;--star:#D9A03A;--red:#F0725C}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;line-height:1.45}
+.app{max-width:560px;margin:0 auto;padding:14px 14px 190px}
+button{font-family:inherit}
+
+/* вход */
+.login{max-width:420px;margin:0 auto;padding:56px 18px}
+.login .mark{font-size:26px;font-weight:800;letter-spacing:-.03em;margin-bottom:6px}
+.login .mark i{font-style:normal;color:var(--dot)}
+.login .sub{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin-bottom:34px}
+.login h2{font-size:21px;letter-spacing:-.02em;margin:0 0 16px}
+.pick{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:7px;font-size:15px;color:var(--ink-2)}
+.pick.on{border-color:var(--dot);border-width:2px;background:var(--card);color:var(--ink);font-weight:700}
+.login .note{font-size:12.5px;color:var(--mute);margin-top:12px;text-align:center}
+
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:12px;border-bottom:2px solid var(--ink);margin-bottom:14px}
+.mark{font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.mark i{font-style:normal;color:var(--dot)}
+.mark small{display:block;font-family:ui-monospace,Menlo,monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);font-weight:400;margin-top:5px}
+.who{text-align:right}
+.who b{display:block;font-size:14px}
+.who span{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.08em;color:var(--mute)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:12px}
+.card .t{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:9px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.grid4 div,.grid3 div{background:var(--surface);border-radius:10px;padding:8px 5px;text-align:center}
+.grid4 b,.grid3 b{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em}
+b.good{color:var(--dot)} b.bad{color:var(--red)}
+.grid4 span,.grid3 span{font-family:ui-monospace,Menlo,monospace;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.bar{height:7px;border-radius:5px;background:var(--surface-2);overflow:hidden;margin:9px 0 4px}
+.bar i{display:block;height:100%;background:var(--dot)}
+.kv{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink-2);padding:6px 0;border-bottom:1px solid var(--line)}
+.kv:last-child{border-bottom:0}
+.kv b{color:var(--ink)}
+
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--mute);border-radius:12px;padding:12px 6px;font-size:14px;font-weight:600}
+.tabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tabs button .c{font-family:ui-monospace,Menlo,monospace;font-size:10px;display:block;margin-top:3px;opacity:.7}
+
+.sec{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:16px 2px 8px}
+.item{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 13px;margin-bottom:8px;display:flex;gap:11px;align-items:center;color:inherit}
+.item .ic{width:30px;height:30px;flex:none;border-radius:9px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:15px}
+.item .tx{flex:1;min-width:0}
+.item .tp{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.item .nm{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .sub{font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .rt{font-size:13px;font-weight:700;flex:none;text-align:right;max-width:42%}
+.rt.ok{color:var(--dot)} .rt.mv{color:var(--star)} .rt.no{color:var(--red)} .rt.wait{color:var(--mute);font-weight:500}
+.item.done{opacity:.72}
+.star{color:var(--star)}
+.add{width:100%;background:transparent;border:1.5px dashed var(--line);color:var(--mute);border-radius:13px;padding:13px;font-size:14px;font-weight:600;margin-bottom:8px}
+.hint{font-size:12.5px;color:var(--mute);margin:2px 4px 12px}
+
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--paper);border-top:1px solid var(--line)}
+.bottom .in{max-width:560px;margin:0 auto;padding:10px 14px calc(8px + env(safe-area-inset-bottom))}
+.cta{width:100%;background:var(--dot);color:var(--on-dot);border:0;border-radius:14px;padding:16px;font-size:16px;font-weight:800;letter-spacing:-.01em}
+.cta[disabled]{background:var(--surface-2);color:var(--mute)}
+.cta.sec{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.timer{text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;color:var(--mute);margin-top:7px}
+.nav{display:flex;gap:2px;margin-top:8px}
+.nav button{flex:1;background:none;border:0;color:var(--mute);font-size:10.5px;padding:6px 2px;border-radius:10px}
+.nav button b{display:block;font-size:17px;line-height:1.2;font-weight:400}
+.nav button.on{color:var(--ink);font-weight:700}
+
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:20}
+.ovl.on{display:flex}
+.sheet{background:var(--paper);width:100%;max-width:560px;margin:0 auto;border-radius:20px 20px 0 0;padding:16px 14px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto}
+.sheet h3{margin:0 0 3px;font-size:18px;letter-spacing:-.02em}
+.sheet .sh{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
+.lbl{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--mute);margin:14px 2px 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14px;color:var(--ink-2);flex:1 1 auto;min-width:calc(33% - 6px)}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:700}
+.chip.on.g{background:var(--dot);color:var(--on-dot)}
+.chip.on.r{background:var(--red);color:#fff}
+.chip.on.s{background:var(--star);color:#fff}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px;font-size:16px;font-family:inherit;color:var(--ink)}
+textarea{min-height:70px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sbtn{display:flex;gap:8px;margin-top:18px}
+.sbtn button{flex:1;border-radius:13px;padding:15px;font-size:15px;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink-2)}
+.sbtn button.pri{background:var(--dot);color:var(--on-dot);border-color:var(--dot)}
+.sbtn button.pri[disabled]{background:var(--surface-2);color:var(--mute);border-color:var(--line)}
+.again{width:100%;margin-top:9px;background:transparent;border:1.5px dashed var(--line);color:var(--mute);border-radius:12px;padding:12px;font-size:13.5px;font-weight:600}
+.done-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center}
+.done-card .big{font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.done-card .lb{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-top:6px}
+.done-card p{font-size:14px;color:var(--ink-2);margin:14px 0 0}
+.foot{margin-top:22px;padding-top:12px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mute);text-align:center}
+.foot button{background:none;border:0;color:var(--mute);font-family:ui-monospace,Menlo,monospace;font-size:11px;text-decoration:underline;padding:6px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="ovl" id="ovl" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
+
+<script>
+/* ================= хранилище ================= */
+var KEY='tochno-agent-v2', mem=null;
+function save(){ var s=JSON.stringify(state); try{ localStorage.setItem(KEY,s); }catch(e){ mem=s; } }
+function load(){ var s=null; try{ s=localStorage.getItem(KEY); }catch(e){ s=mem; } if(!s)s=mem;
+  if(!s) return null; try{ return JSON.parse(s); }catch(e){ return null; } }
+
+/* ================= справочники ================= */
+var STAFF=['Брыкина Александра','Кастромина Ольга','Кондрева Ирина','Роза Марина','Смирнова Анна'];
+var TYPES=[
+ {k:'pokaz', n:'Показ',    ic:'🏘', obj:'Адрес объекта', cl:'Покупатель',  money:false},
+ {k:'ocenka',n:'Оценка',   ic:'🤓', obj:'Адрес объекта', cl:'Собственник', money:false},
+ {k:'pd',    n:'ПД',       ic:'💰', obj:'Адрес объекта', cl:'Клиент',      money:true},
+ {k:'od',    n:'ОД',       ic:'📄', obj:'Адрес объекта', cl:'Клиент',      money:true},
+ {k:'vstr',  n:'Встреча',  ic:'🤝', obj:'Где',           cl:'С кем',       money:false},
+ {k:'rekl',  n:'В рекламу',ic:'📺', obj:'Адрес объекта', cl:'',            money:false}
+];
+var REASONS=['Клиент перенёс','Клиент не на связи','Собственник отказал','Не успел(а)','Ушли мимо','Ипотека не одобрена'];
+var LEAD=['Новая','Прогрев','Показ назначен','Показ совершён','Встреча назначена','Договор на подбор','Оферта','Отказ','Недозвон','Дубль'];
+var LEADBAD={'Отказ':1,'Недозвон':1,'Дубль':1};
+var PROB=['высокая','средняя','низкая'];
+function T(k){ for(var i=0;i<TYPES.length;i++) if(TYPES[i].k===k) return TYPES[i]; return TYPES[0]; }
+
+/* ================= начальные данные ================= */
+function seed(){
+  var d=new Date(), y=new Date(Date.now()-864e5);
+  return {
+    user:null, date:d.toISOString().slice(0,10), dateY:y.toISOString().slice(0,10),
+    submitted:false, seconds:0, seq:100,
+    yest:[
+      {id:1,type:'pokaz', obj:'Строителей 11',    cl:'Кондрева', time:'18:00', status:null},
+      {id:2,type:'pokaz', obj:'Попова 72',        cl:'Кондрева', time:'19:00', status:null},
+      {id:3,type:'ocenka',obj:'Ладожская 35',     cl:'Роза',     time:'13:00', status:null},
+      {id:4,type:'ocenka',obj:'Ген. Глазунова 6', cl:'',         time:'',      status:null},
+      {id:5,type:'rekl',  obj:'Мира 45',          cl:'',         time:'',      status:null}
+    ],
+    today:[
+      {id:11,type:'pokaz', obj:'Онежская 19', cl:'Юлия',      time:'12:00'},
+      {id:12,type:'ocenka',obj:'Тепличная 4',  cl:'Маргарита', time:'16:00'}
+    ],
+    fromRop:'Разобрать портфель — до пятницы',
+    leads:[
+      {id:21,obj:'Мира 6',        src:'Реклама',    st:null},
+      {id:22,obj:'Онежская 19',   src:'Чат агентов',st:null},
+      {id:23,obj:'Ладожская 35',  src:'Реклама',    st:null},
+      {id:24,obj:'Строителей 68а',src:'Реклама',    st:null},
+      {id:25,obj:'Норвуд',        src:'Свой',       st:null},
+      {id:26,obj:'Мира 42',       src:'Реклама',    st:null}
+    ],
+    fc:[
+      {id:31,obj:'Строителей 11',cl:'Кондрева',sum:105000,p:'высокая'},
+      {id:32,obj:'Норвуд',       cl:'Юлия',    sum:95000, p:'средняя'}
+    ],
+    fcSent:false, fcLast:{was:3,hit:1},
+    month:{done:320000,norm:500000,pd:2,pdNorm:4,place:4,of:10,
+           pokaz:41,ocenka:12,rekl:9,leads:58,leadShow:11}
+  };
+}
+var state=load()||seed();
+if(state.date!==new Date().toISOString().slice(0,10)){ var u=state.user; state=seed(); state.user=u; save(); }
+
+/* ================= таймер ================= */
+var t0=Date.now(), tick=null;
+function startTimer(){ if(tick) clearInterval(tick); if(state.submitted) return;
+  tick=setInterval(function(){ var e=document.getElementById('timer');
+    if(e) e.textContent='на экране '+fmt(Math.round((Date.now()-t0)/1000)); },1000); }
+function fmt(s){ var m=Math.floor(s/60), r=s%60; return m? m+' мин '+r+' с' : r+' с'; }
+
+/* ================= состояние навигации ================= */
+var nav='day', tab='f', pickName=null;
+
+/* ================= общий рендер ================= */
+function render(){
+  var r=document.getElementById('root');
+  if(!state.user){ r.innerHTML=loginHTML(); return; }
+  var body='';
+  if(nav==='day')   body=dayHTML();
+  if(nav==='leads') body=leadsHTML();
+  if(nav==='fc')    body=fcHTML();
+  if(nav==='me')    body=meHTML();
+  r.innerHTML=
+    '<div class="app">'+
+      '<div class="hdr"><div class="mark">ТОЧНО<i>.</i><small>План и факт</small></div>'+
+      '<div class="who"><b>'+esc(state.user)+'</b><span>'+ru(state.date)+'</span></div></div>'+
+      body+
+      '<div class="foot">Прототип. Данные сохраняются только на этом устройстве.<br>'+
+      '<button onclick="resetAll()">сбросить и начать заново</button></div>'+
+    '</div>'+ bottomHTML();
+  startTimer();
+}
+function bottomHTML(){
+  var cta='';
+  if(nav==='day'&&!state.submitted)
+    cta='<button class="cta" onclick="submitDay()">Сдать факт и план</button><div class="timer" id="timer"></div>';
+  else if(nav==='day')
+    cta='<button class="cta" disabled>Сдано ✓</button>';
+  else if(nav==='fc'&&!state.fcSent)
+    cta='<button class="cta" onclick="sendFc()">Отправить прогноз РОПу</button>';
+  return '<div class="bottom"><div class="in">'+cta+
+    '<div class="nav">'+
+      nb('day','📋','День')+nb('leads','📞','Заявки')+nb('fc','🎯','Прогноз')+nb('me','📊','Моё')+
+    '</div></div></div>';
+}
+function nb(k,i,n){ return '<button class="'+(nav===k?'on':'')+'" onclick="go(\''+k+'\')"><b>'+i+'</b>'+n+'</button>'; }
+function go(k){ nav=k; render(); }
+function esc(s){ return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
+function ru(d){ var p=d.split('-'); var M=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  return parseInt(p[2],10)+' '+M[parseInt(p[1],10)-1]; }
+function money(n){ return Number(n).toLocaleString('ru-RU')+' ₽'; }
+
+/* ================= A0 · вход ================= */
+function loginHTML(){
+  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">План и факт</div>'+
+    '<h2>Вход в кабинет</h2>';
+  for(var i=0;i<STAFF.length;i++)
+    h+='<button class="pick'+(pickName===STAFF[i]?' on':'')+'" onclick="pickName=\''+STAFF[i]+'\';render()">'+STAFF[i]+'</button>';
+  h+='<div class="lbl">Пароль</div><input type="password" id="pw" placeholder="••••••" value="">'+
+     '<div class="sbtn"><button class="pri" onclick="doLogin()">Войти</button></div>'+
+     '<div class="note">Пароль в прототипе любой.<br>Забыли — сбросит РОП.</div></div>';
+  return h;
+}
+function doLogin(){
+  var pw=document.getElementById('pw');
+  if(!pickName){ alert('Выберите себя из списка'); return; }
+  if(!pw.value){ alert('Введите пароль'); return; }
+  state.user=pickName; save(); t0=Date.now(); nav='day'; render();
+}
+
+/* ================= A1 · день ================= */
+function dayHTML(){
+  var pok=0,oc=0,rk=0,zd=0,left=0;
+  for(var j=0;j<state.yest.length;j++){ var y=state.yest[j];
+    if(!y.status) left++;
+    if(y.status==='ok'){ if(y.type==='pokaz')pok++; if(y.type==='ocenka')oc++; if(y.type==='rekl')rk++; if(y.type==='pd')zd++; } }
+
+  var h='<div class="card"><div class="t">Норма недели</div><div class="grid4">'+
+    cell(zd+'/1',zd>=1,'задаток')+cell(pok+'/15',pok>=15,'показы')+
+    cell(oc+'/4',oc>=4,'оценки')+cell(rk+'/4',rk>=4,'реклама')+'</div></div>';
+
+  if(state.submitted){
+    h+='<div class="done-card"><div class="big">'+fmt(state.seconds)+'</div><div class="lb">заняла сдача</div>'+
+       '<p>Факт за '+ru(state.dateY)+' и план на '+ru(state.date)+' ушли РОПу. Он увидит их в сводке до 11:00.</p></div>'+
+       '<div class="hint" style="margin-top:12px">Дела можно продолжать отмечать в течение дня — тогда завтра утром сдача займёт секунды.</div>';
+    return h;
+  }
+  h+='<div class="tabs">'+
+     '<button class="'+(tab==='f'?'on':'')+'" onclick="setTab(\'f\')">Факт вчера<span class="c">'+(left?left+' без отметки':'готово')+'</span></button>'+
+     '<button class="'+(tab==='p'?'on':'')+'" onclick="setTab(\'p\')">План сегодня<span class="c">'+state.today.length+' дел</span></button></div>';
+
+  if(tab==='f'){
+    h+='<div class="sec">Вчера было запланировано · '+ru(state.dateY)+'</div>';
+    for(var a=0;a<state.yest.length;a++) h+=itemHTML(state.yest[a],'y');
+    h+='<button class="add" onclick="openAdd(\'y\')">+ Что было вне плана ★</button>';
+    h+='<div class="hint">Если отмечали дела по ходу дня, здесь уже всё проставлено — останется подтвердить.</div>';
+  } else {
+    if(state.fromRop) h+='<div class="sec">От РОПа</div><div class="item"><div class="ic">📌</div><div class="tx"><div class="nm">'+esc(state.fromRop)+'</div></div></div>';
+    h+='<div class="sec">План на сегодня</div>';
+    var moved=[];
+    for(var b=0;b<state.yest.length;b++){ var it=state.yest[b];
+      if(it.status==='move'&&it.moveTo===state.date) moved.push(it); }
+    for(var m=0;m<moved.length;m++) h+=itemHTML(moved[m],'m');
+    for(var c=0;c<state.today.length;c++) h+=itemHTML(state.today[c],'t');
+    h+='<button class="add" onclick="openAdd(\'t\')">+ Добавить дело</button>';
+    if(!state.today.length&&!moved.length) h+='<div class="hint">Пустой день. Норма — 6 дел.</div>';
+  }
+  return h;
+}
+function cell(v,g,l){ return '<div><b class="'+(g?'good':'')+'">'+v+'</b><span>'+l+'</span></div>'; }
+function setTab(t){ tab=t; render(); }
+
+function statusView(it){
+  if(!it.status) return '<span class="rt wait">отметить</span>';
+  if(it.status==='ok')    return '<span class="rt ok">✓</span>';
+  if(it.status==='move')  return '<span class="rt mv">↩ '+(it.moveTo?ru(it.moveTo):'')+'</span>';
+  if(it.status==='cancel')return '<span class="rt no">✕</span>';
+  if(it.status==='none')  return '<span class="rt no">не назначено</span>';
+  return '';
+}
+function itemHTML(it,src){
+  var t=T(it.type), sub=[];
+  if(it.cl) sub.push(it.cl); if(it.time) sub.push(it.time);
+  if(it.sum) sub.push(money(it.sum)); if(it.note) sub.push(it.note);
+  var right = src==='y' ? statusView(it) : (src==='m'? '<span class="rt mv">↩ перенос</span>' : '<span class="rt wait">'+(it.time||'—')+'</span>');
+  var click = src==='y' ? 'openStatus('+it.id+')' : (src==='t'?'openEdit('+it.id+')':'');
+  return '<button class="item'+(src==='y'&&it.status?' done':'')+'" onclick="'+click+'"><div class="ic">'+t.ic+'</div><div class="tx">'+
+    '<div class="tp">'+t.n+(it.star?' <span class="star">★ вне плана</span>':'')+'</div>'+
+    '<div class="nm">'+esc(it.obj||'—')+'</div>'+
+    (sub.length?'<div class="sub">'+esc(sub.join(' · '))+'</div>':'')+
+    '</div>'+right+'</button>';
+}
+
+/* ================= A3 · отметка ================= */
+var cur=null, curStatus=null, curReason=null;
+function openStatus(id){
+  cur=null; for(var i=0;i<state.yest.length;i++) if(state.yest[i].id===id) cur=state.yest[i];
+  if(!cur) return;
+  curStatus=cur.status||null; curReason=cur.reason||null;
+  drawStatus(); document.getElementById('ovl').classList.add('on');
+}
+function drawStatus(){
+  var t=T(cur.type);
+  var h='<h3>'+t.n+' · '+esc(cur.obj)+'</h3><div class="sh">'+(cur.cl?esc(cur.cl)+' · ':'')+ru(state.dateY)+'</div>'+
+    '<div class="lbl">Что вышло</div><div class="chips">'+
+    sbtn('ok','Состоялось','g')+sbtn('move','Перенос','s')+sbtn('cancel','Отмена','r')+sbtn('none','Не назначено','r')+'</div>';
+  if(curStatus==='move') h+='<div class="lbl">Перенесено на</div><input type="date" id="fDate" value="'+(cur.moveTo||state.date)+'">';
+  if(curStatus==='move'||curStatus==='cancel'||curStatus==='none'){
+    h+='<div class="lbl">Причина</div><div class="chips">';
+    for(var i=0;i<REASONS.length;i++)
+      h+='<button class="chip'+(curReason===REASONS[i]?' on':'')+'" onclick="curReason=\''+REASONS[i]+'\';drawStatus()">'+REASONS[i]+'</button>';
+    h+='</div>';
+  }
+  if(curStatus==='ok'&&t.money)
+    h+='<div class="lbl">Сумма комиссии · обязательно</div><input type="number" inputmode="numeric" id="fSum" value="'+(cur.sum||'')+'" placeholder="105000">';
+  h+='<div class="lbl">Результат</div><textarea id="fNote" placeholder="Планируем ПД в пятницу">'+esc(cur.note||'')+'</textarea>'+
+     '<div class="sbtn"><button onclick="closeSheet()">Отмена</button>'+
+     '<button class="pri" onclick="saveStatus()"'+(curStatus?'':' disabled')+'>Сохранить</button></div>';
+  document.getElementById('sheet').innerHTML=h;
+}
+function sbtn(k,l,c){ return '<button class="chip'+(curStatus===k?' on '+c:'')+'" onclick="curStatus=\''+k+'\';drawStatus()">'+l+'</button>'; }
+function saveStatus(){
+  var sum=document.getElementById('fSum');
+  if(curStatus==='ok'&&T(cur.type).money&&(!sum||!sum.value)){ alert('Для ПД и ОД сумма комиссии обязательна'); return; }
+  cur.status=curStatus; cur.reason=curReason||null;
+  var d=document.getElementById('fDate'); if(curStatus==='move'&&d) cur.moveTo=d.value;
+  if(sum) cur.sum=sum.value;
+  var n=document.getElementById('fNote'); if(n) cur.note=n.value;
+  save(); closeSheet(); render();
+}
+
+/* ================= A2 · добавление ================= */
+var addTo='t', form={};
+function openAdd(where,keep){
+  addTo=where;
+  form = keep? {type:form.type, cl:form.cl, obj:'', time:'', sum:'', note:''} : {type:'pokaz',obj:'',cl:'',time:'',sum:'',note:''};
+  drawAdd(); document.getElementById('ovl').classList.add('on');
+}
+function openEdit(id){
+  var it=null; for(var i=0;i<state.today.length;i++) if(state.today[i].id===id) it=state.today[i];
+  if(!it) return;
+  addTo='edit'; form={id:it.id,type:it.type,obj:it.obj,cl:it.cl,time:it.time,sum:it.sum||'',note:it.note||''};
+  drawAdd(); document.getElementById('ovl').classList.add('on');
+}
+function drawAdd(){
+  var t=T(form.type);
+  var h='<h3>'+(addTo==='edit'?'Дело':(addTo==='y'?'Дело вне плана ★':'Новое дело'))+'</h3>'+
+        '<div class="sh">'+(addTo==='y'?ru(state.dateY):ru(state.date))+'</div><div class="lbl">Тип</div><div class="chips">';
+  for(var i=0;i<TYPES.length;i++)
+    h+='<button class="chip'+(form.type===TYPES[i].k?' on':'')+'" onclick="form.type=\''+TYPES[i].k+'\';grab();drawAdd()">'+TYPES[i].ic+' '+TYPES[i].n+'</button>';
+  h+='</div><div class="lbl">'+t.obj+'</div><input id="aObj" value="'+esc(form.obj)+'" placeholder="Строителей 11">';
+  if(t.cl) h+='<div class="lbl">'+t.cl+' · имя без фамилии</div><input id="aCl" value="'+esc(form.cl)+'" placeholder="Кондрева">';
+  h+='<div class="row2"><div><div class="lbl">Время</div><input type="time" id="aTime" value="'+(form.time||'')+'"></div>';
+  h+= t.money? '<div><div class="lbl">Комиссия ₽</div><input type="number" inputmode="numeric" id="aSum" value="'+(form.sum||'')+'" placeholder="105000"></div>' : '<div></div>';
+  h+='</div><div class="sbtn"><button onclick="closeSheet()">Отмена</button><button class="pri" onclick="saveAdd(0)">Сохранить</button></div>';
+  if(form.type==='pokaz'&&addTo!=='edit') h+='<button class="again" onclick="saveAdd(1)">Сохранить и ещё показ этому же покупателю</button>';
+  if(addTo==='edit') h+='<button class="again" onclick="delItem()">Удалить дело</button>';
+  document.getElementById('sheet').innerHTML=h;
+  setTimeout(function(){ var o=document.getElementById('aObj'); if(o&&!form.obj) o.focus(); },50);
+}
+function grab(){
+  var o=document.getElementById('aObj'),c=document.getElementById('aCl'),m=document.getElementById('aTime'),s=document.getElementById('aSum');
+  if(o)form.obj=o.value; if(c)form.cl=c.value; if(m)form.time=m.value; if(s)form.sum=s.value;
+}
+function saveAdd(again){
+  grab();
+  if(!form.obj){ alert('Укажите объект'); return; }
+  if(T(form.type).money&&!form.sum){ alert('Для ПД и ОД сумма комиссии обязательна'); return; }
+  if(addTo==='edit'){
+    for(var i=0;i<state.today.length;i++) if(state.today[i].id===form.id){
+      state.today[i].type=form.type; state.today[i].obj=form.obj; state.today[i].cl=form.cl;
+      state.today[i].time=form.time; state.today[i].sum=form.sum; }
+  } else {
+    var it={id:++state.seq,type:form.type,obj:form.obj,cl:form.cl,time:form.time,sum:form.sum};
+    if(addTo==='y'){ it.status='ok'; it.star=true; state.yest.push(it); } else state.today.push(it);
+  }
+  save();
+  if(again){ openAdd(addTo,true); render(); return; }
+  closeSheet(); render();
+}
+function delItem(){
+  var n=[]; for(var i=0;i<state.today.length;i++) if(state.today[i].id!==form.id) n.push(state.today[i]);
+  state.today=n; save(); closeSheet(); render();
+}
+function closeSheet(){ document.getElementById('ovl').classList.remove('on'); }
+
+/* ================= A4 · заявки ================= */
+function leadsHTML(){
+  var done=0,show=0;
+  for(var i=0;i<state.leads.length;i++){ var l=state.leads[i];
+    if(l.st) done++;
+    if(l.st==='Показ назначен'||l.st==='Показ совершён') show++; }
+  var h='<div class="card"><div class="t">Заявки за вчера</div><div class="grid3">'+
+    cell(state.leads.length,false,'пришло')+cell(done+'/'+state.leads.length,done===state.leads.length,'разобрано')+
+    cell(show,show>0,'в показ')+'</div>'+
+    '<div class="hint" style="margin:10px 0 0">Из '+state.leads.length+' заявок получилось показов: '+show+'. Это и есть цифра, которую смотрит РОП.</div></div>';
+  h+='<div class="sec">Разобрать</div>';
+  for(var j=0;j<state.leads.length;j++){ var d=state.leads[j];
+    var rt = d.st? '<span class="rt '+(LEADBAD[d.st]?'no':'ok')+'">'+d.st+'</span>' : '<span class="rt wait">выбрать</span>';
+    h+='<button class="item'+(d.st?' done':'')+'" onclick="openLead('+d.id+')"><div class="ic">📞</div><div class="tx">'+
+       '<div class="tp">'+d.src+'</div><div class="nm">'+esc(d.obj)+'</div></div>'+rt+'</button>';
+  }
+  h+='<div class="hint">У заявки одно текущее состояние, а не набор галочек — поэтому цифры складываются.</div>';
+  return h;
+}
+var curLead=null;
+function openLead(id){
+  curLead=null; for(var i=0;i<state.leads.length;i++) if(state.leads[i].id===id) curLead=state.leads[i];
+  if(!curLead) return;
+  var h='<h3>'+esc(curLead.obj)+'</h3><div class="sh">'+curLead.src+' · вчера</div><div class="lbl">Состояние</div><div class="chips">';
+  for(var j=0;j<LEAD.length;j++)
+    h+='<button class="chip'+(curLead.st===LEAD[j]?' on'+(LEADBAD[LEAD[j]]?' r':' g'):'')+'" onclick="setLead(\''+LEAD[j]+'\')">'+LEAD[j]+'</button>';
+  h+='</div><div class="sbtn"><button onclick="closeSheet()">Закрыть</button></div>';
+  document.getElementById('sheet').innerHTML=h;
+  document.getElementById('ovl').classList.add('on');
+}
+function setLead(v){ curLead.st=v; save(); closeSheet(); render(); }
+
+/* ================= A5 · прогноз ================= */
+function fcHTML(){
+  var sum=0; for(var i=0;i<state.fc.length;i++) sum+=Number(state.fc[i].sum||0);
+  var h='<div class="card"><div class="t">Прогноз на неделю</div><div class="grid3">'+
+    cell(state.fc.length,false,'объекта')+cell(Math.round(sum/1000)+'к',false,'комиссия')+
+    cell(state.fcLast.hit+' из '+state.fcLast.was,state.fcLast.hit>=state.fcLast.was/2,'сбылось')+'</div>'+
+    '<div class="hint" style="margin:10px 0 0">Прошлую неделю закрыли '+state.fcLast.hit+' из '+state.fcLast.was+'. Это про честность с самим собой, а не отчёт.</div></div>';
+  h+='<div class="sec">Объекты, которые рассчитываю закрыть</div>';
+  for(var j=0;j<state.fc.length;j++){ var f=state.fc[j];
+    h+='<button class="item" onclick="openFc('+f.id+')"><div class="ic">🎯</div><div class="tx">'+
+       '<div class="tp">'+f.p+'</div><div class="nm">'+esc(f.obj)+'</div>'+
+       '<div class="sub">'+esc(f.cl||'')+'</div></div><span class="rt '+(f.p==='высокая'?'ok':(f.p==='низкая'?'no':'mv'))+'">'+money(f.sum)+'</span></button>';
+  }
+  h+='<button class="add" onclick="openFc(0)">+ Добавить объект в прогноз</button>';
+  if(state.fcSent) h+='<div class="hint">Прогноз отправлен РОПу ✓</div>';
+  return h;
+}
+var curFc=null;
+function openFc(id){
+  curFc = id? null : {id:0,obj:'',cl:'',sum:'',p:'средняя'};
+  if(id) for(var i=0;i<state.fc.length;i++) if(state.fc[i].id===id) curFc=JSON.parse(JSON.stringify(state.fc[i]));
+  drawFc(); document.getElementById('ovl').classList.add('on');
+}
+function drawFc(){
+  var h='<h3>'+(curFc.id?'Объект в прогнозе':'Новый объект')+'</h3><div class="sh">неделя</div>'+
+    '<div class="lbl">Объект</div><input id="pObj" value="'+esc(curFc.obj)+'" placeholder="Строителей 11">'+
+    '<div class="lbl">Покупатель · имя без фамилии</div><input id="pCl" value="'+esc(curFc.cl)+'" placeholder="Кондрева">'+
+    '<div class="lbl">Ожидаемая комиссия ₽</div><input type="number" inputmode="numeric" id="pSum" value="'+(curFc.sum||'')+'" placeholder="105000">'+
+    '<div class="lbl">Вероятность</div><div class="chips">';
+  for(var i=0;i<PROB.length;i++)
+    h+='<button class="chip'+(curFc.p===PROB[i]?' on':'')+'" onclick="grabFc();curFc.p=\''+PROB[i]+'\';drawFc()">'+PROB[i]+'</button>';
+  h+='</div><div class="sbtn"><button onclick="closeSheet()">Отмена</button><button class="pri" onclick="saveFc()">Сохранить</button></div>';
+  if(curFc.id) h+='<button class="again" onclick="delFc()">Убрать из прогноза</button>';
+  document.getElementById('sheet').innerHTML=h;
+}
+function grabFc(){
+  var o=document.getElementById('pObj'),c=document.getElementById('pCl'),s=document.getElementById('pSum');
+  if(o)curFc.obj=o.value; if(c)curFc.cl=c.value; if(s)curFc.sum=s.value;
+}
+function saveFc(){
+  grabFc();
+  if(!curFc.obj||!curFc.sum){ alert('Нужны объект и ожидаемая комиссия'); return; }
+  if(curFc.id){ for(var i=0;i<state.fc.length;i++) if(state.fc[i].id===curFc.id) state.fc[i]=curFc; }
+  else { curFc.id=++state.seq; state.fc.push(curFc); }
+  state.fcSent=false; save(); closeSheet(); render();
+}
+function delFc(){
+  var n=[]; for(var i=0;i<state.fc.length;i++) if(state.fc[i].id!==curFc.id) n.push(state.fc[i]);
+  state.fc=n; save(); closeSheet(); render();
+}
+function sendFc(){ if(!state.fc.length){ alert('Прогноз пустой'); return; } state.fcSent=true; save(); render(); }
+
+/* ================= A7 · моё ================= */
+function meHTML(){
+  var m=state.month, pct=Math.round(m.done/m.norm*100);
+  var conv=m.leads? Math.round(m.leadShow/m.leads*100):0;
+  var h='<div class="card"><div class="t">Месяц</div>'+
+    '<div class="kv"><span>Подписанная комиссия</span><b>'+money(m.done)+' из '+money(m.norm)+'</b></div>'+
+    '<div class="bar"><i style="width:'+Math.min(pct,100)+'%"></i></div>'+
+    '<div class="kv"><span>Задатки</span><b>'+m.pd+' из '+m.pdNorm+'</b></div>'+
+    '<div class="kv"><span>Место в отделе</span><b>'+m.place+' из '+m.of+'</b></div></div>';
+  h+='<div class="card"><div class="t">Моя воронка за месяц</div>'+
+    '<div class="kv"><span>Заявки</span><b>'+m.leads+'</b></div>'+
+    '<div class="kv"><span>Из них в показ</span><b>'+m.leadShow+' · '+conv+'%</b></div>'+
+    '<div class="kv"><span>Показы</span><b>'+m.pokaz+'</b></div>'+
+    '<div class="kv"><span>Оценки</span><b>'+m.ocenka+'</b></div>'+
+    '<div class="kv"><span>В рекламу</span><b>'+m.rekl+'</b></div>'+
+    '<div class="kv"><span>Показов на задаток</span><b>'+(m.pd? Math.round(m.pokaz/m.pd):'—')+'</b></div></div>';
+  h+='<div class="card"><div class="t">Кабинет</div>'+
+    '<div class="kv"><span>Сотрудник</span><b>'+esc(state.user)+'</b></div>'+
+    '<div class="kv"><span>Отдел</span><b>№2</b></div>'+
+    '<div class="kv"><span>Статус</span><b>агент</b></div></div>'+
+    '<button class="add" onclick="logout()">Выйти из кабинета</button>';
+  return h;
+}
+function logout(){ state.user=null; pickName=null; save(); render(); }
+
+/* ================= сдача и сброс ================= */
+function submitDay(){
+  var left=0; for(var i=0;i<state.yest.length;i++) if(!state.yest[i].status) left++;
+  if(left){ tab='f'; render(); alert('Осталось отметить дел за вчера: '+left); return; }
+  var moved=0; for(var j=0;j<state.yest.length;j++) if(state.yest[j].status==='move'&&state.yest[j].moveTo===state.date) moved++;
+  if(state.today.length+moved===0){ tab='p'; render(); alert('План на сегодня пустой'); return; }
+  state.seconds=Math.round((Date.now()-t0)/1000); state.submitted=true; save(); render();
+}
+function resetAll(){
+  if(!confirm('Сбросить прототип и начать заново?')) return;
+  var u=state.user; state=seed(); state.user=u; save(); t0=Date.now(); nav='day'; tab='f'; render();
+}
+
+render();
+</script>
+</body>
+</html>
