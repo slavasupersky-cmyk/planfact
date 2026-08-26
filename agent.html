@@ -70,7 +70,7 @@ b.good{color:var(--dot)} b.bad{color:var(--red)}
 
 .sec{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:16px 2px 8px}
 .item{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:2px;padding:12px 13px;margin-bottom:8px;display:flex;gap:11px;align-items:center;color:inherit}
-.item .ic{width:30px;height:30px;flex:none;border-radius:2px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:15px}
+.item .ic{width:30px;height:30px;flex:none;border-radius:2px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--ink-2)}
 .item .tx{flex:1;min-width:0}
 .item .tp{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
 .item .nm{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -90,7 +90,7 @@ b.good{color:var(--dot)} b.bad{color:var(--red)}
 .timer{text-align:center;font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:11.5px;letter-spacing:.06em;color:var(--mute);margin-top:7px}
 .nav{display:flex;gap:2px;margin-top:8px}
 .nav button{flex:1;background:none;border:0;color:var(--mute);font-size:11.5px;padding:6px 2px;border-radius:2px}
-.nav button b{display:block;font-size:17px;line-height:1.2;font-weight:400}
+.nav button b{display:flex;justify-content:center;margin-bottom:3px;font-weight:400}
 .nav button.on{color:var(--ink);font-weight:700}
 
 .ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:20}
@@ -100,7 +100,7 @@ b.good{color:var(--dot)} b.bad{color:var(--red)}
 .sheet .sh{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
 .lbl{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:14px 2px 6px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:12px 13px;font-size:15px;color:var(--ink-2);flex:1 1 auto;min-width:calc(33% - 6px)}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:12px 13px;font-size:15px;color:var(--ink-2);flex:1 1 auto;min-width:calc(33% - 6px);display:flex;align-items:center;justify-content:center}
 .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:700}
 .chip.on.g{background:var(--dot);color:var(--on-dot)}
 .chip.on.r{background:var(--red);color:#fff}
@@ -126,6 +126,38 @@ textarea{min-height:70px;resize:vertical}
 <div class="ovl" id="ovl" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
 
 <script>
+/* ============ иконки · сетка 24, линия 2, цвет от темы ============ */
+var IC={
+list:'<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+users:'<circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.5"/><path d="M17.5 14a6 6 0 0 1 3 6"/>',
+chart:'<path d="M4 20h16"/><path d="M7.5 20v-5M12 20v-9M16.5 20v-6"/>',
+home:'<path d="M4 11 12 4l8 7"/><path d="M6.5 10v10h11V10"/>',
+search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/>',
+money:'<rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="12" cy="12" r="2.5"/>',
+doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/>',
+meet:'<circle cx="8" cy="8.5" r="2.5"/><circle cx="16" cy="8.5" r="2.5"/><path d="M3.5 19a4.5 4.5 0 0 1 9 0"/><path d="M11.5 19a4.5 4.5 0 0 1 9 0"/>',
+screen:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/>',
+phone:'<path d="M5 4h3.5l1.8 4.5-2.3 1.4a12 12 0 0 0 5.1 5.1l1.4-2.3L19 14.5V18a1.5 1.5 0 0 1-1.7 1.5A15.5 15.5 0 0 1 3.5 5.7 1.5 1.5 0 0 1 5 4z"/>',
+target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 12h.01"/>',
+check:'<circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l2.6 2.6L16 9.5"/>',
+undo:'<path d="M4.5 9H13a6 6 0 1 1 0 12H8.5"/><path d="M8 4.5 4 9l4 4.5"/>',
+cross:'<circle cx="12" cy="12" r="8.5"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/>',
+dash:'<circle cx="12" cy="12" r="8.5" stroke-dasharray="3 3.6"/>',
+star:'<path d="M12 3.8l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.9l5.8-.8z"/>',
+past:'<path d="M3.8 12a8.2 8.2 0 1 0 2.6-6"/><path d="M3.5 3.5v4.2h4.2"/><path d="M12 8v4.4l3 1.8"/>',
+future:'<rect x="3" y="5" width="18" height="16" rx="1.5"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9.5 15.5h5.5m-2-2.2 2.2 2.2-2.2 2.2"/>',
+norm:'<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15.5" cy="12" r="2"/><circle cx="7.5" cy="17" r="2"/>',
+bolt:'<path d="M13.5 3 5.5 13.5H11l-.5 7.5 8-10.5H13z"/>',
+send:'<path d="M20.5 3.5 3.5 10.8l7 2.9 2.9 7z"/><path d="M20.5 3.5 10.5 13.7"/>',
+pin:'<path d="M9 3h6l-1 5.2 3 2.8v2H7v-2l3-2.8z"/><path d="M12 13v8"/>',
+key:'<circle cx="8" cy="8" r="4.2"/><path d="M11 11l9 9"/><path d="M16.5 16.5 18.5 14.5M14.5 14.5 16.5 12.5"/>',
+alert:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.5v.01"/>',
+edit:'<path d="M4 20h4.2L20 8.2 15.8 4 4 15.8z"/><path d="M14 6.2 17.8 10"/>',
+ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>'
+};
+function ic(n,s){ s=s||18; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
+
 /* ================= хранилище ================= */
 var KEY='topf-agent-v3', mem=null;
 function save(){ var s=JSON.stringify(state); try{ localStorage.setItem(KEY,s); }catch(e){ mem=s; } }
@@ -135,12 +167,12 @@ function load(){ var s=null; try{ s=localStorage.getItem(KEY); }catch(e){ s=mem;
 /* ================= справочники ================= */
 var STAFF=['Брыкина Александра','Кастромина Ольга','Кондрева Ирина','Роза Марина','Смирнова Анна'];
 var TYPES=[
- {k:'pokaz', n:'Показ',    ic:'🏘', obj:'Адрес объекта', cl:'Покупатель',  money:false},
- {k:'ocenka',n:'Оценка',   ic:'🤓', obj:'Адрес объекта', cl:'Собственник', money:false},
- {k:'pd',    n:'ПД',       ic:'💰', obj:'Адрес объекта', cl:'Клиент',      money:true},
- {k:'od',    n:'ОД',       ic:'📄', obj:'Адрес объекта', cl:'Клиент',      money:true},
- {k:'vstr',  n:'Встреча',  ic:'🤝', obj:'Где',           cl:'С кем',       money:false},
- {k:'rekl',  n:'В рекламу',ic:'📺', obj:'Адрес объекта', cl:'',            money:false}
+ {k:'pokaz', n:'Показ',    ic:'home',   obj:'Адрес объекта', cl:'Покупатель',  money:false},
+ {k:'ocenka',n:'Оценка',   ic:'search', obj:'Адрес объекта', cl:'Собственник', money:false},
+ {k:'pd',    n:'ПД',       ic:'money',  obj:'Адрес объекта', cl:'Клиент',      money:true},
+ {k:'od',    n:'ОД',       ic:'doc',    obj:'Адрес объекта', cl:'Клиент',      money:true},
+ {k:'vstr',  n:'Встреча',  ic:'meet',   obj:'Где',           cl:'С кем',       money:false},
+ {k:'rekl',  n:'В рекламу',ic:'screen', obj:'Адрес объекта', cl:'',            money:false}
 ];
 var REASONS=['Клиент перенёс','Клиент не на связи','Собственник отказал','Не успел(а)','Ушли мимо','Ипотека не одобрена'];
 var LEAD=['Новая','Прогрев','Показ назначен','Показ совершён','Встреча назначена','Договор на подбор','Оферта','Отказ','Недозвон','Дубль'];
@@ -261,10 +293,10 @@ function bottomHTML(){
     cta='<button class="cta" onclick="sendFc()">Отправить прогноз РОПу</button>';
   return '<div class="bottom"><div class="in">'+cta+
     '<div class="nav">'+
-      nb('day','📋','День')+nb('leads','📞','Заявки')+nb('fc','🎯','Прогноз')+nb('me','📊','Моё')+
+      nb('day','list','День')+nb('leads','phone','Заявки')+nb('fc','target','Прогноз')+nb('me','chart','Моё')+
     '</div></div></div>';
 }
-function nb(k,i,n){ return '<button class="'+(nav===k?'on':'')+'" onclick="go(\''+k+'\')"><b>'+i+'</b>'+n+'</button>'; }
+function nb(k,i,n){ return '<button class="'+(nav===k?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,21)+'</b>'+n+'</button>'; }
 function go(k){ nav=k; render(); }
 function esc(s){ return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
 function ru(d){ var p=d.split('-'); var M=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
@@ -332,7 +364,7 @@ function dayHTML(){
     h+='<button class="add" onclick="openAdd(\'y\')">+ Что было вне плана ★</button>';
     h+='<div class="hint">Если отмечали дела по ходу дня, здесь уже всё проставлено — останется подтвердить.</div>';
   } else {
-    if(state.fromRop) h+='<div class="sec">От РОПа</div><div class="item"><div class="ic">📌</div><div class="tx"><div class="nm">'+esc(state.fromRop)+'</div></div></div>';
+    if(state.fromRop) h+='<div class="sec">От РОПа</div><div class="item"><div class="ic">'+ic('pin')+'</div><div class="tx"><div class="nm">'+esc(state.fromRop)+'</div></div></div>';
     h+='<div class="sec">План на сегодня</div>';
     var moved=[];
     for(var b=0;b<state.yest.length;b++){ var it=state.yest[b];
@@ -355,7 +387,7 @@ function pastHTML(){
   var h='<div class="sec">Последние дни · только просмотр</div>';
   for(var i=0;i<state.past.length;i++){ var d=state.past[i];
     var pct=Math.round(d.fact/d.plan*100);
-    h+='<button class="item dayrow" onclick="openPast('+i+')"><div class="ic">'+(d.sent?'✓':'!')+'</div><div class="tx">'+
+    h+='<button class="item dayrow" onclick="openPast('+i+')"><div class="ic">'+ic(d.sent?'ok':'alert')+'</div><div class="tx">'+
        '<div class="tp">'+(d.sent?'сдан вовремя':'сдан с опозданием')+'</div>'+
        '<div class="nm">'+d.day+'</div><div class="sub">план '+d.plan+' · факт '+d.fact+'</div></div>'+
        '<span class="rt '+(pct>=100?'ok':(pct>=70?'mv':'no'))+'">'+pct+'%</span></button>';
@@ -399,13 +431,13 @@ function openNormSheet(kk){
   if(kk==='pd'&&state.fc.length){
     h+='<div class="sec">В прогнозе на неделю</div>';
     for(var q=0;q<state.fc.length;q++)
-      h+='<div class="item"><div class="ic">🎯</div><div class="tx"><div class="tp">'+state.fc[q].p+'</div>'+
+      h+='<div class="item"><div class="ic">'+ic('target')+'</div><div class="tx"><div class="tp">'+state.fc[q].p+'</div>'+
          '<div class="nm">'+esc(state.fc[q].obj)+'</div></div><span class="rt ok">'+money(state.fc[q].sum)+'</span></div>';
   }
   h+='<div class="sec">Засчитано на этой неделе</div>';
   if(!items.length) h+='<div class="hint">Пока ничего.</div>';
   for(var i=0;i<items.length;i++)
-    h+='<div class="item"><div class="ic">✓</div><div class="tx"><div class="tp">'+items[i].day+'</div>'+
+    h+='<div class="item"><div class="ic">'+ic('ok')+'</div><div class="tx"><div class="tp">'+items[i].day+'</div>'+
        '<div class="nm">'+esc(items[i].obj)+'</div></div></div>';
   h+='<div class="sbtn"><button onclick="closeSheet()">Закрыть</button></div>';
   document.getElementById('sheet').innerHTML=h;
@@ -431,7 +463,7 @@ function itemHTML(it,src){
             : src==='fut' ? '<span class="rt wait">'+(it.time||'—')+'</span>'
             : '<span class="rt wait">'+(it.time||'—')+'</span>';
   var click = src==='y' ? 'openStatus('+it.id+')' : (src==='t'?'openEdit('+it.id+')':(src==='fut'?'delFuture('+it.id+')':''));
-  return '<button class="item'+(src==='y'&&it.status?' done':'')+'" onclick="'+click+'"><div class="ic">'+t.ic+'</div><div class="tx">'+
+  return '<button class="item'+(src==='y'&&it.status?' done':'')+'" onclick="'+click+'"><div class="ic">'+ic(t.ic)+'</div><div class="tx">'+
     '<div class="tp">'+t.n+(it.star?' <span class="star">★ вне плана</span>':'')+'</div>'+
     '<div class="nm">'+esc(it.obj||'—')+'</div>'+
     (sub.length?'<div class="sub">'+esc(sub.join(' · '))+'</div>':'')+
@@ -494,7 +526,7 @@ function drawAdd(){
   var h='<h3>'+(addTo==='edit'?'Дело':(addTo==='y'?'Дело вне плана ★':(addTo==='fut'?'Назначить вперёд':'Новое дело')))+'</h3>'+
         '<div class="sh">'+(addTo==='y'?ru(state.dateY):(addTo==='fut'?'выберите дату':ru(state.date)))+'</div><div class="lbl">Тип</div><div class="chips">';
   for(var i=0;i<TYPES.length;i++)
-    h+='<button class="chip'+(form.type===TYPES[i].k?' on':'')+'" onclick="form.type=\''+TYPES[i].k+'\';grab();drawAdd()">'+TYPES[i].ic+' '+TYPES[i].n+'</button>';
+    h+='<button class="chip'+(form.type===TYPES[i].k?' on':'')+'" onclick="form.type=\''+TYPES[i].k+'\';grab();drawAdd()">'+ic(TYPES[i].ic,16)+'<span style="margin-left:7px">'+TYPES[i].n+'</span></button>';
   h+='</div>';
   if(addTo==='fut') h+='<div class="lbl">Дата</div><input type="date" id="aDate" value="'+(form.date||'')+'" min="'+state.date+'">';
   h+='<div class="lbl">'+t.obj+'</div><input id="aObj" value="'+esc(form.obj)+'" placeholder="Строителей 11">';
@@ -560,7 +592,7 @@ function leadsHTML(){
   h+='<div class="sec">Разобрать</div>';
   for(var j=0;j<state.leads.length;j++){ var d=state.leads[j];
     var rt = d.st? '<span class="rt '+(LEADBAD[d.st]?'no':'ok')+'">'+d.st+'</span>' : '<span class="rt wait">выбрать</span>';
-    h+='<button class="item'+(d.st?' done':'')+'" onclick="openLead('+d.id+')"><div class="ic">📞</div><div class="tx">'+
+    h+='<button class="item'+(d.st?' done':'')+'" onclick="openLead('+d.id+')"><div class="ic">'+ic('phone')+'</div><div class="tx">'+
        '<div class="tp">'+d.src+'</div><div class="nm">'+esc(d.obj)+'</div></div>'+rt+'</button>';
   }
   h+='<div class="hint">У заявки одно текущее состояние, а не набор галочек — поэтому цифры складываются.</div>';
@@ -588,7 +620,7 @@ function fcHTML(){
     '<div class="hint" style="margin:10px 0 0">Прошлую неделю закрыли '+state.fcLast.hit+' из '+state.fcLast.was+'. Это про честность с самим собой, а не отчёт.</div></div>';
   h+='<div class="sec">Объекты, которые рассчитываю закрыть</div>';
   for(var j=0;j<state.fc.length;j++){ var f=state.fc[j];
-    h+='<button class="item" onclick="openFc('+f.id+')"><div class="ic">🎯</div><div class="tx">'+
+    h+='<button class="item" onclick="openFc('+f.id+')"><div class="ic">'+ic('target')+'</div><div class="tx">'+
        '<div class="tp">'+f.p+'</div><div class="nm">'+esc(f.obj)+'</div>'+
        '<div class="sub">'+esc(f.cl||'')+'</div></div><span class="rt '+(f.p==='высокая'?'ok':(f.p==='низкая'?'no':'mv'))+'">'+money(f.sum)+'</span></button>';
   }
