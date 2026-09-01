@@ -107,6 +107,7 @@ button{font-family:inherit}
 .chip.on.s{background:var(--star);color:#fff;border-color:var(--star)}
 .chip.half{min-width:calc(50% - 6px)}
 input,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:2px;padding:13px;font-size:16px;font-family:inherit;color:var(--ink)}
+input[type=date],input[type=time]{padding:11px 12px;min-height:48px;-webkit-appearance:none;appearance:none;text-align:left}
 textarea{min-height:70px;resize:vertical}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sbtn{display:flex;gap:8px;margin-top:18px}
@@ -603,70 +604,71 @@ function saveRop(){
 }
 
 /* ================= добавление дела ================= */
-var form={};
+var frm={};
 function openAdd(date,star,editId){
-  form={id:editId||0,type:'pokaz',obj:'',cl:'',clt:'buyer',date:date||state.date,time:'',sum:'',star:!!star,vague:false};
-  if(editId){ var t=task(editId); if(t) form={id:t.id,type:t.type,obj:t.obj,cl:t.cl,clt:t.clt,date:t.date,time:t.time,sum:t.sum||'',star:!!t.star,vague:!!t.vague}; }
+  frm={id:editId||0,type:'pokaz',obj:'',cl:'',clt:'buyer',date:date||state.date,time:'',sum:'',star:!!star,vague:false};
+  if(editId){ var t=task(editId); if(t) frm={id:t.id,type:t.type,obj:t.obj,cl:t.cl,clt:t.clt,date:t.date,time:t.time,sum:t.sum||'',star:!!t.star,vague:!!t.vague}; }
   fixClt(); drawAdd();
 }
-function openVague(){ form={id:0,type:'pokaz',obj:'',cl:'',clt:'',date:state.date,time:'',sum:'',star:false,vague:true}; drawAdd(); }
-function fixClt(){ var t=T(form.type); if(t.cl!=='any') form.clt=t.cl; }
+function openVague(){ frm={id:0,type:'pokaz',obj:'',cl:'',clt:'',date:state.date,time:'',sum:'',star:false,vague:true}; drawAdd(); }
+function fixClt(){ var t=T(frm.type); if(t.cl!=='any') frm.clt=t.cl; }
 function drawAdd(){
-  var t=T(form.type);
-  var h='<h3>'+(form.id?'Дело':(form.vague?'Назначить новое':(form.star?'Дело вне плана':'Новое дело')))+'</h3>'+
-    '<div class="sh">'+(form.vague?'без адреса и клиента':rud(form.date))+'</div>'+
+  var t=T(frm.type);
+  var h='<h3>'+(frm.id?'Дело':(frm.vague?'Назначить новое':(frm.star?'Дело вне плана':'Новое дело')))+'</h3>'+
+    '<div class="sh">'+(frm.vague?'без адреса и клиента':rud(frm.date))+'</div>'+
     '<div class="lbl">Тип</div><div class="chips">';
   for(var i=0;i<TYPES.length;i++)
-    h+='<button class="chip half'+(form.type===TYPES[i].k?' on':'')+'" onclick="grab();form.type=\''+TYPES[i].k+'\';fixClt();drawAdd()">'+ic(TYPES[i].ic,18)+TYPES[i].n+'</button>';
-  h+='</div><div class="lbl">Дата</div><input type="date" id="aDate" value="'+form.date+'">';
-  if(!form.vague){
-    h+='<div class="lbl">Объект · адрес</div><input id="aObj" value="'+esc(form.obj)+'" placeholder="Строителей 11">'+
-       '<div class="lbl">Клиент · имя без фамилии</div><input id="aCl" value="'+esc(form.cl)+'" placeholder="Кондрева">'+
+    h+='<button class="chip half'+(frm.type===TYPES[i].k?' on':'')+'" onclick="grab();frm.type=\''+TYPES[i].k+'\';fixClt();drawAdd()">'+ic(TYPES[i].ic,18)+TYPES[i].n+'</button>';
+  h+='</div><div class="row2">'+
+     '<div><div class="lbl">Дата</div><input type="date" id="aDate" value="'+frm.date+'"></div>'+
+     '<div><div class="lbl">Время</div><input type="time" id="aTime" value="'+(frm.time||'')+'"></div></div>';
+  if(!frm.vague){
+    h+='<div class="lbl">Объект · адрес</div><input id="aObj" value="'+esc(frm.obj)+'" placeholder="Строителей 11">'+
+       '<div class="lbl">Клиент · имя без фамилии</div><input id="aCl" value="'+esc(frm.cl)+'" placeholder="Кондрева">'+
        '<div class="lbl">Тип клиента</div><div class="chips">';
     if(t.cl==='any'){
-      h+='<button class="chip half'+(form.clt==='buyer'?' on':'')+'" onclick="grab();form.clt=\'buyer\';drawAdd()">Покупатель</button>'+
-         '<button class="chip half'+(form.clt==='seller'?' on':'')+'" onclick="grab();form.clt=\'seller\';drawAdd()">Продавец</button>';
+      h+='<button class="chip half'+(frm.clt==='buyer'?' on':'')+'" onclick="grab();frm.clt=\'buyer\';drawAdd()">Покупатель</button>'+
+         '<button class="chip half'+(frm.clt==='seller'?' on':'')+'" onclick="grab();frm.clt=\'seller\';drawAdd()">Продавец</button>';
     } else {
       h+='<button class="chip on">'+(t.cl==='buyer'?'Покупатель':'Продавец')+' · по типу дела</button>';
     }
     h+='</div>';
   }
-  h+='<div class="row2"><div><div class="lbl">Время</div><input type="time" id="aTime" value="'+(form.time||'')+'"></div>'+
-     (t.money?'<div><div class="lbl">Комиссия ₽</div><input type="number" inputmode="numeric" id="aSum" value="'+(form.sum||'')+'" placeholder="105000"></div>':'<div></div>')+
-     '</div><div class="sbtn"><button onclick="closeSheet()">Отмена</button><button class="pri" onclick="saveAdd(0)">Сохранить</button></div>';
-  if(!form.id&&!form.vague&&form.type==='pokaz') h+='<button class="add" style="margin-top:9px" onclick="saveAdd(1)">Сохранить и ещё показ этому же клиенту</button>';
-  if(form.id) h+='<button class="add" style="margin-top:9px" onclick="delTask()">Удалить дело</button>';
+  if(t.money) h+='<div class="lbl">Комиссия ₽</div><input type="number" inputmode="numeric" id="aSum" value="'+(frm.sum||'')+'" placeholder="105000">';
+  h+='<div class="sbtn"><button onclick="closeSheet()">Отмена</button><button class="pri" onclick="saveAdd(0)">Сохранить</button></div>';
+  if(!frm.id&&!frm.vague&&frm.type==='pokaz') h+='<button class="add" style="margin-top:9px" onclick="saveAdd(1)">Сохранить и ещё показ этому же клиенту</button>';
+  if(frm.id) h+='<button class="add" style="margin-top:9px" onclick="delTask()">Удалить дело</button>';
   sheet(h);
-  setTimeout(function(){ var o=document.getElementById('aObj'); if(o&&!form.obj) o.focus(); },60);
+  setTimeout(function(){ var o=document.getElementById('aObj'); if(o&&!frm.obj) o.focus(); },60);
 }
 function grab(){
   var g=function(id){ var e=document.getElementById(id); return e?e.value:null; }, v;
-  if((v=g('aObj'))!==null) form.obj=v;
-  if((v=g('aCl'))!==null) form.cl=v;
-  if((v=g('aTime'))!==null) form.time=v;
-  if((v=g('aSum'))!==null) form.sum=v;
-  if((v=g('aDate'))!==null) form.date=v;
+  if((v=g('aObj'))!==null) frm.obj=v;
+  if((v=g('aCl'))!==null) frm.cl=v;
+  if((v=g('aTime'))!==null) frm.time=v;
+  if((v=g('aSum'))!==null) frm.sum=v;
+  if((v=g('aDate'))!==null) frm.date=v;
 }
 function saveAdd(again){
   grab(); fixClt();
-  var t=T(form.type);
-  if(!form.vague&&!form.obj){ alert('Укажите адрес объекта'); return; }
-  if(!form.vague&&t.cl==='any'&&!form.clt){ alert('Выберите: покупатель или продавец'); return; }
-  if(t.money&&!form.vague&&!form.sum){ alert('Для задатка и договора нужна сумма комиссии'); return; }
-  if(form.id){
-    var e=task(form.id);
-    e.type=form.type; e.obj=form.obj; e.cl=form.cl; e.clt=form.clt; e.date=form.date; e.time=form.time;
-    if(form.sum) e.sum=Number(form.sum);
+  var t=T(frm.type);
+  if(!frm.vague&&!frm.obj){ alert('Укажите адрес объекта'); return; }
+  if(!frm.vague&&t.cl==='any'&&!frm.clt){ alert('Выберите: покупатель или продавец'); return; }
+  if(t.money&&!frm.vague&&!frm.sum){ alert('Для задатка и договора нужна сумма комиссии'); return; }
+  if(frm.id){
+    var e=task(frm.id);
+    e.type=frm.type; e.obj=frm.obj; e.cl=frm.cl; e.clt=frm.clt; e.date=frm.date; e.time=frm.time;
+    if(frm.sum) e.sum=Number(frm.sum);
   } else {
-    var it={id:++state.seq,type:form.type,obj:form.obj,cl:form.cl,clt:form.clt,date:form.date,time:form.time,status:null};
-    if(form.sum) it.sum=Number(form.sum);
-    if(form.star){ it.star=true; it.status='done'; }
-    if(form.vague){ it.vague=true; it.obj=''; it.cl=''; }
+    var it={id:++state.seq,type:frm.type,obj:frm.obj,cl:frm.cl,clt:frm.clt,date:frm.date,time:frm.time,status:null};
+    if(frm.sum) it.sum=Number(frm.sum);
+    if(frm.star){ it.star=true; it.status='done'; }
+    if(frm.vague){ it.vague=true; it.obj=''; it.cl=''; }
     state.tasks.push(it);
   }
   save();
   if(again){
-    form={id:0,type:'pokaz',obj:'',cl:form.cl,clt:form.clt,date:form.date,time:'',sum:'',star:form.star,vague:false};
+    frm={id:0,type:'pokaz',obj:'',cl:frm.cl,clt:frm.clt,date:frm.date,time:'',sum:'',star:frm.star,vague:false};
     drawAdd(); return;
   }
   closeSheet();
@@ -674,7 +676,7 @@ function saveAdd(again){
 }
 function delTask(){
   if(!confirm('Удалить дело?')) return;
-  var n=[]; for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].id!==form.id) n.push(state.tasks[i]);
+  var n=[]; for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].id!==frm.id) n.push(state.tasks[i]);
   state.tasks=n; save(); closeSheet();
   if(document.getElementById('wiz').classList.contains('on')) drawWiz(); else render();
 }
