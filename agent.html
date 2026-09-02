@@ -177,9 +177,28 @@ function ru(d){ var p=String(d).split('-'); return parseInt(p[2],10)+' '+MN[pars
 function rud(d){ var dt=new Date(d+'T00:00:00'); return WD[dt.getDay()]+', '+ru(d); }
 function money(n){ return Number(n||0).toLocaleString('ru-RU')+' ₽'; }
 function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
-function weekLabel(){ var d=new Date(), day=(d.getDay()+6)%7; return 'Неделя с '+ru(plus(-day)); }
+function weekStart(){ var d=new Date(), day=(d.getDay()+6)%7; return plus(-day); }
+function weekLabel(){ return 'Неделя с '+ru(weekStart()); }
 
 /* ================= данные ================= */
+function weekHistory(){
+  // дела, сделанные с начала недели до вчера — чтобы счётчик и список сходились
+  var ws=weekStart(), out=[], id=50;
+  var tpl=[
+    {type:'pokaz', obj:'Мира 6',        cl:'Сомова',   clt:'buyer',  back:2},
+    {type:'pokaz', obj:'Попова 72',     cl:'Сомова',   clt:'buyer',  back:2},
+    {type:'pokaz', obj:'Тепличная 4',   cl:'Маргарита',clt:'buyer',  back:3},
+    {type:'ocenka',obj:'Ладожская 146', cl:'Титов',    clt:'seller', back:3},
+    {type:'rekl',  obj:'Мира 42',       cl:'Титов',    clt:'seller', back:2},
+    {type:'vstr',  obj:'Офис',          cl:'Пётр',     clt:'buyer',  back:3}
+  ];
+  for(var i=0;i<tpl.length;i++){
+    var dt=plus(-tpl[i].back);
+    if(dt<ws) continue;                       // на этой неделе таких дней ещё не было
+    out.push({id:id++,type:tpl[i].type,obj:tpl[i].obj,cl:tpl[i].cl,clt:tpl[i].clt,date:dt,time:'',status:'done'});
+  }
+  return out;
+}
 function seed(){
   var t=iso(new Date()), y=plus(-1);
   return {
@@ -196,13 +215,13 @@ function seed(){
       {id:7,type:'ocenka',obj:'Тепличная 4',   cl:'Маргарита',clt:'seller',date:t,       time:'16:00', status:null},
       {id:8,type:'pokaz', obj:'Строителей 68а',cl:'Пётр',     clt:'buyer', date:plus(1), time:'11:00', status:null},
       {id:9,type:'pd',    obj:'Тепличная 4',   cl:'Маргарита',clt:'buyer', date:plus(2), time:'15:00', sum:105000, status:null}
-    ],
+    ].concat(weekHistory()),
     ropTasks:[
       {id:21,text:'Разобрать портфель',date:t,done:null,why:''},
       {id:22,text:'Сделать предложение по цене Маргарите',date:t,done:null,why:''}
     ],
     leadsY:null,
-    weekDone:{pokaz:4,ocenka:1,rekl:1,vstr:1,pd:0,leads:5},
+    weekDone:{leads:5},
     fc:{week:weekLabel(),items:[{id:31,obj:'Строителей 11',cl:'Кондрева',sum:105000}],sent:false},
     reports:[
       {date:plus(-1),label:'Вчера',        kind:'day', status:'accepted',plan:5,fact:4,leads:5},
@@ -229,12 +248,19 @@ function futureTasks(){ var o=[]; for(var i=0;i<state.tasks.length;i++) if(state
   o.sort(function(a,b){ return a.date<b.date?-1:1; }); return o; }
 function task(id){ for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].id===id) return state.tasks[i]; return null; }
 function yestLeft(){ var n=0,y=byDate(state.dateY); for(var i=0;i<y.length;i++) if(!y[i].status) n++; return n; }
-function weekCount(k){
-  var n=state.weekDone[k]||0, d=byDate(state.dateY).concat(byDate(state.date));
-  for(var i=0;i<d.length;i++) if(d[i].type===k&&d[i].status==='done') n++;
-  return n;
+function weekTasks(k,doneOnly){
+  var ws=weekStart(), o=[];
+  for(var i=0;i<state.tasks.length;i++){ var t=state.tasks[i];
+    if(t.type!==k) continue;
+    if(doneOnly){ if(t.status==='done'&&t.date>=ws&&t.date<=state.date) o.push(t); }
+    else if(!t.status&&t.date>=state.date) o.push(t);
+  }
+  o.sort(function(a,b){ return a.date<b.date?-1:1; });
+  return o;
 }
+function weekCount(k){ return weekTasks(k,true).length; }
 function weekLeads(){ return (state.weekDone.leads||0)+(state.leadsY||0); }
+/* заявки — не дела, у них нет карточек, поэтому считаются отдельно */
 
 /* ================= рендер ================= */
 var nav='today', pickName=null, meMode='month';
@@ -519,11 +545,7 @@ function openNorm(k){
     '<div class="card"><div class="kv"><span>Сделано</span><b class="'+(done>=need?'g':'')+'">'+done+' из '+need+' · '+Math.round(done/need*100)+'%</b></div>'+
     '<div class="bar"><i style="width:'+Math.min(Math.round(done/need*100),100)+'%"></i></div>'+
     '<div class="kv"><span>Норму задал</span><b>РОП</b></div></div>';
-  var dn=[],pl=[];
-  for(var j=0;j<state.tasks.length;j++){ var t=state.tasks[j];
-    if(t.type!==k) continue;
-    if(t.status==='done') dn.push(t); else if(!t.status) pl.push(t);
-  }
+  var dn=weekTasks(k,true), pl=weekTasks(k,false);
   h+='<div class="sec">Засчитано</div>';
   if(!dn.length) h+='<div class="hint">Пока ничего.</div>';
   for(var a=0;a<dn.length;a++) h+=miniRow(dn[a],'сделано');
