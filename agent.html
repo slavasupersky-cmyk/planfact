@@ -12,7 +12,8 @@
   --ink:#101010; --ink-2:#5A5A5A; --mute:#757575;
   --line:#E6E6E6; --paper:#FFFFFF; --card:#FFFFFF;
   --surface:#FAFAFA; --surface-2:#F0F0F0;
-  --dot:#0D7A46; --on-dot:#FFFFFF; --star:#8A6100; --red:#B3261E;
+  --lime:#AEEA00; --on-lime:#101010; --green:#0D7A46;
+  --star:#8A6100; --red:#B3261E; --r:6px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--paper);color:var(--ink);
@@ -20,103 +21,109 @@ html,body{margin:0;background:var(--paper);color:var(--ink);
   font-size:16px;line-height:1.55}
 button{font-family:inherit}
 .app{max-width:560px;margin:0 auto;padding:14px 14px 150px}
+.mono{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,monospace}
 
 .login{max-width:420px;margin:0 auto;padding:56px 18px}
 .login .mark{font-size:26px;font-weight:600;letter-spacing:-.03em;margin-bottom:6px}
-.login .mark i{font-style:normal;color:var(--dot)}
+.login .mark i{font-style:normal;color:var(--lime)}
 .login .sub{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:34px}
 .login h2{font-size:21px;letter-spacing:-.03em;margin:0 0 16px}
-.pick{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:2px;padding:14px;margin-bottom:7px;font-size:15px;color:var(--ink-2)}
-.pick.on{border-color:var(--dot);border-width:2px;color:var(--ink);font-weight:600}
+.pick{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:7px;font-size:15px;color:var(--ink-2)}
+.pick.on{border-color:var(--ink);border-width:2px;color:var(--ink);font-weight:600}
 .note{font-size:13px;color:var(--mute);margin-top:12px;text-align:center}
 
 .hdr{padding-bottom:12px;border-bottom:2px solid var(--ink);margin-bottom:14px}
 .hdr .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .mark{font-size:20px;font-weight:600;letter-spacing:-.03em;line-height:1}
-.mark i{font-style:normal;color:var(--dot)}
+.mark i{font-style:normal;color:var(--lime)}
 .mark small{display:block;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:400;margin-top:5px}
 .who{text-align:right}
 .who b{display:block;font-size:14px;font-weight:600}
 .who span{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mute)}
 
-.submit{width:100%;margin-top:12px;background:var(--dot);color:var(--on-dot);border:0;border-radius:2px;padding:15px;font-size:16px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;justify-content:center;gap:9px}
-.submit[disabled]{background:var(--surface-2);color:var(--mute)}
+.btn{width:100%;min-height:54px;border-radius:var(--r);padding:14px;font-size:15.5px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:9px}
+.btn.pri{background:var(--lime);color:var(--on-lime);border-color:var(--lime)}
+.btn.ghost{border-style:dashed;color:var(--mute);background:transparent}
+.btn[disabled]{background:var(--surface-2);color:var(--mute);border-color:var(--surface-2)}
+.btn+.btn{margin-top:8px}
+.submit{margin-top:12px}
 .status{margin-top:8px;display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-2)}
-.dotmark{width:9px;height:9px;border-radius:50%;flex:none}
-.dotmark.ok{background:var(--dot)} .dotmark.wait{background:var(--star)} .dotmark.no{background:var(--red)} .dotmark.none{background:var(--line)}
+.dm{width:9px;height:9px;border-radius:50%;flex:none}
+.dm.ok{background:var(--green)} .dm.wait{background:var(--star)} .dm.no{background:var(--red)} .dm.none{background:var(--line)}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:13px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px;margin-bottom:12px}
 .card .t{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
-.norms{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.norms button{background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:9px 5px;text-align:center;color:inherit}
-.norms b{display:block;font-size:17px;font-weight:600;letter-spacing:-.03em}
-.norms b.good{color:var(--dot)}
-.norms span{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
-.bar{height:6px;background:var(--surface-2);overflow:hidden;margin:8px 0 4px}
-.bar i{display:block;height:100%;background:var(--dot)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.grid button,.grid div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-height:58px;padding:9px 4px;text-align:center;color:inherit;width:100%}
+.grid b{display:block;font-size:16px;font-weight:600;letter-spacing:-.03em}
+.grid b.good{color:var(--green)}
+.grid span{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.bar{height:6px;background:var(--surface-2);border-radius:var(--r);overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:var(--lime)}
 .kv{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;color:var(--ink-2);padding:7px 0;border-bottom:1px solid var(--line)}
 .kv:last-child{border-bottom:0}
 .kv b{color:var(--ink);text-align:right;white-space:nowrap;font-weight:600}
-.kv b.g{color:var(--dot)} .kv b.r{color:var(--red)} .kv b.s{color:var(--star)}
+.kv b.g{color:var(--green)} .kv b.r{color:var(--red)} .kv b.s{color:var(--star)}
 
 .sec{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:18px 2px 8px}
-.item{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:2px;padding:12px 13px;margin-bottom:8px;display:flex;gap:12px;align-items:center;color:inherit}
+.item{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 13px;margin-bottom:8px;display:flex;gap:12px;align-items:center;color:inherit}
 .item.done{background:var(--surface)}
 .item.alert{border-color:var(--red)}
-.item .ic{width:44px;height:44px;flex:none;border-radius:2px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--dot)}
+.item .ic{width:44px;height:44px;flex:none;border-radius:var(--r);background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--green)}
 .item .tx{flex:1;min-width:0}
 .item .tp{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
 .item .nm{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item .sub{font-size:13.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item .rt{font-size:13px;font-weight:600;flex:none;text-align:right;max-width:40%}
-.rt.ok{color:var(--dot)} .rt.mv{color:var(--star)} .rt.no{color:var(--red)} .rt.wait{color:var(--mute);font-weight:400}
-.add{width:100%;background:transparent;border:1.5px dashed var(--line);color:var(--mute);border-radius:2px;padding:13px;font-size:14.5px;font-weight:600;margin-bottom:8px}
-.add.solid{border-style:solid;border-color:var(--ink);color:var(--ink)}
+.rt.ok{color:var(--green)} .rt.mv{color:var(--star)} .rt.no{color:var(--red)} .rt.wait{color:var(--mute);font-weight:400}
 .hint{font-size:13.5px;color:var(--mute);margin:2px 4px 12px}
+.yest{--card:#FAFAFA;--surface:#F3F3F3}
+.yest .item{border-color:#DFDFDF}
 
 .bottom{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--paper);border-top:1px solid var(--line)}
 .bottom .in{max-width:560px;margin:0 auto;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
-.nav{display:flex;gap:2px}
-.nav button{flex:1;background:none;border:0;color:var(--mute);font-size:11px;padding:6px 2px}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.nav button{background:none;border:0;color:var(--mute);font-size:11px;padding:6px 2px;width:100%}
 .nav button b{display:flex;justify-content:center;margin-bottom:3px;font-weight:400}
-.nav button.on{color:var(--dot);font-weight:600}
+.nav button.on{color:var(--ink);font-weight:600}
+.nav button.on b{color:var(--green)}
 
-.ovl{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:flex-end;z-index:40}
+.ovl{position:fixed;inset:0;background:rgba(16,16,16,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:flex-end;z-index:40}
 .ovl.on{display:flex}
-.sheet{background:var(--paper);width:100%;max-width:560px;margin:0 auto;border-radius:2px 2px 0 0;padding:16px 14px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto}
+.sheet{background:var(--paper);width:calc(100% - 24px);max-width:536px;margin:0 auto 12px;border-radius:14px;padding:18px 16px 20px;max-height:88vh;min-height:58vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.18);display:flex;flex-direction:column}
 .sheet h3{margin:0 0 3px;font-size:19px;letter-spacing:-.03em}
+.sheet .grow{flex:1}
 .sh{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
 .wiz{position:fixed;inset:0;background:var(--paper);z-index:30;display:none;overflow-y:auto}
 .wiz.on{display:block}
-.wiz .in{max-width:560px;margin:0 auto;padding:16px 14px 120px}
+.wiz .in{max-width:560px;margin:0 auto;padding:16px 14px 200px}
 .wtitle{font-size:22px;letter-spacing:-.03em;margin:0 0 4px;font-weight:600}
-.steps{display:flex;gap:5px;margin-bottom:16px}
-.steps div{flex:1;height:4px;background:var(--surface-2)}
-.steps div.on{background:var(--dot)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:16px}
+.steps div{height:4px;background:var(--surface-2);border-radius:var(--r)}
+.steps div.on{background:var(--lime)}
 .wizbar{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
-.wizbar .in{max-width:560px;margin:0 auto;display:flex;gap:8px}
-.wizbar button{flex:1;border-radius:2px;padding:15px;font-size:15px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink-2)}
-.wizbar button.pri{background:var(--dot);color:var(--on-dot);border-color:var(--dot);flex:2}
+.wizbar .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}
+.wizbar .in.one{grid-template-columns:1fr}
 
 .lbl{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:14px 2px 6px}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:12px 13px;font-size:15px;color:var(--ink-2);flex:1 1 auto;min-width:calc(33% - 6px);display:flex;align-items:center;justify-content:center;gap:7px}
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.chips.three{grid-template-columns:repeat(3,1fr)}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:var(--r);min-height:52px;padding:10px 8px;font-size:14.5px;color:var(--ink-2);display:flex;align-items:center;justify-content:center;gap:7px;text-align:center;width:100%}
 .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:600}
-.chip.on.g{background:var(--dot);color:var(--on-dot);border-color:var(--dot)}
+.chip.on.g{background:var(--lime);color:var(--on-lime);border-color:var(--lime)}
 .chip.on.r{background:var(--red);color:#fff;border-color:var(--red)}
 .chip.on.s{background:var(--star);color:#fff;border-color:var(--star)}
-.chip.half{min-width:calc(50% - 6px)}
-input,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:2px;padding:13px;font-size:16px;font-family:inherit;color:var(--ink)}
-input[type=date],input[type=time]{padding:11px 12px;min-height:48px;-webkit-appearance:none;appearance:none;text-align:left}
+input,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px;font-size:16px;font-family:inherit;color:var(--ink)}
+input[type=date],input[type=time]{padding:11px 12px;min-height:48px;-webkit-appearance:none;appearance:none}
 textarea{min-height:70px;resize:vertical}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sbtn{display:flex;gap:8px;margin-top:18px}
-.sbtn button{flex:1;border-radius:2px;padding:15px;font-size:15px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink-2)}
-.sbtn button.pri{background:var(--dot);color:var(--on-dot);border-color:var(--dot)}
-.big{font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1.05}
+.sbtn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:18px;align-items:stretch}
+.sbtn .btn{min-height:54px;margin:0}
+.big{font-size:32px;font-weight:600;letter-spacing:-.03em;line-height:1.05}
 .big small{display:block;font-size:13.5px;font-weight:400;color:var(--ink-2);letter-spacing:0;margin-top:6px}
 .foot{margin-top:22px;padding-top:12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mute);text-align:center}
 .foot button{background:none;border:0;color:var(--mute);font-family:ui-monospace,Menlo,monospace;font-size:11px;text-decoration:underline;padding:6px}
+.party{background:var(--lime);color:var(--on-lime);border-radius:var(--r);padding:14px;text-align:center;font-weight:600;margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -132,7 +139,7 @@ chart:'<path d="M4 20h16"/><path d="M7.5 20v-5M12 20v-9M16.5 20v-6"/>',
 home:'<path d="M4 11 12 4l8 7"/><path d="M6.5 10v10h11V10"/>',
 search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/>',
 money:'<rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="12" cy="12" r="2.5"/>',
-doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/>',
+deal:'<path d="M3.5 11 8 6.5l3.5 2.5L16 6l4.5 5"/><path d="M4 13.5 9 19l4-3 4 3 3-4"/>',
 meet:'<circle cx="8" cy="8.5" r="2.5"/><circle cx="16" cy="8.5" r="2.5"/><path d="M3.5 19a4.5 4.5 0 0 1 9 0"/><path d="M11.5 19a4.5 4.5 0 0 1 9 0"/>',
 screen:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/>',
 target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 12h.01"/>',
@@ -143,58 +150,75 @@ pin:'<path d="M9 3h6l-1 5.2 3 2.8v2H7v-2l3-2.8z"/><path d="M12 13v8"/>',
 ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
 alert:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.5v.01"/>',
 week:'<rect x="3" y="4" width="18" height="17" rx="1.5"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h8"/>',
-plus:'<path d="M12 5v14M5 12h14"/>'
+phone:'<path d="M5 4h3.5l1.8 4.5-2.3 1.4a12 12 0 0 0 5.1 5.1l1.4-2.3L19 14.5V18a1.5 1.5 0 0 1-1.7 1.5A15.5 15.5 0 0 1 3.5 5.7 1.5 1.5 0 0 1 5 4z"/>'
 };
 function ic(n,s){ s=s||26; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
 
 /* ================= хранилище ================= */
-var KEY='topf-agent-v4', mem=null;
+var KEY='topf-agent-v21', mem=null;
 function save(){ var s=JSON.stringify(state); try{ localStorage.setItem(KEY,s);}catch(e){ mem=s; } }
 function load(){ var s=null; try{ s=localStorage.getItem(KEY);}catch(e){ s=mem; } if(!s)s=mem;
   if(!s) return null; try{ return JSON.parse(s);}catch(e){ return null; } }
 
-/* ================= справочники ================= */
+/* ================= классы ================= */
 var STAFF=['Брыкина Александра','Кастромина Ольга','Кондратьева Ирина','Розанова Мария','Смирнова Анна'];
+/* cl: сторона клиента · sides: чьи причины показываем · free: причины текстом */
 var TYPES=[
- {k:'pokaz', n:'Показ',    ic:'home',   cl:'buyer'},
- {k:'ocenka',n:'Оценка',   ic:'search', cl:'seller'},
- {k:'vstr',  n:'Встреча',  ic:'meet',   cl:'buyer'},
- {k:'pd',    n:'Задаток',  ic:'money',  cl:'any',  money:true},
- {k:'rekl',  n:'В рекламу',ic:'screen', cl:'seller'},
- {k:'od',    n:'Договор',  ic:'doc',    cl:'any',  money:true}
+ {k:'pokaz', n:'Показ',   ic:'home',   cl:'buyer',  sides:'both'},
+ {k:'ocenka',n:'Оценка',  ic:'search', cl:'seller', sides:'seller'},
+ {k:'vstr',  n:'Встреча', ic:'meet',   cl:'buyer',  sides:'both'},
+ {k:'rekl',  n:'Реклама', ic:'screen', cl:'seller', sides:'free'},
+ {k:'pd',    n:'Задаток', ic:'money',  cl:'any',    sides:'both', money:true},
+ {k:'sdelka',n:'Сделка',  ic:'deal',   cl:'any',    sides:'both', dayoff:true}
 ];
-var NORMKEYS=[{k:'pd',label:'задаток'},{k:'pokaz',label:'показы'},{k:'ocenka',label:'оценки'},
-              {k:'rekl',label:'реклама'},{k:'vstr',label:'встречи'},{k:'leads',label:'заявки'}];
-var REASONS=['Клиент перенёс','Клиент не на связи','Собственник отказал','Не успел(а)','Ушли мимо','Ипотека не одобрена'];
+var NORMKEYS=[{k:'pd',l:'задаток'},{k:'sdelka',l:'сделки'},{k:'pokaz',l:'показы'},
+              {k:'ocenka',l:'оценки'},{k:'vstr',l:'встречи'},{k:'rekl',l:'реклама'},{k:'leads',l:'заявки'}];
+var MOVE={buyer:[{k:'buyer_move',n:'Покупатель перенёс'},{k:'buyer_nc',n:'Покупатель не на связи'}],
+          seller:[{k:'seller_move',n:'Продавец перенёс'},{k:'seller_nc',n:'Продавец не на связи'}]};
+var REF={buyer:[{k:'buyer_ref',n:'Покупатель отказался'}],
+         seller:[{k:'seller_ref',n:'Продавец отказал'}]};
+function reasons(t,kind){
+  var src=(kind==='move'?MOVE:REF), out=[];
+  if(t.sides==='both'||t.sides==='buyer') out=out.concat(src.buyer);
+  if(t.sides==='both'||t.sides==='seller') out=out.concat(src.seller);
+  out.push({k:'other',n:'Другое'});
+  return out;
+}
+function rname(k){
+  var all=MOVE.buyer.concat(MOVE.seller,REF.buyer,REF.seller);
+  for(var i=0;i<all.length;i++) if(all[i].k===k) return all[i].n;
+  return k==='other'?'Другое':k;
+}
 function T(k){ for(var i=0;i<TYPES.length;i++) if(TYPES[i].k===k) return TYPES[i]; return TYPES[0]; }
 
 /* ================= даты ================= */
 function iso(d){ return d.toISOString().slice(0,10); }
 function plus(n){ return iso(new Date(Date.now()+n*864e5)); }
 var MN=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+var MNF=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 var WD=['вс','пн','вт','ср','чт','пт','сб'];
 function ru(d){ var p=String(d).split('-'); return parseInt(p[2],10)+' '+MN[parseInt(p[1],10)-1]; }
 function rud(d){ var dt=new Date(d+'T00:00:00'); return WD[dt.getDay()]+', '+ru(d); }
+function weekStart(){ var d=new Date(), day=(d.getDay()+6)%7; return plus(-day); }
+function weekEnd(){ var d=new Date(), day=(d.getDay()+6)%7; return plus(6-day); }
+function monthStart(){ var d=new Date(); return iso(new Date(d.getFullYear(),d.getMonth(),2)).slice(0,8)+'01'; }
+function monthEnd(){ var d=new Date(); return iso(new Date(d.getFullYear(),d.getMonth()+1,1)); }
+function monthName(){ var d=new Date(); return MNF[d.getMonth()]; }
+function monthNom(){ var d=new Date(); return ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][d.getMonth()]; }
 function money(n){ return Number(n||0).toLocaleString('ru-RU')+' ₽'; }
 function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
-function weekStart(){ var d=new Date(), day=(d.getDay()+6)%7; return plus(-day); }
-function weekLabel(){ return 'Неделя с '+ru(weekStart()); }
 
 /* ================= данные ================= */
-function weekHistory(){
-  // дела, сделанные с начала недели до вчера — чтобы счётчик и список сходились
+function history(){
   var ws=weekStart(), out=[], id=50;
-  var tpl=[
-    {type:'pokaz', obj:'Мира 6',        cl:'Сомова',   clt:'buyer',  back:2},
-    {type:'pokaz', obj:'Попова 72',     cl:'Сомова',   clt:'buyer',  back:2},
-    {type:'pokaz', obj:'Тепличная 4',   cl:'Маргарита',clt:'buyer',  back:3},
-    {type:'ocenka',obj:'Ладожская 146', cl:'Титов',    clt:'seller', back:3},
-    {type:'rekl',  obj:'Мира 42',       cl:'Титов',    clt:'seller', back:2},
-    {type:'vstr',  obj:'Офис',          cl:'Пётр',     clt:'buyer',  back:3}
-  ];
-  for(var i=0;i<tpl.length;i++){
-    var dt=plus(-tpl[i].back);
-    if(dt<ws) continue;                       // на этой неделе таких дней ещё не было
+  var tpl=[{type:'pokaz',obj:'Мира 6',cl:'Сомова',clt:'buyer',back:1},
+           {type:'pokaz',obj:'Попова 72',cl:'Сомова',clt:'buyer',back:2},
+           {type:'ocenka',obj:'Ладожская 146',cl:'Титов',clt:'seller',back:2},
+           {type:'rekl',obj:'Мира 42',cl:'Титов',clt:'seller',back:1},
+           {type:'vstr',obj:'Офис',cl:'Пётр',clt:'buyer',back:3},
+           {type:'pokaz',obj:'Тепличная 4',cl:'Маргарита',clt:'buyer',back:3}];
+  for(var i=0;i<tpl.length;i++){ var dt=plus(-tpl[i].back);
+    if(dt<ws) continue;
     out.push({id:id++,type:tpl[i].type,obj:tpl[i].obj,cl:tpl[i].cl,clt:tpl[i].clt,date:dt,time:'',status:'done'});
   }
   return out;
@@ -202,36 +226,48 @@ function weekHistory(){
 function seed(){
   var t=iso(new Date()), y=plus(-1);
   return {
-    user:null, date:t, dateY:y, seq:100,
-    norm:{pd:1,pokaz:5,ocenka:4,rekl:2,vstr:4,leads:6},
-    monthNorm:{pokaz:20,ocenka:16,rekl:6},
+    user:null, date:t, dateY:y, seq:200,
+    monthNorm:{pd:4,sdelka:3,pokaz:20,ocenka:16,vstr:16,rekl:6,leads:24},
     tasks:[
-      {id:1,type:'pokaz', obj:'Строителей 11', cl:'Кондрева', clt:'buyer', date:y,       time:'18:00', status:'done'},
-      {id:2,type:'pokaz', obj:'Попова 72',     cl:'Кондрева', clt:'buyer', date:y,       time:'19:00', status:null},
-      {id:3,type:'ocenka',obj:'Ладожская 35',  cl:'Роза',     clt:'seller',date:y,       time:'13:00', status:null},
-      {id:4,type:'rekl',  obj:'Мира 45',       cl:'Сомов',    clt:'seller',date:y,       time:'',      status:null},
-      {id:5,type:'vstr',  obj:'Офис',          cl:'Юлия',     clt:'buyer', date:y,       time:'16:00', status:null},
-      {id:6,type:'pokaz', obj:'Онежская 19',   cl:'Юлия',     clt:'buyer', date:t,       time:'12:00', status:null},
-      {id:7,type:'ocenka',obj:'Тепличная 4',   cl:'Маргарита',clt:'seller',date:t,       time:'16:00', status:null},
-      {id:8,type:'pokaz', obj:'Строителей 68а',cl:'Пётр',     clt:'buyer', date:plus(1), time:'11:00', status:null},
-      {id:9,type:'pd',    obj:'Тепличная 4',   cl:'Маргарита',clt:'buyer', date:plus(2), time:'15:00', sum:105000, status:null}
-    ].concat(weekHistory()),
-    ropTasks:[
-      {id:21,text:'Разобрать портфель',date:t,done:null,why:''},
-      {id:22,text:'Сделать предложение по цене Маргарите',date:t,done:null,why:''}
-    ],
+      /* вчера · все шесть классов, ничего не отмечено */
+      {id:1,type:'pokaz', obj:'Строителей 11', cl:'Кондрева', clt:'buyer', date:y,time:'18:00',status:null},
+      {id:2,type:'ocenka',obj:'Ладожская 35',  cl:'Роза',     clt:'seller',date:y,time:'13:00',status:null},
+      {id:3,type:'vstr',  obj:'Офис',          cl:'Юлия',     clt:'buyer', date:y,time:'16:00',status:null},
+      {id:4,type:'rekl',  obj:'Мира 45',       cl:'Сомов',    clt:'seller',date:y,time:'',     status:null},
+      {id:5,type:'pd',    obj:'Попова 72',     cl:'Кондрева', clt:'buyer', date:y,time:'11:00',sum:98000,status:null},
+      {id:6,type:'sdelka',obj:'Кулакова 2',    cl:'Гончаров', clt:'seller',date:y,time:'09:30',status:null},
+      /* сегодня · тоже все шесть */
+      {id:11,type:'pokaz', obj:'Онежская 19',   cl:'Юлия',     clt:'buyer', date:t,time:'12:00',status:null},
+      {id:12,type:'ocenka',obj:'Тепличная 4',   cl:'Маргарита',clt:'seller',date:t,time:'16:00',status:null},
+      {id:13,type:'vstr',  obj:'Офис · Строителей',cl:'Пётр',  clt:'buyer', date:t,time:'10:00',status:null},
+      {id:14,type:'rekl',  obj:'Ладожская 146', cl:'Титов',    clt:'seller',date:t,time:'',     status:null},
+      {id:15,type:'pd',    obj:'Мира 6',        cl:'Сомова',   clt:'buyer', date:t,time:'18:00',sum:112000,status:null},
+      {id:16,type:'sdelka',obj:'Норвуд',        cl:'Юлия',     clt:'buyer', date:t,time:'14:00',status:null},
+      /* будущее · раскидано по дням */
+      {id:21,type:'pokaz', obj:'Строителей 68а',cl:'Пётр',     clt:'buyer', date:plus(1),time:'11:00',status:null},
+      {id:22,type:'ocenka',obj:'Мира 42',       cl:'Титов',    clt:'seller',date:plus(1),time:'15:00',status:null},
+      {id:23,type:'pd',    obj:'Тепличная 4',   cl:'Маргарита',clt:'buyer', date:plus(2),time:'15:00',sum:105000,status:null},
+      {id:24,type:'vstr',  obj:'Офис',          cl:'Сомова',   clt:'buyer', date:plus(3),time:'12:00',status:null},
+      {id:25,type:'sdelka',obj:'Попова 72',     cl:'Кондрева', clt:'buyer', date:plus(4),time:'10:00',status:null},
+      {id:26,type:'rekl',  obj:'Онежская 19',   cl:'Юлия',     clt:'seller',date:plus(6),time:'',status:null},
+      {id:27,type:'pokaz', obj:'Ладожская 35',  cl:'Роза',     clt:'buyer', date:plus(8),time:'13:00',status:null},
+      {id:28,type:'pd',    obj:'Норвуд',        cl:'Юлия',     clt:'buyer', date:plus(9),time:'',sum:95000,status:null},
+      {id:29,type:'pd',    obj:'Кулакова 2',    cl:'Гончаров', clt:'seller',date:plus(16),time:'',sum:130000,status:null},
+      {id:30,type:'ocenka',obj:'Мира 45',       cl:'Сомов',    clt:'seller',date:plus(12),time:'11:00',status:null}
+    ].concat(history()),
+    ropTasks:[{id:21,text:'Разобрать портфель',date:t,done:null,why:''},
+              {id:22,text:'Сделать предложение по цене Маргарите',date:t,done:null,why:''}],
+    leads:[{date:plus(-2),n:4},{date:plus(-3),n:5}],
     leadsY:null,
-    weekDone:{leads:5},
-    fc:{week:weekLabel(),items:[{id:31,obj:'Строителей 11',cl:'Кондрева',sum:105000}],sent:false},
     reports:[
-      {date:plus(-1),label:'Вчера',        kind:'day', status:'accepted',plan:5,fact:4,leads:5},
-      {date:plus(-2),label:'Позавчера',    kind:'day', status:'extra',   plan:6,fact:6,leads:7,note:'Принят с задачей: разобрать портфель'},
-      {date:plus(-4),label:'Пт – сб – вс', kind:'day', status:'accepted',plan:9,fact:7,leads:11},
+      {date:plus(-1),label:'Вчера',kind:'day',status:'accepted',plan:5,fact:4,leads:5},
+      {date:plus(-2),label:'Позавчера',kind:'day',status:'extra',plan:6,fact:6,leads:4,note:'Принят с задачей: разобрать портфель'},
       {date:plus(-7),label:'Прошлая неделя',kind:'week',status:'auto',
-       w:{pd:'1/1',pokaz:'12/5',ocenka:'3/4',rekl:'2/2',vstr:'5/4',leads:'24/6'}}
+       w:{pd:'1/1',sdelka:'0/1',pokaz:'12/5',ocenka:'3/4',vstr:'5/4',rekl:'2/2',leads:'24/6'}},
+      {date:plus(-30),label:'Прошлый месяц',kind:'month',status:'auto',
+       w:{pd:'4/4',sdelka:'3/3',pokaz:'41/20',ocenka:'12/16',vstr:'18/16',rekl:'9/6',leads:'58/24'}}
     ],
-    today:{sent:false,status:null,at:null},
-    month:{pokaz:14,ocenka:5,rekl:3,vstr:6,pd:2,leads:22,comm:320000}
+    today:{sent:false,status:null,at:null}
   };
 }
 var state=load()||seed();
@@ -242,33 +278,66 @@ var state=load()||seed();
   save();
 })();
 
+/* ================= нормы ================= */
+function normM(k){ return state.monthNorm[k]||0; }
+function normW(k){ return Math.ceil(normM(k)/4.33); }
+
 /* ================= выборки ================= */
 function byDate(d){ var o=[]; for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].date===d) o.push(state.tasks[i]); return o; }
+function task(id){ for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].id===id) return state.tasks[i]; return null; }
 function futureTasks(){ var o=[]; for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].date>state.date) o.push(state.tasks[i]);
   o.sort(function(a,b){ return a.date<b.date?-1:1; }); return o; }
-function task(id){ for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].id===id) return state.tasks[i]; return null; }
 function yestLeft(){ var n=0,y=byDate(state.dateY); for(var i=0;i<y.length;i++) if(!y[i].status) n++; return n; }
-function weekTasks(k,doneOnly){
-  var ws=weekStart(), o=[];
-  for(var i=0;i<state.tasks.length;i++){ var t=state.tasks[i];
+function inRange(d,a,b){ return d>=a&&d<=b; }
+function doneIn(k,a,b){
+  var n=0; for(var i=0;i<state.tasks.length;i++){ var t=state.tasks[i];
+    if(t.type===k&&t.status==='done'&&inRange(t.date,a,b)) n++; }
+  return n;
+}
+function leadsIn(a,b){
+  var n=0; for(var i=0;i<state.leads.length;i++) if(inRange(state.leads[i].date,a,b)) n+=state.leads[i].n;
+  if(state.leadsY!==null&&inRange(state.dateY,a,b)) n+=state.leadsY;
+  return n;
+}
+function cntW(k){ return k==='leads'? leadsIn(weekStart(),state.date) : doneIn(k,weekStart(),state.date); }
+function cntM(k){ return k==='leads'? leadsIn(monthStart(),state.date) : doneIn(k,monthStart(),state.date); }
+function listW(k,doneOnly){
+  var o=[]; for(var i=0;i<state.tasks.length;i++){ var t=state.tasks[i];
     if(t.type!==k) continue;
-    if(doneOnly){ if(t.status==='done'&&t.date>=ws&&t.date<=state.date) o.push(t); }
+    if(doneOnly){ if(t.status==='done'&&inRange(t.date,weekStart(),state.date)) o.push(t); }
     else if(!t.status&&t.date>=state.date) o.push(t);
   }
-  o.sort(function(a,b){ return a.date<b.date?-1:1; });
-  return o;
+  o.sort(function(a,b){ return a.date<b.date?-1:1; }); return o;
 }
-function weekCount(k){ return weekTasks(k,true).length; }
-function weekLeads(){ return (state.weekDone.leads||0)+(state.leadsY||0); }
-/* заявки — не дела, у них нет карточек, поэтому считаются отдельно */
+
+/* ================= прогноз ================= */
+function fcRange(mode){
+  if(mode==='week') return [weekStart(),weekEnd()];
+  if(mode==='month') return [monthStart(),monthEnd()];
+  return [monthEnd(),'9999-12-31'];
+}
+function fcItems(mode){
+  var r=fcRange(mode), o=[];
+  for(var i=0;i<state.tasks.length;i++){ var t=state.tasks[i];
+    if(t.type!=='pd'||t.status==='refuse') continue;
+    if(mode==='future'? t.date>r[0] : inRange(t.date,r[0],r[1])) o.push(t);
+  }
+  o.sort(function(a,b){ return a.date<b.date?-1:1; }); return o;
+}
+function fcStat(mode){
+  var it=fcItems(mode), pn=it.length, ps=0, fn=0, fs=0;
+  for(var i=0;i<it.length;i++){ ps+=Number(it[i].sum||0);
+    if(it[i].status==='done'){ fn++; fs+=Number(it[i].sum||0); } }
+  return {n:pn,s:ps,fn:fn,fs:fs,items:it};
+}
 
 /* ================= рендер ================= */
-var nav='today', pickName=null, meMode='month';
+var nav='today', pickName=null, meMode='week', fcMode='week';
 function render(){
   try{ draw(); }catch(e){
     document.getElementById('root').innerHTML='<div class="app"><div class="card"><div class="t">Что-то пошло не так</div>'+
       '<p style="font-size:14px">Похоже, сохранились данные прошлой версии.</p>'+
-      '<button class="add" onclick="hardReset()">Очистить и открыть заново</button>'+
+      '<button class="btn" onclick="hardReset()">Очистить и открыть заново</button>'+
       '<div class="hint">'+esc(e.message)+'</div></div></div>';
   }
 }
@@ -278,54 +347,51 @@ function draw(){
   if(!state.user){ r.innerHTML=loginHTML(); return; }
   var body = nav==='today'? todayHTML()
            : nav==='yest' ? yestHTML()
-           : nav==='past' ? pastHTML()
            : nav==='fut'  ? futHTML()
+           : nav==='past' ? pastHTML()
            : nav==='fc'   ? fcHTML()
            : meHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет агента v0.4 · прототип<br>Данные хранятся только на этом устройстве.<br>'+
+    '<div class="foot">ТОЧНО. · кабинет агента v2.1 · прототип<br>Данные хранятся только на этом устройстве.<br>'+
     '<button onclick="resetAll()">сбросить и начать заново</button></div></div>'+navHTML();
 }
 function navHTML(){
-  var t=(nav==='yest'?'today':nav);
+  var c=(nav==='yest'?'today':nav);
   return '<div class="bottom"><div class="in"><div class="nav">'+
-    nb(t,'today','list','Сегодня')+nb(t,'past','past','Прошлое')+nb(t,'fut','future','Будущее')+
-    nb(t,'fc','target','Прогноз')+nb(t,'me','chart','Моё')+'</div></div></div>';
+    nb(c,'today','list','Сегодня')+nb(c,'fut','future','Будущее')+nb(c,'past','past','Прошлое')+
+    nb(c,'fc','target','Прогноз')+nb(c,'me','chart','Моё')+'</div></div></div>';
 }
-function nb(cur,k,i,n){ return '<button class="'+(cur===k?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,24)+'</b>'+n+'</button>'; }
+function nb(c,k,i,n){ return '<button class="'+(c===k?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,24)+'</b>'+n+'</button>'; }
 function go(k){ nav=k; render(); }
 
 function hdrHTML(){
   var st=state.today;
   var h='<div class="hdr"><div class="row">'+
-    '<div class="mark">ТОЧНО<i>.</i><small>план / факт · v0.4</small></div>'+
+    '<div class="mark">ТОЧНО<i>.</i><small>план / факт · v2.1</small></div>'+
     '<div class="who"><b>'+esc(state.user)+'</b><span>'+rud(state.date)+'</span></div></div>';
   if(!st.sent){
-    h+='<button class="submit" onclick="openWiz()">'+ic('send',20)+'Сдать план и факт</button>'+
-       '<div class="status"><span class="dotmark none"></span>Не сдан · срок до 10:00</div>';
+    h+='<button class="btn pri submit" onclick="openWiz()">'+ic('send',20)+'Сдать план и факт</button>'+
+       '<div class="status"><span class="dm none"></span>Не сдан · срок до 10:00</div>';
   } else {
-    var m={sent:['wait','Сдан в '+st.at+' · ждёт приёмки РОПа'],
-           accepted:['ok','Принят РОПом'],
-           extra:['wait','Принят с дополнительными задачами'],
-           rejected:['no','Не принят — нужны правки']};
+    var m={sent:['wait','Сдан в '+st.at+' · ждёт приёмки'],accepted:['ok','Принят РОПом'],
+           extra:['wait','Принят с дополнительными задачами'],rejected:['no','Не принят — нужны правки']};
     var s=m[st.status]||m.sent;
-    h+='<button class="submit" disabled>'+ic('ok',20)+'План и факт сданы</button>'+
-       '<div class="status"><span class="dotmark '+s[0]+'"></span>'+s[1]+
+    h+='<button class="btn submit" disabled>'+ic('ok',20)+'План и факт сданы</button>'+
+       '<div class="status"><span class="dm '+s[0]+'"></span>'+s[1]+
        '<button style="background:none;border:0;color:var(--mute);text-decoration:underline;font-size:12px;padding:0 0 0 6px" onclick="cycleStatus()">демо</button></div>';
   }
   return h+'</div>';
 }
-function cycleStatus(){
-  var o=['sent','accepted','extra','rejected'], i=o.indexOf(state.today.status);
-  state.today.status=o[(i+1)%o.length]; save(); render();
-}
+function cycleStatus(){ var o=['sent','accepted','extra','rejected'],i=o.indexOf(state.today.status);
+  state.today.status=o[(i+1)%o.length]; save(); render(); }
 
 function loginHTML(){
-  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">план / факт · v0.4</div><h2>Вход в кабинет</h2>';
+  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">план / факт · v2.1</div><h2>Вход в кабинет</h2>';
   for(var i=0;i<STAFF.length;i++)
     h+='<button class="pick'+(pickName===STAFF[i]?' on':'')+'" onclick="pickName=\''+STAFF[i]+'\';render()">'+STAFF[i]+'</button>';
   h+='<div class="lbl">Пароль</div><input type="password" id="pw" placeholder="••••••">'+
-     '<div class="sbtn"><button class="pri" onclick="doLogin()">Войти</button></div>'+
+     '<div class="sbtn"><button class="btn" onclick="pickName=null;render()">Сброс</button>'+
+     '<button class="btn pri" onclick="doLogin()">Войти</button></div>'+
      '<div class="note">Пароль в прототипе любой. Забыли — сбросит РОП.</div></div>';
   return h;
 }
@@ -338,18 +404,16 @@ function doLogin(){
 
 /* ================= СЕГОДНЯ ================= */
 function todayHTML(){
-  var h='<div class="card"><div class="t">Норма недели · задаёт РОП</div><div class="norms">';
-  for(var i=0;i<NORMKEYS.length;i++){
-    var k=NORMKEYS[i].k, done=(k==='leads'?weekLeads():weekCount(k)), need=state.norm[k];
-    h+='<button onclick="openNorm(\''+k+'\')"><b class="'+(done>=need?'good':'')+'">'+done+'/'+need+'</b><span>'+NORMKEYS[i].label+'</span></button>';
+  var h='<div class="card"><div class="t">Норма недели · '+ru(weekStart())+' – '+ru(weekEnd())+'</div><div class="grid">';
+  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k, d=cntW(k), n=normW(k);
+    h+='<button onclick="openNorm(\''+k+'\')"><b class="'+(d>=n?'good':'')+'">'+d+'/'+n+'</b><span>'+NORMKEYS[i].l+'</span></button>';
   }
   h+='</div><div class="hint" style="margin:9px 0 0">Тап по цифре — что засчитано и что запланировано. Больше нормы — хорошо.</div></div>';
 
   var left=yestLeft();
   h+='<button class="item'+(left?' alert':'')+'" onclick="go(\'yest\')">'+
      '<div class="ic"'+(left?' style="color:var(--red)"':'')+'>'+ic(left?'alert':'ok')+'</div><div class="tx">'+
-     '<div class="tp">вчера · '+rud(state.dateY)+'</div>'+
-     '<div class="nm">'+(left?'Не отмечено дел: '+left:'Все дела отмечены')+'</div>'+
+     '<div class="tp">вчера · '+rud(state.dateY)+'</div><div class="nm">'+(left?'Не отмечено дел: '+left:'Все дела отмечены')+'</div>'+
      '<div class="sub">'+(left?'нужно перед сдачей':'можно добавить то, что было вне плана')+'</div></div>'+
      '<span class="rt '+(left?'no':'ok')+'">открыть</span></button>';
 
@@ -362,86 +426,44 @@ function todayHTML(){
          (rt.why?'<div class="sub">'+esc(rt.why)+'</div>':'')+'</div>'+right+'</button>';
     }
   }
-
   h+='<div class="sec">Сегодня · '+rud(state.date)+'</div>';
   var t=byDate(state.date);
-  for(var m=0;m<t.length;m++) h+=itemHTML(t[m],'today');
+  for(var m=0;m<t.length;m++) h+=itemHTML(t[m],'day');
   if(!t.length) h+='<div class="hint">На сегодня пусто.</div>';
-  h+='<button class="add solid" onclick="openAdd(state.date)">+ Добавить дело</button>'+
-     '<button class="add" onclick="openVague()">Назначить новое · без адреса</button>'+
-     '<div class="hint">«Назначить новое» — когда знаете, что будет показ или оценка, но объект и клиент ещё не определены.</div>';
+  h+='<button class="btn" onclick="openAdd(state.date)">+ Добавить дело</button>'+
+     '<button class="btn ghost" onclick="openVague()">Назначить новое · без адреса</button>'+
+     '<div class="hint" style="margin-top:10px">«Назначить новое» — когда знаете, что будет показ или оценка, но объект и клиент ещё не определены.</div>';
   return h;
 }
-
 function itemHTML(it,mode){
   var t=T(it.type), sub=[];
   if(it.cl) sub.push(it.cl+(it.clt?' · '+(it.clt==='buyer'?'покупатель':'продавец'):''));
   if(it.time) sub.push(it.time);
   if(it.sum) sub.push(money(it.sum));
   if(it.vague) sub.push('без адреса');
-  var right = mode==='fut' ? '<span class="rt wait">'+ru(it.date)+(it.time?' · '+it.time:'')+'</span>'
-            : (it.status?statusView(it):'<span class="rt wait">отметить</span>');
+  var right = mode==='fut'? '<span class="rt wait">'+ru(it.date)+(it.time?' · '+it.time:'')+'</span>' : statusView(it);
   return '<button class="item'+(it.status?' done':'')+'" onclick="openTask('+it.id+')"><div class="ic">'+ic(t.ic)+'</div>'+
     '<div class="tx"><div class="tp">'+t.n+(it.star?' · вне плана':'')+'</div>'+
     '<div class="nm">'+esc(it.obj||'без адреса')+'</div>'+
     (sub.length?'<div class="sub">'+esc(sub.join(' · '))+'</div>':'')+'</div>'+right+'</button>';
 }
 function statusView(it){
-  if(it.status==='done')   return '<span class="rt ok">сделано</span>';
-  if(it.status==='cancel') return '<span class="rt no">отмена</span>';
-  if(it.status==='none')   return '<span class="rt no">не назначено</span>';
+  if(it.status==='done')  return '<span class="rt ok">сделано</span>';
+  if(it.status==='refuse')return '<span class="rt no">отказ</span>';
+  if(it.status==='moved') return '<span class="rt mv">перенесено</span>';
   return '<span class="rt wait">отметить</span>';
 }
 
 /* ================= ВЧЕРА ================= */
 function yestHTML(){
-  var y=byDate(state.dateY), done=y.length-yestLeft();
-  var h='<div class="card"><div class="t">Факт за вчера · '+rud(state.dateY)+'</div>'+
-    '<div class="kv"><span>Отмечено</span><b>'+done+' из '+y.length+'</b></div></div>';
-  for(var i=0;i<y.length;i++) h+=itemHTML(y[i],'today');
-  h+='<button class="add solid" onclick="openAdd(state.dateY,true)">+ Что было вне плана</button>'+
-     '<div class="hint">Дела, которых не было в плане, добавляются сюда и засчитываются в норму.</div>'+
-     '<button class="add" onclick="go(\'today\')">← Вернуться в сегодня</button>';
+  var y=byDate(state.dateY), left=yestLeft();
+  var h='<div class="yest">'+'<div class="card"><div class="t">Факт за вчера · '+rud(state.dateY)+'</div>'+
+    '<div class="kv"><span>Отмечено</span><b>'+(y.length-left)+' из '+y.length+'</b></div></div>';
+  for(var i=0;i<y.length;i++) h+=itemHTML(y[i],'day');
+  h+='<button class="btn" onclick="openAdd(state.dateY,true)">+ Что было вне плана</button>'+
+     '<button class="btn" onclick="go(\'today\')">В сегодня →</button>'+
+     '<div class="hint" style="margin-top:10px">Дела, которых не было в плане, добавляются сюда и засчитываются в норму.</div></div>';
   return h;
-}
-
-/* ================= ПРОШЛОЕ ================= */
-function pastHTML(){
-  var h='<div class="hint" style="margin:4px 4px 14px">Сданные отчёты. Правке не подлежат. Пятница закрывается вместе с выходными и сдаётся в понедельник до 10:00.</div>';
-  for(var i=0;i<state.reports.length;i++){ var r=state.reports[i];
-    if(r.kind==='week'){
-      h+='<button class="item" onclick="openReport('+i+')"><div class="ic">'+ic('week')+'</div><div class="tx">'+
-         '<div class="tp">итог недели · собран автоматически</div><div class="nm">'+esc(r.label)+'</div>'+
-         '<div class="sub">задаток '+r.w.pd+' · показы '+r.w.pokaz+' · оценки '+r.w.ocenka+'</div></div>'+
-         '<span class="rt ok">'+pct(r.w.pokaz)+'</span></button>';
-    } else {
-      var st={accepted:['ok','принят'],extra:['mv','с задачами'],rejected:['no','не принят'],sent:['wait','ждёт']}[r.status]||['wait','—'];
-      h+='<button class="item" onclick="openReport('+i+')"><div class="ic">'+ic('ok')+'</div><div class="tx">'+
-         '<div class="tp">'+ru(r.date)+'</div><div class="nm">'+esc(r.label)+'</div>'+
-         '<div class="sub">план '+r.plan+' · факт '+r.fact+' · заявок '+r.leads+'</div></div>'+
-         '<span class="rt '+st[0]+'">'+st[1]+'</span></button>';
-    }
-  }
-  return h;
-}
-function pct(s){ var p=String(s).split('/'); return Math.round(p[0]/p[1]*100)+'%'; }
-function openReport(i){
-  var r=state.reports[i], h='<h3>'+esc(r.label)+'</h3><div class="sh">'+(r.kind==='week'?'итог недели':ru(r.date))+'</div>';
-  if(r.kind==='week'){
-    h+='<div class="card">';
-    for(var j=0;j<NORMKEYS.length;j++){ var k=NORMKEYS[j].k, v=r.w[k]||'—', p=String(v).split('/');
-      h+='<div class="kv"><span>'+NORMKEYS[j].label+'</span><b class="'+(Number(p[0])>=Number(p[1])?'g':'r')+'">'+v+' · '+pct(v)+'</b></div>'; }
-    h+='</div><div class="hint">Свод собрался сам в понедельник в 10:00, после чего счётчик недели обнулился.</div>';
-  } else {
-    h+='<div class="card"><div class="kv"><span>План</span><b>'+r.plan+'</b></div>'+
-       '<div class="kv"><span>Факт</span><b>'+r.fact+'</b></div>'+
-       '<div class="kv"><span>Заявок</span><b>'+r.leads+'</b></div>'+
-       '<div class="kv"><span>Статус</span><b>'+({accepted:'принят',extra:'принят с задачами',rejected:'не принят'}[r.status]||'ждёт приёмки')+'</b></div></div>';
-    if(r.note) h+='<div class="hint">'+esc(r.note)+'</div>';
-    h+='<div class="hint">Отчёт закрыт для правок.</div>';
-  }
-  h+='<div class="sbtn"><button onclick="closeSheet()">Закрыть</button></div>';
-  sheet(h);
 }
 
 /* ================= БУДУЩЕЕ ================= */
@@ -452,107 +474,125 @@ function futHTML(){
     h+=itemHTML(f[i],'fut');
   }
   if(!f.length) h+='<div class="hint">Пока ничего не назначено вперёд.</div>';
-  h+='<button class="add solid" onclick="openAdd(plus(1))">+ Назначить на дату</button>';
+  h+='<button class="btn" onclick="openAdd(plus(1))">+ Назначить на дату</button>';
   return h;
+}
+
+/* ================= ПРОШЛОЕ ================= */
+function pastHTML(){
+  var h='<div class="hint" style="margin:4px 4px 14px">Сданные отчёты. Правке не подлежат. Пятница закрывается вместе с выходными и сдаётся в понедельник. Недельный и месячный своды собираются автоматически.</div>';
+  for(var i=0;i<state.reports.length;i++){ var r=state.reports[i];
+    if(r.kind!=='day'){
+      h+='<button class="item" onclick="openReport('+i+')"><div class="ic">'+ic(r.kind==='week'?'week':'chart')+'</div><div class="tx">'+
+         '<div class="tp">'+(r.kind==='week'?'итог недели':'итог месяца')+' · автоматически</div><div class="nm">'+esc(r.label)+'</div>'+
+         '<div class="sub">задаток '+r.w.pd+' · показы '+r.w.pokaz+' · заявки '+r.w.leads+'</div></div>'+
+         '<span class="rt ok">свод</span></button>';
+    } else {
+      var st={accepted:['ok','принят'],extra:['mv','с задачами'],rejected:['no','не принят'],sent:['wait','ждёт']}[r.status]||['wait','—'];
+      h+='<button class="item" onclick="openReport('+i+')"><div class="ic">'+ic('ok')+'</div><div class="tx">'+
+         '<div class="tp">'+ru(r.date)+'</div><div class="nm">'+esc(r.label)+'</div>'+
+         '<div class="sub">план '+r.plan+' · факт '+r.fact+' · заявок '+r.leads+'</div></div>'+
+         '<span class="rt '+st[0]+'">'+st[1]+'</span></button>';
+    }
+  }
+  return h;
+}
+function pctv(s){ var p=String(s).split('/'); return Math.round(p[0]/p[1]*100)+'%'; }
+function openReport(i){
+  var r=state.reports[i], h='<h3>'+esc(r.label)+'</h3><div class="sh">'+(r.kind==='day'?ru(r.date):(r.kind==='week'?'итог недели':'итог месяца'))+'</div>';
+  if(r.kind!=='day'){
+    h+='<div class="card">';
+    for(var j=0;j<NORMKEYS.length;j++){ var k=NORMKEYS[j].k, v=r.w[k]; if(!v) continue;
+      var p=String(v).split('/');
+      h+='<div class="kv"><span>'+NORMKEYS[j].l+'</span><b class="'+(Number(p[0])>=Number(p[1])?'g':'r')+'">'+v+' · '+pctv(v)+'</b></div>'; }
+    h+='</div><div class="hint">Свод собрался сам: недельный в понедельник в 10:00, месячный — 1 числа суммой всех дней.</div>';
+  } else {
+    h+='<div class="card"><div class="kv"><span>План</span><b>'+r.plan+'</b></div>'+
+       '<div class="kv"><span>Факт</span><b>'+r.fact+'</b></div>'+
+       '<div class="kv"><span>Заявок</span><b>'+r.leads+'</b></div>'+
+       '<div class="kv"><span>Статус</span><b>'+({accepted:'принят',extra:'принят с задачами',rejected:'не принят'}[r.status]||'ждёт приёмки')+'</b></div></div>';
+    if(r.note) h+='<div class="hint">'+esc(r.note)+'</div>';
+    h+='<div class="hint">Отчёт закрыт для правок.</div>';
+  }
+  h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Закрыть</button><button class="btn pri" onclick="closeSheet()">Понятно</button></div>';
+  sheet(h);
 }
 
 /* ================= ПРОГНОЗ ================= */
-function fcSum(){ var s=0; for(var i=0;i<state.fc.items.length;i++) s+=Number(state.fc.items[i].sum||0); return s; }
 function fcHTML(){
-  var h='<div class="card"><div class="t">'+esc(state.fc.week)+'</div>'+
-    '<div class="big">'+money(fcSum())+'<small>прогноз по задаткам · объектов: '+state.fc.items.length+'</small></div>'+
-    '<div class="kv" style="margin-top:10px"><span>Норма недели</span><b>'+state.norm.pd+' задаток</b></div>'+
-    '<div class="kv"><span>Статус</span><b class="'+(state.fc.sent?'g':'r')+'">'+(state.fc.sent?'сдан РОПу':'не сдан')+'</b></div></div>'+
-    '<div class="sec">Объекты в прогнозе</div>';
-  for(var j=0;j<state.fc.items.length;j++){ var f=state.fc.items[j];
-    h+='<button class="item" onclick="openFc('+f.id+')"><div class="ic">'+ic('target')+'</div><div class="tx">'+
-       '<div class="tp">задаток</div><div class="nm">'+esc(f.obj)+'</div><div class="sub">'+esc(f.cl)+'</div></div>'+
-       '<span class="rt ok">'+money(f.sum)+'</span></button>';
+  var s=fcStat(fcMode);
+  var h='<div class="card"><div class="t">Прогноз по задаткам</div>'+
+    '<div class="chips three" style="margin-bottom:12px">'+
+    fcTab('week','Неделя')+fcTab('month','Месяц')+fcTab('future','Дальше')+'</div>'+
+    '<div class="big">'+money(s.s)+'<small>план · задатков: '+s.n+'</small></div>'+
+    '<div class="bar"><i style="width:'+(s.s?Math.min(Math.round(s.fs/s.s*100),100):0)+'%"></i></div>'+
+    '<div class="kv"><span>Факт</span><b class="g">'+money(s.fs)+' · '+s.fn+' из '+s.n+'</b></div>'+
+    (fcMode!=='future'?'<div class="kv"><span>Норма периода</span><b>'+(fcMode==='week'?normW('pd')+' задаток в неделю':normM('pd')+' в месяц')+'</b></div>':'')+
+    '</div>';
+  h+='<div class="sec">Объекты</div>';
+  for(var i=0;i<s.items.length;i++){ var f=s.items[i];
+    h+='<button class="item'+(f.status==='done'?' done':'')+'" onclick="openTask('+f.id+')"><div class="ic">'+ic('money')+'</div>'+
+       '<div class="tx"><div class="tp">'+ru(f.date)+'</div><div class="nm">'+esc(f.obj||'без адреса')+'</div>'+
+       '<div class="sub">'+esc(f.cl)+' · '+money(f.sum)+'</div></div>'+
+       (f.status==='done'?'<span class="rt ok">факт</span>':'<span class="rt wait">план</span>')+'</button>';
   }
-  if(!state.fc.items.length) h+='<div class="hint">Прогноз пустой. Заполняется в начале недели.</div>';
-  h+='<button class="add solid" onclick="openFc(0)">+ Добавить объект</button>'+
-     '<div class="hint">Прогноз — не норма, а поимённо: какие объекты рассчитываете закрыть на этой неделе и на какую комиссию.</div>';
+  if(!s.items.length) h+='<div class="hint">В этом периоде задатков нет.</div>';
+  h+='<button class="btn" onclick="openAdd(fcMode===\'week\'?state.date:plus(10),false,0,\'pd\')">+ Добавить задаток</button>'+
+     '<div class="hint" style="margin-top:10px">Задаток попадает сюда сам — по своей дате. Отказ убирает его из прогноза вместе с суммой.</div>';
   return h;
 }
-var curFc=null;
-function openFc(id){
-  curFc = id? null : {id:0,obj:'',cl:'',sum:''};
-  if(id) for(var i=0;i<state.fc.items.length;i++) if(state.fc.items[i].id===id) curFc=JSON.parse(JSON.stringify(state.fc.items[i]));
-  sheet('<h3>'+(curFc.id?'Объект в прогнозе':'Новый объект')+'</h3><div class="sh">'+esc(state.fc.week)+'</div>'+
-    '<div class="lbl">Объект</div><input id="pObj" value="'+esc(curFc.obj)+'" placeholder="Строителей 11">'+
-    '<div class="lbl">Клиент</div><input id="pCl" value="'+esc(curFc.cl)+'" placeholder="Кондрева">'+
-    '<div class="lbl">Сумма комиссии ₽</div><input type="number" inputmode="numeric" id="pSum" value="'+(curFc.sum||'')+'" placeholder="105000">'+
-    '<div class="sbtn"><button onclick="closeSheet()">Отмена</button><button class="pri" onclick="saveFc()">Сохранить</button></div>'+
-    (curFc.id?'<button class="add" style="margin-top:9px" onclick="delFc()">Убрать из прогноза</button>':''));
-}
-function saveFc(){
-  var o=document.getElementById('pObj').value,c=document.getElementById('pCl').value,s=document.getElementById('pSum').value;
-  if(!o||!s){ alert('Нужны объект и сумма комиссии'); return; }
-  if(curFc.id){ for(var i=0;i<state.fc.items.length;i++) if(state.fc.items[i].id===curFc.id) state.fc.items[i]={id:curFc.id,obj:o,cl:c,sum:Number(s)}; }
-  else state.fc.items.push({id:++state.seq,obj:o,cl:c,sum:Number(s)});
-  save(); closeSheet(); if(document.getElementById('wiz').classList.contains('on')) drawWiz(); else render();
-}
-function delFc(){
-  var n=[]; for(var i=0;i<state.fc.items.length;i++) if(state.fc.items[i].id!==curFc.id) n.push(state.fc.items[i]);
-  state.fc.items=n; save(); closeSheet(); if(document.getElementById('wiz').classList.contains('on')) drawWiz(); else render();
-}
+function fcTab(m,n){ return '<button class="chip'+(fcMode===m?' on':'')+'" onclick="fcMode=\''+m+'\';render()">'+n+'</button>'; }
 
 /* ================= МОЁ ================= */
 function meHTML(){
-  var mn=state.monthNorm, f=state.month;
-  var w={pokaz:weekCount('pokaz'),ocenka:weekCount('ocenka'),rekl:weekCount('rekl'),vstr:weekCount('vstr'),pd:weekCount('pd'),leads:weekLeads()};
-  var h='<div class="card"><div class="t">Месяц · обнуляется 1 числа</div>'+
-    mrow('Показы',f.pokaz,mn.pokaz)+mrow('Оценки',f.ocenka,mn.ocenka)+mrow('В рекламу',f.rekl,mn.rekl)+
-    '<div class="kv"><span>Задатки</span><b>'+f.pd+'</b></div>'+
-    '<div class="kv"><span>Подписанная комиссия</span><b>'+money(f.comm)+'</b></div></div>';
-  var d = meMode==='month'? f : w;
-  h+='<div class="card"><div class="t">Моя воронка</div>'+
-    '<div class="chips" style="margin-bottom:10px">'+
-    '<button class="chip half'+(meMode==='month'?' on':'')+'" onclick="meMode=\'month\';render()">Месяц</button>'+
-    '<button class="chip half'+(meMode==='week'?' on':'')+'" onclick="meMode=\'week\';render()">Неделя</button></div>'+
-    '<div class="kv"><span>Заявки</span><b>'+d.leads+'</b></div>'+
-    '<div class="kv"><span>Показы</span><b>'+d.pokaz+'</b></div>'+
-    '<div class="kv"><span>Оценки</span><b>'+d.ocenka+'</b></div>'+
-    '<div class="kv"><span>Встречи</span><b>'+d.vstr+'</b></div>'+
-    '<div class="kv"><span>В рекламу</span><b>'+d.rekl+'</b></div>'+
-    '<div class="kv"><span>Задатки</span><b class="g">'+d.pd+'</b></div></div>';
+  var h='<div class="card"><div class="t">Период</div><div class="chips">'+
+    '<button class="chip'+(meMode==='week'?' on':'')+'" onclick="meMode=\'week\';render()">Неделя</button>'+
+    '<button class="chip'+(meMode==='month'?' on':'')+'" onclick="meMode=\'month\';render()">Месяц</button></div></div>';
+  var isW=meMode==='week';
+  var sum=0,need=0;
+  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k;
+    sum+=(isW?cntW(k):cntM(k)); need+=(isW?normW(k):normM(k)); }
+  h+='<div class="card"><div class="t">'+(isW?'Неделя '+ru(weekStart())+' – '+ru(weekEnd()):'Месяц с 1 '+monthName())+'</div>'+
+     '<div class="kv"><span>Исполнение</span><b class="'+(sum>=need?'g':'')+'">'+Math.round(sum/need*100)+'%</b></div>'+
+     '<div class="bar"><i style="width:'+Math.min(Math.round(sum/need*100),100)+'%"></i></div>';
+  for(var j=0;j<NORMKEYS.length;j++){ var kk=NORMKEYS[j].k, d=isW?cntW(kk):cntM(kk), n=isW?normW(kk):normM(kk);
+    h+='<div class="kv"><span>'+NORMKEYS[j].l.charAt(0).toUpperCase()+NORMKEYS[j].l.slice(1)+'</span>'+
+       '<b class="'+(d>=n?'g':'')+'">'+d+' / '+n+' · '+Math.round(d/n*100)+'%</b></div>';
+  }
+  h+='</div>';
+  h+='<div class="hint">Норма недели считается из месячной: месячная ÷ 4,33 с округлением вверх. Поэтому сумма недельных чуть больше месячной — так задумано.</div>';
   h+='<div class="card"><div class="t">Кабинет</div>'+
-    '<div class="kv"><span>Сотрудник</span><b>'+esc(state.user)+'</b></div>'+
-    '<div class="kv"><span>Отдел</span><b>№2</b></div></div>'+
-    '<button class="add" onclick="logout()">Выйти из кабинета</button>';
+     '<div class="kv"><span>Сотрудник</span><b>'+esc(state.user)+'</b></div>'+
+     '<div class="kv"><span>Отдел</span><b>№2</b></div></div>'+
+     '<button class="btn ghost" onclick="logout()">Выйти из кабинета</button>';
   return h;
-}
-function mrow(n,f,norm){
-  var p=Math.round(f/norm*100);
-  return '<div class="kv"><span>'+n+'</span><b class="'+(p>=100?'g':'')+'">'+f+' / '+norm+' · '+p+'%</b></div>'+
-         '<div class="bar"><i style="width:'+Math.min(p,100)+'%"></i></div>';
 }
 function logout(){ state.user=null; pickName=null; save(); render(); }
 
 /* ================= раскрытие нормы ================= */
 function openNorm(k){
   if(k==='leads'){
-    return sheet('<h3>Заявки</h3><div class="sh">неделя · норма '+state.norm.leads+'</div>'+
-      '<div class="card"><div class="kv"><span>Пришло за неделю</span><b>'+weekLeads()+'</b></div>'+
-      '<div class="kv"><span>Норма</span><b>'+state.norm.leads+'</b></div>'+
+    return sheet('<h3>Заявки</h3><div class="sh">неделя · норма '+normW('leads')+'</div>'+
+      '<div class="card"><div class="kv"><span>За неделю</span><b>'+cntW('leads')+'</b></div>'+
+      '<div class="kv"><span>За месяц</span><b>'+cntM('leads')+'</b></div>'+
       '<div class="kv"><span>За вчера</span><b>'+(state.leadsY===null?'не подтверждено':state.leadsY)+'</b></div></div>'+
-      '<div class="hint">Количество заявок за вчера подтверждается при сдаче плана и факта.</div>'+
-      '<div class="sbtn"><button onclick="closeSheet()">Закрыть</button></div>');
+      '<div class="hint">Число новых заявок за день агент вводит сам при сдаче плана и факта.</div>'+
+      '<div class="sbtn"><button class="btn" onclick="closeSheet()">Закрыть</button><button class="btn pri" onclick="closeSheet()">Понятно</button></div>');
   }
-  var done=weekCount(k), need=state.norm[k], nm='';
-  for(var i=0;i<NORMKEYS.length;i++) if(NORMKEYS[i].k===k) nm=NORMKEYS[i].label;
-  var h='<h3>'+nm.charAt(0).toUpperCase()+nm.slice(1)+'</h3><div class="sh">неделя · норма '+need+'</div>'+
-    '<div class="card"><div class="kv"><span>Сделано</span><b class="'+(done>=need?'g':'')+'">'+done+' из '+need+' · '+Math.round(done/need*100)+'%</b></div>'+
-    '<div class="bar"><i style="width:'+Math.min(Math.round(done/need*100),100)+'%"></i></div>'+
-    '<div class="kv"><span>Норму задал</span><b>РОП</b></div></div>';
-  var dn=weekTasks(k,true), pl=weekTasks(k,false);
-  h+='<div class="sec">Засчитано</div>';
+  var d=cntW(k), n=normW(k), nm='';
+  for(var i=0;i<NORMKEYS.length;i++) if(NORMKEYS[i].k===k) nm=NORMKEYS[i].l;
+  var h='<h3>'+nm.charAt(0).toUpperCase()+nm.slice(1)+'</h3><div class="sh">неделя · норма '+n+'</div>'+
+    '<div class="card"><div class="kv"><span>Сделано</span><b class="'+(d>=n?'g':'')+'">'+d+' из '+n+' · '+Math.round(d/n*100)+'%</b></div>'+
+    '<div class="bar"><i style="width:'+Math.min(Math.round(d/n*100),100)+'%"></i></div>'+
+    '<div class="kv"><span>За месяц</span><b>'+cntM(k)+' из '+normM(k)+'</b></div></div>';
+  var dn=listW(k,true), pl=listW(k,false);
+  h+='<div class="sec">Засчитано на этой неделе</div>';
   if(!dn.length) h+='<div class="hint">Пока ничего.</div>';
   for(var a=0;a<dn.length;a++) h+=miniRow(dn[a],'сделано');
   h+='<div class="sec">Запланировано</div>';
   if(!pl.length) h+='<div class="hint">Ничего не запланировано.</div>';
   for(var b=0;b<pl.length;b++) h+=miniRow(pl[b],ru(pl[b].date));
-  h+='<div class="sbtn"><button onclick="closeSheet()">Закрыть</button></div>';
+  h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Закрыть</button><button class="btn pri" onclick="closeSheet()">Понятно</button></div>';
   sheet(h);
 }
 function miniRow(t,right){
@@ -562,45 +602,97 @@ function miniRow(t,right){
 }
 
 /* ================= отметка дела ================= */
-var cur=null,curStatus=null,curReason=null;
+var cur=null,cSt=null,cRs=null,cDeal=false;
 function openTask(id){
   cur=task(id); if(!cur) return;
+  if(cur.status==='moved'||cur.status==='refuse'||(cur.status==='done'&&cur.date<state.dateY)) return viewTask();
   if(cur.date>state.date) return openAdd(cur.date,false,cur.id);
-  curStatus=cur.status||null; curReason=cur.reason||null; drawTask();
+  cSt=cur.status||null; cRs=cur.reason||null; cDeal=false; drawTask();
+}
+function viewTask(){
+  var t=T(cur.type);
+  sheet('<h3>'+t.n+' · '+esc(cur.obj||'без адреса')+'</h3><div class="sh">'+rud(cur.date)+'</div>'+
+    '<div class="card"><div class="kv"><span>Статус</span><b>'+({done:'сделано',refuse:'отказ',moved:'перенесено'}[cur.status])+'</b></div>'+
+    (cur.reason?'<div class="kv"><span>Причина</span><b>'+esc(rname(cur.reason))+'</b></div>':'')+
+    (cur.why?'<div class="kv"><span>Пояснение</span><b>'+esc(cur.why)+'</b></div>':'')+
+    (cur.res?'<div class="kv"><span>Результат</span><b>'+esc(cur.res)+'</b></div>':'')+'</div>'+
+    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Закрыть</button><button class="btn pri" onclick="closeSheet()">Понятно</button></div>');
 }
 function drawTask(){
   var t=T(cur.type);
   var h='<h3>'+t.n+' · '+esc(cur.obj||'без адреса')+'</h3><div class="sh">'+rud(cur.date)+(cur.time?' · '+cur.time:'')+'</div>'+
-    '<div class="lbl">Что вышло</div><div class="chips">'+
-    sb('done','Сделано','g')+sb('move','Перенос','s')+sb('cancel','Отмена','r')+sb('none','Не назначено','r')+'</div>';
-  if(curStatus==='move') h+='<div class="lbl">Перенесено на</div><input type="date" id="fDate" value="'+(cur.moveTo||plus(1))+'" min="'+state.date+'">';
-  if(curStatus&&curStatus!=='done'){
-    h+='<div class="lbl">Причина</div><div class="chips">';
-    for(var i=0;i<REASONS.length;i++)
-      h+='<button class="chip half'+(curReason===REASONS[i]?' on':'')+'" onclick="curReason=\''+REASONS[i]+'\';drawTask()">'+REASONS[i]+'</button>';
-    h+='</div>';
+    '<div class="lbl">Что вышло</div><div class="chips three">'+
+    sb('done','Сделано','g')+sb('move','Перенос','s')+sb('refuse','Отказ','r')+'</div>';
+
+  if(cSt==='done'){
+    if(t.money) h+='<div class="lbl">Подтвердите сумму · обязательно</div><input type="number" inputmode="numeric" id="fSum" value="'+(cur.sum||'')+'" placeholder="105000">';
+    h+='<div class="lbl">Результат</div><textarea id="fRes"'+(t.k==='ocenka'?'':' placeholder="Что решили"')+'>'+esc(cur.res)+'</textarea>';
+    if(t.k==='pd'){
+      h+='<div class="lbl">Сделка</div><div class="chips">'+
+         '<button class="chip'+(cDeal?' on g':'')+'" onclick="grabTask();cDeal=true;drawTask()">Назначить</button>'+
+         '<button class="chip'+(!cDeal?' on':'')+'" onclick="grabTask();cDeal=false;drawTask()">Пока нет</button></div>';
+      if(cDeal) h+='<div class="lbl">Дата сделки</div><input type="date" id="fDeal" value="'+(cur.dealDate||plus(14))+'" min="'+state.date+'">';
+    }
+    if(t.k==='sdelka') h+='<div class="party">Сделка закрыта. Отличный день.</div>';
   }
-  if(curStatus==='done'&&t.money)
-    h+='<div class="lbl">Сумма комиссии · обязательно</div><input type="number" inputmode="numeric" id="fSum" value="'+(cur.sum||'')+'" placeholder="105000">';
-  h+='<div class="lbl">Результат</div><textarea id="fNote" placeholder="Планируем задаток в пятницу">'+esc(cur.note)+'</textarea>'+
-     '<div class="sbtn"><button onclick="closeSheet()">Отмена</button>'+
-     '<button class="pri" onclick="saveTask()"'+(curStatus?'':' disabled')+'>Сохранить</button></div>'+
-     '<button class="add" style="margin-top:9px" onclick="openAdd(cur.date,cur.star,cur.id)">Изменить объект и клиента</button>';
+  if(cSt==='move'){
+    h+='<div class="lbl">Перенесено на · обязательно</div><input type="date" id="fDate" value="'+(cur.moveTo||plus(1))+'" min="'+state.date+'">';
+    h+=reasonBlock(t,'move');
+  }
+  if(cSt==='refuse') h+=reasonBlock(t,'refuse');
+
+  h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
+     '<button class="btn pri" onclick="saveTask()"'+(cSt?'':' disabled')+'>Сохранить</button></div>'+
+     '<button class="btn ghost" style="margin-top:8px" onclick="openAdd(cur.date,cur.star,cur.id)">Изменить объект и клиента</button>';
   sheet(h);
 }
-function sb(k,l,c){ return '<button class="chip half'+(curStatus===k?' on '+c:'')+'" onclick="curStatus=\''+k+'\';drawTask()">'+l+'</button>'; }
+function reasonBlock(t,kind){
+  if(t.sides==='free')
+    return '<div class="lbl">Причина · обязательно</div><textarea id="fWhy" placeholder="Опишите, что произошло">'+esc(cur.why)+'</textarea>';
+  var rs=reasons(t,kind), h='<div class="lbl">Причина</div><div class="chips">';
+  for(var i=0;i<rs.length;i++)
+    h+='<button class="chip'+(cRs===rs[i].k?' on':'')+'" onclick="grabTask();cRs=\''+rs[i].k+'\';drawTask()">'+rs[i].n+'</button>';
+  h+='</div>';
+  if(cRs==='other'||kind==='refuse')
+    h+='<div class="lbl">'+(kind==='refuse'?'Описать почему · обязательно':'Пояснить · обязательно')+
+       '</div><textarea id="fWhy" placeholder="Что произошло">'+esc(cur.why)+'</textarea>';
+  return h;
+}
+function sb(k,l,c){ return '<button class="chip'+(cSt===k?' on '+c:'')+'" onclick="grabTask();cSt=\''+k+'\';cRs=null;drawTask()">'+l+'</button>'; }
+function grabTask(){
+  var g=function(id){ var e=document.getElementById(id); return e?e.value:null; },v;
+  if((v=g('fRes'))!==null) cur.res=v;
+  if((v=g('fWhy'))!==null) cur.why=v;
+  if((v=g('fSum'))!==null&&v) cur.sum=Number(v);
+}
 function saveTask(){
-  var s=document.getElementById('fSum');
-  if(curStatus==='done'&&T(cur.type).money&&(!s||!s.value)){ alert('Для задатка и договора сумма комиссии обязательна'); return; }
-  var n=document.getElementById('fNote'); if(n) cur.note=n.value;
-  if(s&&s.value) cur.sum=Number(s.value);
-  if(curStatus==='move'){
+  grabTask();
+  var t=T(cur.type);
+  if(cSt==='done'&&t.money&&!cur.sum){ alert('Подтвердите сумму комиссии'); return; }
+  if(cSt==='move'){
     var d=document.getElementById('fDate');
-    cur.date=d?d.value:plus(1); cur.status=null; cur.reason=curReason;
+    if(!d||!d.value){ alert('Укажите новую дату'); return; }
+    if(t.sides==='free'&&!cur.why){ alert('Опишите причину переноса'); return; }
+    if(t.sides!=='free'&&!cRs){ alert('Выберите причину'); return; }
+    if(cRs==='other'&&!cur.why){ alert('Поясните причину'); return; }
+    var copy={id:++state.seq,type:cur.type,obj:cur.obj,cl:cur.cl,clt:cur.clt,date:d.value,time:cur.time,sum:cur.sum,status:null};
+    state.tasks.push(copy);
+    cur.status='moved'; cur.reason=cRs; cur.moveTo=d.value;
+  } else if(cSt==='refuse'){
+    if(t.sides==='free'&&!cur.why){ alert('Опишите причину отказа'); return; }
+    if(t.sides!=='free'&&!cRs){ alert('Выберите причину'); return; }
+    if(!cur.why){ alert('Опишите, почему отказ'); return; }
+    cur.status='refuse'; cur.reason=cRs;
+    if(t.money) cur.sum=0;
   } else {
-    cur.status=curStatus; cur.reason=(curStatus==='done'?null:curReason);
+    cur.status='done'; cur.reason=null;
+    if(t.k==='pd'&&cDeal){
+      var dd=document.getElementById('fDeal');
+      cur.dealDate=dd?dd.value:plus(14);
+      state.tasks.push({id:++state.seq,type:'sdelka',obj:cur.obj,cl:cur.cl,clt:cur.clt,date:cur.dealDate,time:'',status:null,fromPd:cur.id});
+    }
   }
-  save(); closeSheet(); if(document.getElementById('wiz').classList.contains('on')) drawWiz(); else render();
+  save(); closeSheet(); afterChange();
 }
 
 /* ================= задача от РОПа ================= */
@@ -611,10 +703,10 @@ function openRop(id){
   sheet('<h3>Задача от РОПа</h3><div class="sh">'+ru(curRop.date)+'</div>'+
     '<div class="card"><div style="font-size:15px">'+esc(curRop.text)+'</div></div>'+
     '<div class="lbl">Выполнено?</div><div class="chips">'+
-    '<button class="chip half'+(curRop.done===true?' on g':'')+'" onclick="setRop(true)">Да</button>'+
-    '<button class="chip half'+(curRop.done===false?' on r':'')+'" onclick="setRop(false)">Нет</button></div>'+
+    '<button class="chip'+(curRop.done===true?' on g':'')+'" onclick="setRop(true)">Да</button>'+
+    '<button class="chip'+(curRop.done===false?' on r':'')+'" onclick="setRop(false)">Нет</button></div>'+
     (curRop.done===false?'<div class="lbl">Почему не сделано · обязательно</div><textarea id="rWhy" placeholder="Не дозвонился собственнику">'+esc(curRop.why)+'</textarea>':'')+
-    '<div class="sbtn"><button onclick="closeSheet()">Закрыть</button><button class="pri" onclick="saveRop()">Сохранить</button></div>');
+    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Закрыть</button><button class="btn pri" onclick="saveRop()">Сохранить</button></div>');
 }
 function setRop(v){ curRop.done=v; openRop(curRop.id); }
 function saveRop(){
@@ -622,49 +714,49 @@ function saveRop(){
   var w=document.getElementById('rWhy');
   if(curRop.done===false&&(!w||!w.value)){ alert('Напишите, почему не сделано'); return; }
   if(w) curRop.why=w.value;
-  save(); closeSheet(); render();
+  save(); closeSheet(); afterChange();
 }
 
 /* ================= добавление дела ================= */
 var frm={};
-function openAdd(date,star,editId){
-  frm={id:editId||0,type:'pokaz',obj:'',cl:'',clt:'buyer',date:date||state.date,time:'',sum:'',star:!!star,vague:false};
+function openAdd(date,star,editId,type){
+  frm={id:editId||0,type:type||'pokaz',obj:'',cl:'',clt:'',date:date||state.date,time:'',sum:'',star:!!star,vague:false};
   if(editId){ var t=task(editId); if(t) frm={id:t.id,type:t.type,obj:t.obj,cl:t.cl,clt:t.clt,date:t.date,time:t.time,sum:t.sum||'',star:!!t.star,vague:!!t.vague}; }
   fixClt(); drawAdd();
 }
-function openVague(){ frm={id:0,type:'pokaz',obj:'',cl:'',clt:'',date:state.date,time:'',sum:'',star:false,vague:true}; drawAdd(); }
+function openVague(){ frm={id:0,type:'pokaz',obj:'',cl:'',clt:'',date:state.date,time:'',sum:'',star:false,vague:true}; fixClt(); drawAdd(); }
 function fixClt(){ var t=T(frm.type); if(t.cl!=='any') frm.clt=t.cl; }
 function drawAdd(){
   var t=T(frm.type);
   var h='<h3>'+(frm.id?'Дело':(frm.vague?'Назначить новое':(frm.star?'Дело вне плана':'Новое дело')))+'</h3>'+
     '<div class="sh">'+(frm.vague?'без адреса и клиента':rud(frm.date))+'</div>'+
-    '<div class="lbl">Тип</div><div class="chips">';
+    '<div class="lbl">Класс</div><div class="chips three">';
   for(var i=0;i<TYPES.length;i++)
-    h+='<button class="chip half'+(frm.type===TYPES[i].k?' on':'')+'" onclick="grab();frm.type=\''+TYPES[i].k+'\';fixClt();drawAdd()">'+ic(TYPES[i].ic,18)+TYPES[i].n+'</button>';
-  h+='</div><div class="row2">'+
-     '<div><div class="lbl">Дата</div><input type="date" id="aDate" value="'+frm.date+'"></div>'+
+    h+='<button class="chip'+(frm.type===TYPES[i].k?' on':'')+'" onclick="grabAdd();frm.type=\''+TYPES[i].k+'\';fixClt();drawAdd()">'+TYPES[i].n+'</button>';
+  h+='</div><div class="row2"><div><div class="lbl">Дата</div><input type="date" id="aDate" value="'+frm.date+'"></div>'+
      '<div><div class="lbl">Время</div><input type="time" id="aTime" value="'+(frm.time||'')+'"></div></div>';
   if(!frm.vague){
     h+='<div class="lbl">Объект · адрес</div><input id="aObj" value="'+esc(frm.obj)+'" placeholder="Строителей 11">'+
        '<div class="lbl">Клиент · имя без фамилии</div><input id="aCl" value="'+esc(frm.cl)+'" placeholder="Кондрева">'+
        '<div class="lbl">Тип клиента</div><div class="chips">';
     if(t.cl==='any'){
-      h+='<button class="chip half'+(frm.clt==='buyer'?' on':'')+'" onclick="grab();frm.clt=\'buyer\';drawAdd()">Покупатель</button>'+
-         '<button class="chip half'+(frm.clt==='seller'?' on':'')+'" onclick="grab();frm.clt=\'seller\';drawAdd()">Продавец</button>';
+      h+='<button class="chip'+(frm.clt==='buyer'?' on':'')+'" onclick="grabAdd();frm.clt=\'buyer\';drawAdd()">Покупатель</button>'+
+         '<button class="chip'+(frm.clt==='seller'?' on':'')+'" onclick="grabAdd();frm.clt=\'seller\';drawAdd()">Продавец</button>';
     } else {
-      h+='<button class="chip on">'+(t.cl==='buyer'?'Покупатель':'Продавец')+' · по типу дела</button>';
+      h+='<button class="chip on" style="grid-column:1/-1">'+(t.cl==='buyer'?'Покупатель':'Продавец')+' · по классу</button>';
     }
     h+='</div>';
   }
-  if(t.money) h+='<div class="lbl">Комиссия ₽</div><input type="number" inputmode="numeric" id="aSum" value="'+(frm.sum||'')+'" placeholder="105000">';
-  h+='<div class="sbtn"><button onclick="closeSheet()">Отмена</button><button class="pri" onclick="saveAdd(0)">Сохранить</button></div>';
-  if(!frm.id&&!frm.vague&&frm.type==='pokaz') h+='<button class="add" style="margin-top:9px" onclick="saveAdd(1)">Сохранить и ещё показ этому же клиенту</button>';
-  if(frm.id) h+='<button class="add" style="margin-top:9px" onclick="delTask()">Удалить дело</button>';
+  if(t.money) h+='<div class="lbl">Сумма комиссии ₽ · обязательно</div><input type="number" inputmode="numeric" id="aSum" value="'+(frm.sum||'')+'" placeholder="105000">';
+  if(t.dayoff) h+='<div class="hint" style="margin-top:12px">Сделка занимает день целиком — в этот день другие дела не планируются.</div>';
+  h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="saveAdd(0)">Сохранить</button></div>';
+  if(!frm.id&&!frm.vague&&frm.type==='pokaz') h+='<button class="btn ghost" style="margin-top:8px" onclick="saveAdd(1)">Сохранить и ещё показ этому же клиенту</button>';
+  if(frm.id) h+='<button class="btn ghost" style="margin-top:8px" onclick="delTask()">Удалить дело</button>';
   sheet(h);
   setTimeout(function(){ var o=document.getElementById('aObj'); if(o&&!frm.obj) o.focus(); },60);
 }
-function grab(){
-  var g=function(id){ var e=document.getElementById(id); return e?e.value:null; }, v;
+function grabAdd(){
+  var g=function(id){ var e=document.getElementById(id); return e?e.value:null; },v;
   if((v=g('aObj'))!==null) frm.obj=v;
   if((v=g('aCl'))!==null) frm.cl=v;
   if((v=g('aTime'))!==null) frm.time=v;
@@ -672,11 +764,11 @@ function grab(){
   if((v=g('aDate'))!==null) frm.date=v;
 }
 function saveAdd(again){
-  grab(); fixClt();
+  grabAdd(); fixClt();
   var t=T(frm.type);
   if(!frm.vague&&!frm.obj){ alert('Укажите адрес объекта'); return; }
   if(!frm.vague&&t.cl==='any'&&!frm.clt){ alert('Выберите: покупатель или продавец'); return; }
-  if(t.money&&!frm.vague&&!frm.sum){ alert('Для задатка и договора нужна сумма комиссии'); return; }
+  if(t.money&&!frm.vague&&!frm.sum){ alert('Для задатка сумма комиссии обязательна'); return; }
   if(frm.id){
     var e=task(frm.id);
     e.type=frm.type; e.obj=frm.obj; e.cl=frm.cl; e.clt=frm.clt; e.date=frm.date; e.time=frm.time;
@@ -689,77 +781,75 @@ function saveAdd(again){
     state.tasks.push(it);
   }
   save();
-  if(again){
-    frm={id:0,type:'pokaz',obj:'',cl:frm.cl,clt:frm.clt,date:frm.date,time:'',sum:'',star:frm.star,vague:false};
-    drawAdd(); return;
-  }
-  closeSheet();
-  if(document.getElementById('wiz').classList.contains('on')) drawWiz(); else render();
+  if(again){ frm={id:0,type:'pokaz',obj:'',cl:frm.cl,clt:frm.clt,date:frm.date,time:'',sum:'',star:frm.star,vague:false}; drawAdd(); return; }
+  closeSheet(); afterChange();
 }
 function delTask(){
-  if(!confirm('Удалить дело?')) return;
   var n=[]; for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].id!==frm.id) n.push(state.tasks[i]);
-  state.tasks=n; save(); closeSheet();
-  if(document.getElementById('wiz').classList.contains('on')) drawWiz(); else render();
+  state.tasks=n; save(); closeSheet(); afterChange();
 }
 
 /* ================= мастер сдачи ================= */
 var step=0, wLeads='';
 function openWiz(){ step=0; wLeads=(state.leadsY===null?'':String(state.leadsY)); drawWiz(); document.getElementById('wiz').classList.add('on'); }
 function closeWiz(){ document.getElementById('wiz').classList.remove('on'); render(); }
+function afterChange(){ if(document.getElementById('wiz').classList.contains('on')) drawWiz(); else render(); }
 function drawWiz(){
-  var h='<div class="steps">'+[0,1,2,3].map(function(i){ return '<div class="'+(i<=step?'on':'')+'"></div>'; }).join('')+'</div>', bar='';
+  var h='<div class="steps">'+[0,1,2,3].map(function(i){ return '<div class="'+(i<=step?'on':'')+'"></div>'; }).join('')+'</div>', bar='', one=false;
   if(step===0){
     var y=byDate(state.dateY), left=yestLeft();
-    h+='<div class="wtitle">Факт за вчера</div><div class="sh">'+rud(state.dateY)+'</div>';
-    for(var i=0;i<y.length;i++) h+=itemHTML(y[i],'today');
-    h+='<button class="add solid" onclick="openAdd(state.dateY,true)">+ Что было вне плана</button>';
+    h+='<div class="wtitle">Факт за вчера</div><div class="sh">'+rud(state.dateY)+'</div>'+
+       '<button class="btn" style="margin-bottom:12px" onclick="openAdd(state.dateY,true)">+ Что было вне плана</button>';
+    for(var i=0;i<y.length;i++) h+=itemHTML(y[i],'day');
     if(left) h+='<div class="hint" style="color:var(--red)">Не отмечено дел: '+left+'. Без этого сдать нельзя.</div>';
-    bar='<button onclick="closeWiz()">Закрыть</button><button class="pri" onclick="wizNext()">Дальше</button>';
+    bar='<button class="btn" onclick="closeWiz()">Закрыть</button><button class="btn pri" onclick="wizNext()">Дальше</button>';
   }
   if(step===1){
-    h+='<div class="wtitle">Заявки за вчера</div><div class="sh">сколько пришло</div>'+
-       '<div class="card"><div class="kv"><span>Норма недели</span><b>'+state.norm.leads+'</b></div>'+
-       '<div class="kv"><span>Уже за неделю</span><b>'+(state.weekDone.leads||0)+'</b></div></div>'+
-       '<div class="lbl">Заявок за вчера</div><input type="number" inputmode="numeric" id="wLeads" value="'+wLeads+'" placeholder="0">'+
+    h+='<div class="wtitle">Заявки за вчера</div><div class="sh">сколько новых пришло</div>'+
+       '<div class="card"><div class="kv"><span>Норма недели</span><b>'+normW('leads')+'</b></div>'+
+       '<div class="kv"><span>Уже за неделю</span><b>'+cntW('leads')+'</b></div></div>'+
+       '<div class="lbl">Новых заявок</div><input type="number" inputmode="numeric" id="wLeads" value="'+wLeads+'" placeholder="0">'+
        '<div class="hint">Это входящий поток, а не ваша работа. Цифра нужна, чтобы считать, сколько заявок дошло до показа.</div>';
-    bar='<button onclick="wizBack()">Назад</button><button class="pri" onclick="wizNext()">Дальше</button>';
+    bar='<button class="btn" onclick="wizBack()">Назад</button><button class="btn pri" onclick="wizNext()">Дальше</button>';
   }
   if(step===2){
     var t=byDate(state.date);
     h+='<div class="wtitle">План на сегодня</div><div class="sh">'+rud(state.date)+'</div>';
     for(var j=0;j<t.length;j++) h+=itemHTML(t[j],'fut');
-    h+='<button class="add solid" onclick="openAdd(state.date)">+ Добавить дело</button>'+
-       '<button class="add" onclick="openVague()">Назначить новое · без адреса</button>';
+    h+='<button class="btn" onclick="openAdd(state.date)">+ Добавить дело</button>'+
+       '<button class="btn ghost" onclick="openVague()">Назначить новое · без адреса</button>';
     if(!t.length) h+='<div class="hint" style="color:var(--red)">План пустой. Добавьте хотя бы одно дело.</div>';
-    bar='<button onclick="wizBack()">Назад</button><button class="pri" onclick="wizNext()">Дальше</button>';
+    bar='<button class="btn" onclick="wizBack()">Назад</button><button class="btn pri" onclick="wizNext()">Дальше</button>';
   }
   if(step===3){
-    h+='<div class="wtitle">Прогноз недели</div><div class="sh">'+esc(state.fc.week)+'</div>'+
-       '<div class="card"><div class="big">'+money(fcSum())+'<small>по объектам: '+state.fc.items.length+'</small></div></div>';
-    for(var w=0;w<state.fc.items.length;w++){ var f=state.fc.items[w];
-      h+='<button class="item" onclick="openFc('+f.id+')"><div class="ic">'+ic('target')+'</div><div class="tx">'+
-         '<div class="tp">задаток</div><div class="nm">'+esc(f.obj)+'</div><div class="sub">'+esc(f.cl)+'</div></div>'+
+    var s=fcStat('week'), sm=fcStat('month');
+    h+='<div class="wtitle">Прогноз</div><div class="sh">задатки на неделю и месяц</div>'+
+       '<div class="card"><div class="kv"><span>Неделя</span><b>'+money(s.s)+' · '+s.n+'</b></div>'+
+       '<div class="kv"><span>Месяц</span><b>'+money(sm.s)+' · '+sm.n+'</b></div></div>';
+    for(var w=0;w<s.items.length;w++){ var f=s.items[w];
+      h+='<button class="item" onclick="openTask('+f.id+')"><div class="ic">'+ic('money')+'</div><div class="tx">'+
+         '<div class="tp">'+ru(f.date)+'</div><div class="nm">'+esc(f.obj)+'</div><div class="sub">'+esc(f.cl)+'</div></div>'+
          '<span class="rt ok">'+money(f.sum)+'</span></button>';
     }
-    h+='<button class="add solid" onclick="openFc(0)">+ Добавить объект</button>'+
-       '<div class="hint">Подтвердите прогноз или скорректируйте. В понедельник он обязателен.</div>';
-    bar='<button onclick="wizBack()">Назад</button><button class="pri" onclick="wizDone()">Сдать план и факт</button>';
+    if(!s.items.length) h+='<div class="hint">На этой неделе задатков не запланировано.</div>';
+    h+='<button class="btn" onclick="openAdd(state.date,false,0,\'pd\')">+ Добавить задаток</button>'+
+       '<div class="hint">Подтвердите прогноз или добавьте объекты. В понедельник прогноз обязателен.</div>';
+    bar='<button class="btn" onclick="wizBack()">Назад</button><button class="btn pri" onclick="wizDone()">Сдать</button>';
   }
   document.getElementById('wizin').innerHTML=h;
   document.getElementById('wizbar').innerHTML=bar;
+  document.getElementById('wizbar').className='in'+(one?' one':'');
 }
 function wizBack(){ if(step===1){ var e=document.getElementById('wLeads'); if(e) wLeads=e.value; } step--; drawWiz(); }
 function wizNext(){
   if(step===0&&yestLeft()){ alert('Отметьте все вчерашние дела'); return; }
   if(step===1){ var e=document.getElementById('wLeads');
-    if(!e||e.value===''){ alert('Укажите количество заявок за вчера'); return; } wLeads=e.value; }
+    if(!e||e.value===''){ alert('Укажите количество заявок'); return; } wLeads=e.value; }
   if(step===2&&!byDate(state.date).length){ alert('План на сегодня пустой'); return; }
   step++; drawWiz();
 }
 function wizDone(){
   state.leadsY=Number(wLeads||0);
-  state.fc.sent=true;
   var d=new Date();
   state.today={sent:true,status:'sent',at:('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)};
   var y=byDate(state.dateY), f=0;
@@ -771,7 +861,13 @@ function wizDone(){
 /* ================= общее ================= */
 function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on'); }
 function closeSheet(){ document.getElementById('ovl').classList.remove('on'); }
-function resetAll(){ if(!confirm('Сбросить прототип?')) return; var u=state.user; state=seed(); state.user=u; save(); nav='today'; render(); }
+function resetAll(){
+  sheet('<h3>Сбросить прототип?</h3><div class="sh">данные вернутся к исходным</div>'+
+    '<div class="hint">Все отметки, добавленные дела и сданные отчёты будут стёрты.</div>'+
+    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
+    '<button class="btn pri" onclick="doReset()">Сбросить</button></div>');
+}
+function doReset(){ var u=state.user; state=seed(); state.user=u; save(); nav='today'; closeSheet(); render(); }
 render();
 </script>
 </body>
