@@ -23,21 +23,22 @@ body{margin:0;background:var(--paper);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.55}
 .wrap{max-width:520px;margin:0 auto;padding:40px 16px 60px}
 .mark{font-size:26px;font-weight:600;letter-spacing:-.03em;line-height:1}
-.mark i{font-style:normal;color:var(--dot)}
+.mark i{font-style:normal;color:var(--lime)}
 .sub{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin:7px 0 26px}
 h1{font-size:24px;letter-spacing:-.03em;margin:0 0 6px;font-weight:600}
 .lede{color:var(--ink-2);font-size:14.5px;margin:0 0 24px}
 a.card{display:flex;gap:16px;align-items:center;text-decoration:none;color:inherit;
-  background:var(--card);border:1px solid var(--line);border-radius:2px;padding:16px;margin-bottom:10px}
+  background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:10px}
+a.card:active{border-color:var(--lime);border-width:2px;padding:15px}
 a.card.off{opacity:.55;pointer-events:none}
-.ic{width:56px;height:56px;flex:none;border-radius:2px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--dot)}
+.ic{width:56px;height:56px;flex:none;border-radius:6px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--lime)}
 .tx{flex:1;min-width:0}
 .tx b{display:block;font-size:16.5px;letter-spacing:-.01em}
 .tx span{font-size:13.5px;color:var(--ink-2)}
 .tag{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-  background:var(--dot);color:var(--on-dot);border-radius:2px;padding:3px 7px;flex:none;font-weight:700}
+  background:var(--lime);color:var(--on-lime);border-radius:6px;padding:4px 9px;flex:none;font-weight:700}
 .tag.soon{background:var(--surface-2);color:var(--mute);font-weight:400}
-.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--star);border-radius:2px;padding:15px;margin-top:22px;font-size:13.5px;color:var(--ink-2)}
+.note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--lime);border-radius:6px;padding:15px;margin-top:22px;font-size:13.5px;color:var(--ink-2)}
 .note b{color:var(--ink);display:block;margin-bottom:4px;font-size:14px}
 .foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mute)}
 </style>
@@ -47,19 +48,19 @@ a.card.off{opacity:.55;pointer-events:none}
   <div class="mark">ТОЧНО<i>.</i></div>
   <div class="sub">план / факт · прототипы</div>
 
-  <h1>Три кабинета</h1>
+  <h1>Три кабинета<span style="color:var(--lime)">.</span></h1>
   <p class="lede">Кликабельные прототипы для проверки на живых людях. Данные выдуманные и хранятся только на вашем устройстве — ничего никуда не уходит.</p>
 
   <a class="card" href="agent.html">
     <span class="ic"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
-    <span class="tx"><b>Агент</b><span>Сегодня, прошлое, будущее, прогноз, моё</span></span>
-    <span class="tag">v0.4</span>
+    <span class="tx"><b>Агент</b><span>Семь классов, прогноз план-факт, неделя и месяц</span></span>
+    <span class="tag">v2.1</span>
   </a>
 
   <a class="card" href="rop.html">
     <span class="ic"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.5"/><path d="M17.5 14a6 6 0 0 1 3 6"/></svg></span>
-    <span class="tx"><b>РОП</b><span>Утро отдела, карточка агента, деньги, свод</span></span>
-    <span class="tag">v0.1</span>
+    <span class="tx"><b>РОП</b><span>Приёмка отчётов, отказы, прогноз, свод, нормы</span></span>
+    <span class="tag">v2.1</span>
   </a>
 
   <a class="card" href="vladelec.html">

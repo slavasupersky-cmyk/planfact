@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>ТОЧНО. — Классы и значения v2</title>
+<style>
+:root{
+  color-scheme:light;
+  --ink:#101010; --ink-2:#5A5A5A; --mute:#757575;
+  --line:#E6E6E6; --paper:#FFFFFF; --card:#FFFFFF;
+  --surface:#FAFAFA; --surface-2:#F0F0F0;
+  --dot:#0D7A46; --lime:#AEEA00; --star:#8A6100; --red:#B3261E;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:16px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:26px 16px 80px}
+.top{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:28px}
+.mark{font-size:22px;font-weight:600;letter-spacing:-.03em}
+.mark i{font-style:normal;color:var(--dot)}
+.eyebrow{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-top:6px}
+h1{font-size:clamp(26px,6vw,42px);line-height:1.04;letter-spacing:-.03em;margin:14px 0 10px;font-weight:600}
+.lede{max-width:62ch;color:var(--ink-2);font-size:clamp(15px,3.6vw,17px);margin:0}
+section{margin-top:42px}
+.sechead{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:9px;margin-bottom:18px;flex-wrap:wrap}
+.sechead h2{font-size:clamp(19px,5vw,26px);letter-spacing:-.03em;margin:0;font-weight:600}
+.sechead .tag{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);font-size:13.5px;margin-bottom:14px}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface-2);font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);font-weight:400}
+td:first-child{font-weight:600}
+.req{color:var(--red);font-weight:600}
+.auto{color:var(--dot);font-weight:600}
+.opt{color:var(--mute)}
+.cls{background:var(--card);border:1px solid var(--line);margin-bottom:14px}
+.cls > header{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;background:var(--surface);flex-wrap:wrap}
+.cls .num{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:var(--ink);color:#fff;padding:3px 7px}
+.cls h3{margin:0;font-size:17px;letter-spacing:-.02em}
+.cls .meta{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.cls .body{padding:14px}
+.st{margin-bottom:10px;padding-left:12px;border-left:3px solid var(--line)}
+.st.ok{border-color:var(--dot)} .st.no{border-color:var(--red)} .st.mv{border-color:var(--star)}
+.st b{display:block;font-size:14.5px}
+.st span{font-size:13.5px;color:var(--ink-2)}
+.pill{display:inline-block;background:var(--surface-2);padding:3px 9px;font-size:12.5px;margin:3px 4px 0 0}
+.pill.need{background:#FDECEA;color:var(--red)}
+.pill.free{background:#FFF6E5;color:var(--star)}
+.q{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--star);padding:14px;margin-bottom:10px}
+.q b{display:block;font-size:15px;margin-bottom:3px}
+.q span{font-size:13.5px;color:var(--ink-2)}
+.done{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--dot);padding:14px;margin-bottom:14px;font-size:14.5px;color:var(--ink-2)}
+.done b{color:var(--ink)}
+footer{margin-top:50px;border-top:2px solid var(--ink);padding-top:14px;font-size:12.5px;color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="mark">ТОЧНО<i>.</i></div>
+  <div class="eyebrow">план / факт · словарь классов · v2.1</div>
+  <h1>Семь классов,<br>одна механика</h1>
+  <p class="lede">Все семь классов устроены одинаково: три исхода, причина из списка сторон, обязательное пояснение при «другое». Различаются только набор допустимых сторон и две особенности — сумма у задатка и порождение сделки. Это значит, что в коде будет одна форма и семь строк справочника, а не семь экранов.</p>
+</header>
+
+<section>
+  <div class="sechead"><h2>Главное правило</h2><span class="tag">определяет всё остальное</span></div>
+  <div class="done">
+    <b>Есть конкретная новая дата — это перенос. Нет даты — это отказ.</b><br>
+    Перенос уезжает на новую дату и появляется в «Сегодня» или «Будущем». В отчёте за старый день строка остаётся с пометкой «перенесено» — не исчезает, но в «сделано» не засчитывается. Отказ — ноль: в норму не идёт, причина обязательна.
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><h2>Общие поля</h2><span class="tag">у всех классов</span></div>
+  <table>
+    <tr><th>Поле</th><th>Значения</th><th>Правило</th></tr>
+    <tr><td>Класс</td><td>показ, оценка, встреча, реклама, задаток, сделка, заявка</td><td>выбирает агент</td></tr>
+    <tr><td>Дата</td><td>дата</td><td><span class="req">обязательно</span> · сегодня или будущая</td></tr>
+    <tr><td>Время</td><td>время</td><td><span class="opt">не обязательно</span></td></tr>
+    <tr><td>Объект</td><td>адрес строкой</td><td><span class="req">обязательно</span>, кроме «назначить новое»</td></tr>
+    <tr><td>Клиент</td><td>имя без фамилии</td><td>персональные данные не храним</td></tr>
+    <tr><td>Тип клиента</td><td>продавец · покупатель</td><td>собственник = продавец; у части классов <span class="auto">задан жёстко</span></td></tr>
+    <tr><td>Статус</td><td>запланировано · сделано · перенос · отказ</td><td>ставит агент</td></tr>
+    <tr><td>Результат</td><td>текст</td><td>при «сделано»</td></tr>
+    <tr><td>Причина</td><td>из списка сторон</td><td><span class="req">обязательно</span> при переносе и отказе</td></tr>
+    <tr><td>Пояснение</td><td>текст</td><td><span class="req">обязательно</span> при причине «другое»</td></tr>
+    <tr><td>Новая дата</td><td>дата</td><td><span class="req">обязательно</span> при переносе</td></tr>
+    <tr><td>Вне плана</td><td>да · нет</td><td><span class="auto">ставится само</span>, если дело заведено задним числом</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="sechead"><h2>Единый набор причин</h2><span class="tag">свободы формулировок у агента нет</span></div>
+  <table>
+    <tr><th>Исход</th><th>Причины</th></tr>
+    <tr><td>Перенос</td><td>
+      <span class="pill">Покупатель перенёс</span><span class="pill">Продавец перенёс</span>
+      <span class="pill">Покупатель не на связи</span><span class="pill">Продавец не на связи</span>
+      <span class="pill need">Другое → пояснить</span></td></tr>
+    <tr><td>Отказ</td><td>
+      <span class="pill">Покупатель отказался</span><span class="pill">Продавец отказал</span>
+      <span class="pill need">Другое → пояснить</span></td></tr>
+  </table>
+  <div class="done">
+    «Не успел(а)» убрано из списков — уходит в «другое» с пояснением. Набор сторон сужается по классу: оценка и реклама — только продавец, встреча — только покупатель, показ, задаток и сделка — обе стороны.
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><h2>Классы</h2><span class="tag">01 – 07</span></div>
+
+  <div class="cls">
+    <header><span class="num">01</span><h3>Показ</h3><span class="meta">клиент: покупатель · стороны в причинах: обе</span></header>
+    <div class="body">
+      <div class="st ok"><b>Сделано</b><span>Результат текстом.</span></div>
+      <div class="st mv"><b>Перенос</b><span>Новая дата обязательна. Все четыре стороны плюс «другое» — собственник тоже может не пустить в квартиру.</span></div>
+      <div class="st no"><b>Отказ</b><span>Покупатель отказался · Продавец отказал · Другое с пояснением.</span></div>
+    </div>
+  </div>
+
+  <div class="cls">
+    <header><span class="num">02</span><h3>Оценка</h3><span class="meta">клиент: продавец · стороны: продавец</span></header>
+    <div class="body">
+      <div class="st ok"><b>Сделано</b><span>Результат текстом, поле без подсказки-примера.</span></div>
+      <div class="st mv"><b>Перенос</b><span>Продавец перенёс · Продавец не на связи · Другое с пояснением.</span></div>
+      <div class="st no"><b>Отказ</b><span>Продавец отказал · Другое с пояснением.</span></div>
+    </div>
+  </div>
+
+  <div class="cls">
+    <header><span class="num">03</span><h3>Встреча</h3><span class="meta">клиент: покупатель · стороны: только покупатель</span></header>
+    <div class="body">
+      <div class="st ok"><b>Сделано</b><span>Результат текстом.</span></div>
+      <div class="st mv"><b>Перенос</b><span>Покупатель перенёс · Покупатель не на связи · Другое с пояснением.</span></div>
+      <div class="st no"><b>Отказ</b><span>Покупатель отказался · Другое с пояснением.</span></div>
+    </div>
+  </div>
+
+  <div class="cls">
+    <header><span class="num">04</span><h3>Реклама</h3><span class="meta">клиент: продавец · причины свободным текстом</span></header>
+    <div class="body">
+      <div class="st ok"><b>Сделано</b><span>Комментарий по желанию — например, ссылка на объявление.</span></div>
+      <div class="st mv"><b>Перенос</b><span>Новая дата обязательна. <span class="pill free">Причина текстом</span> — без готовых вариантов, подсказка ситуативная.</span></div>
+      <div class="st no"><b>Отказ</b><span><span class="pill free">Причина текстом</span></span></div>
+    </div>
+  </div>
+
+  <div class="cls">
+    <header><span class="num">05</span><h3>Задаток</h3><span class="meta">клиент: выбор · сумма обязательна всегда</span></header>
+    <div class="body">
+      <div class="st ok"><b>Сделано</b><span>Результат текстом и подтверждение суммы — она могла измениться против плановой. Здесь же опция назначить сделку.</span></div>
+      <div class="st mv"><b>Перенос</b><span>Новая дата обязательна. Обе стороны плюс «другое».</span></div>
+      <div class="st no"><b>Отказ</b><span>Причина обязательна. <b>Сумма исчезает</b> — из задатка и из прогноза.</span></div>
+      <div class="done" style="margin:12px 0 0">
+        Сумма обязательна и при планировании, и при подтверждении. Задаток автоматически попадает в прогноз в период по своей дате.
+      </div>
+    </div>
+  </div>
+
+  <div class="cls">
+    <header><span class="num">06</span><h3>Сделка</h3><span class="meta">клиент: выбор · суммы нет · занимает день</span></header>
+    <div class="body">
+      <div class="st ok"><b>Сделано</b><span>Отмечается празднично — событие дня.</span></div>
+      <div class="st mv"><b>Перенос</b><span>Новая дата обязательна. Обе стороны плюс «другое».</span></div>
+      <div class="st no"><b>Отказ</b><span>Причина обязательна.</span></div>
+      <div class="done" style="margin:12px 0 0">
+        Появляется двумя путями: <b>из задатка</b>, если при его подтверждении назначена сделка с датой, или <b>заводится руками</b> — в том числе повторно по тому же клиенту. В день сделки от агента больше ничего не ждём.
+      </div>
+    </div>
+  </div>
+
+  <div class="cls">
+    <header><span class="num">07</span><h3>Заявка</h3><span class="meta">просто число · не планируется</span></header>
+    <div class="body">
+      <div style="font-size:14.5px;color:var(--ink-2)">
+        Сколько новых заявок пришло за день. Число вводит сам агент при сдаче плана и факта. Ни статусов, ни объектов, ни причин — это входящий поток, а не работа агента. Идёт шестой нормой недели и суммируется в месяц.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sechead"><h2>Прогноз</h2><span class="tag">срез по задаткам · план и факт</span></div>
+  <div class="done">
+    Прогноз — не отдельная сущность, а взгляд на класс «Задаток». Любой задаток с датой попадает в него сам: сегодняшний виден и в дне, будущий — в будущем, дальний — только в прогнозе. Прогноз дальних задатков видит и агент, и РОП.
+  </div>
+  <table>
+    <tr><th>Срез</th><th>Период</th><th>Ставится</th><th>Показывает</th></tr>
+    <tr><td>Неделя</td><td>понедельник – воскресенье</td><td>каждый понедельник</td><td>план и факт по количеству и сумме</td></tr>
+    <tr><td>Месяц</td><td>с 1 числа</td><td>1 числа</td><td>план и факт по количеству и сумме</td></tr>
+    <tr><td>Будущее</td><td>всё, что дальше</td><td>по мере появления</td><td>список, который можно поторопить</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="sechead"><h2>Периоды и нормы</h2><span class="tag">дни складываются в периоды</span></div>
+  <table>
+    <tr><th>Что</th><th>Правило</th></tr>
+    <tr><td>Неделя</td><td>понедельник – воскресенье; счётчик обнуляется в понедельник в 10:00</td></tr>
+    <tr><td>Месяц</td><td>календарный, с 1 числа; недели через границу месяца не делятся</td></tr>
+    <tr><td>Норма месяца</td><td>задаёт РОП по каждому классу</td></tr>
+    <tr><td>Норма недели</td><td><span class="auto">считается</span>: месячная ÷ 4,33, округление вверх. Сумма недельных выходит больше месячной — это принято осознанно</td></tr>
+    <tr><td>Процент</td><td>отдельно по неделе и по месяцу; больше 100% — норма</td></tr>
+    <tr><td>Отчёт дня</td><td>сдаётся до 10:00 за предыдущий день</td></tr>
+    <tr><td>Пятница</td><td>закрывается вместе с выходными, сдаётся в понедельник до 10:00</td></tr>
+    <tr><td>Отчёт недели</td><td><span class="auto">автоматически</span> в понедельник в 10:00</td></tr>
+    <tr><td>Отчёт месяца</td><td><span class="auto">автоматически</span> 1 числа, суммой всех дней месяца</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="sechead"><h2>Что осталось выяснить</h2><span class="tag">три пункта</span></div>
+
+      <div class="q"><b>Факт прогноза при опоздании</b><span>Обещали задаток на этой неделе, случился на следующей. Для недельного прогноза это промах, а для месячного попадание — или считаем попаданием в обоих?</span></div>
+
+  <div class="q"><b>Заявки за выходные</b><span>Пятница сдаётся в понедельник вместе с субботой и воскресеньем. Заявки за эти три дня — одно число или три отдельных?</span></div>
+
+  <div class="q"><b>Отказ и норма</b><span>Приняли: отказ — ноль, в норму не идёт. Но у РОПа он всё равно должен быть виден как потраченное время агента. Показывать отдельной строкой «отказов за неделю» или не показывать вовсе?</span></div>
+</section>
+
+<footer>
+  ТОЧНО<i style="font-style:normal;color:var(--dot);font-weight:600">.</i> · словарь классов v2.1 — основа для пересборки кабинета агента v0.9
+</footer>
+
+</div>
+</body>
+</html>
