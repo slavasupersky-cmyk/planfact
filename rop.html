@@ -7,118 +7,203 @@
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
 <title>ТОЧНО. — Кабинет РОПа</title>
 <style>
+/* ============================================================
+   ТОЧНО · план/факт — единая система интерфейса
+   Цвета: чёрный, белый, салатовый + два сигнальных
+   Шрифт: один · размеры 28/17/15/12 · начертания 400/600
+   ============================================================ */
 :root{
+  --ink:#0F0F0F;        /* текст и активный фон */
+  --mute:#8C8C8C;       /* единственный серый для текста */
+  --line:#E9E9E9;       /* единственный серый для границ */
+  --soft:#F6F6F6;       /* единственный серый для подложек */
+  --bg:#FFFFFF;
+  --lime:#AEEA00;       /* факт, достигнутое, главное действие */
+  --on-lime:#0F0F0F;
+  --plan:#F07C00;       /* план, ещё не сделано */
+  --alarm:#E03A2F;      /* отказ, срыв */
+  --t1:28px; --t2:17px; --t3:15px; --t4:12px;
+  --r:8px; --pill:999px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px;
   color-scheme:light;
-  --ink:#101010; --ink-2:#5A5A5A; --mute:#757575;
-  --line:#E6E6E6; --paper:#FFFFFF; --card:#FFFFFF;
-  --surface:#FAFAFA; --surface-2:#F0F0F0;
-  --lime:#AEEA00; --on-lime:#101010; --green:#0D7A46;
-  --plan:#5A5A5A; --star:#8A6100; --red:#B3261E; --r:6px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--paper);color:var(--ink);
+html,body{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  font-size:16px;line-height:1.55}
-button{font-family:inherit}
-.app{max-width:560px;margin:0 auto;padding:14px 14px 160px}
+  font-size:var(--t3);line-height:1.5;font-weight:400}
+button,input,textarea{font-family:inherit;font-size:var(--t3);color:var(--ink)}
+.app{max-width:560px;margin:0 auto;padding:var(--s4) var(--s4) 170px}
 
-.login{max-width:420px;margin:0 auto;padding:56px 18px}
-.login .mark{font-size:26px;font-weight:600;letter-spacing:-.03em;margin-bottom:6px}
-.login .mark i{font-style:normal;color:var(--lime)}
-.login .sub{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:34px}
-.login h2{font-size:21px;letter-spacing:-.03em;margin:0 0 16px}
-.pick{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:7px;font-size:15px;color:var(--ink-2)}
-.pick.on{border-color:var(--ink);border-width:2px;color:var(--ink);font-weight:600}
-.note{font-size:13px;color:var(--mute);margin-top:12px;text-align:center}
+/* ---------- типографика ---------- */
+.t1{font-size:var(--t1);font-weight:600;letter-spacing:-.03em;line-height:1.15}
+.t2{font-size:var(--t2);font-weight:600;letter-spacing:-.01em;line-height:1.3}
+.lbl,.sec,.sh,.t{font-size:var(--t4);font-weight:400;color:var(--mute);
+  text-transform:uppercase;letter-spacing:.04em;line-height:1.3}
+.hint{font-size:var(--t4);color:var(--mute);margin:var(--s2) 2px var(--s3)}
+.big{font-size:var(--t1);font-weight:600;letter-spacing:-.03em;line-height:1.15}
+.big small{display:block;font-size:var(--t4);font-weight:400;color:var(--mute);letter-spacing:0;margin-top:var(--s2)}
 
-.hdr{padding-bottom:12px;border-bottom:2px solid var(--ink);margin-bottom:14px}
-.hdr .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+/* ---------- шапка ---------- */
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3);
+  padding-bottom:var(--s3);border-bottom:1px solid var(--line);margin-bottom:var(--s4)}
 .mark{font-size:20px;font-weight:600;letter-spacing:-.03em;line-height:1}
 .mark i{font-style:normal;color:var(--lime)}
-.mark small{display:block;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:400;margin-top:5px}
-.who{text-align:right}
-.who b{display:block;font-size:14px;font-weight:600}
-.who span{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mute)}
-.role{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:var(--surface-2);color:var(--ink-2);padding:2px 7px;border-radius:var(--r);margin-top:4px}
+.mark small{display:block;font-size:var(--t4);color:var(--mute);font-weight:400;margin-top:6px;letter-spacing:.04em;text-transform:uppercase}
+.who{display:flex;flex-direction:column;align-items:flex-end;gap:var(--s1);text-align:right}
+.who b{font-size:var(--t3);font-weight:600}
+.who .dt{font-size:var(--t4);color:var(--mute)}
+.role{font-size:var(--t4);font-weight:600;background:var(--lime);color:var(--on-lime);
+  padding:2px var(--s2);border-radius:var(--r);letter-spacing:.04em;text-transform:uppercase}
 
-.btn{width:100%;min-height:54px;border-radius:var(--r);padding:14px;font-size:15.5px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:9px}
-.btn.pri{background:var(--lime);color:var(--on-lime);border-color:var(--lime)}
-.btn.ghost{border-style:dashed;color:var(--mute);background:transparent}
-.btn.warn{border-color:var(--red);color:var(--red)}
-.btn+.btn{margin-top:8px}
+/* ---------- кнопки ---------- */
+.btn{width:100%;height:52px;border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  border-radius:var(--r);font-size:var(--t3);font-weight:600;display:flex;align-items:center;
+  justify-content:center;gap:var(--s2);padding:0 var(--s3)}
+.btn+.btn{margin-top:var(--s2)}
+.btn.pri{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
+.btn.ghost{border-style:dashed;color:var(--mute)}
+.btn.warn{border-color:var(--alarm);color:var(--alarm)}
+.btn[disabled]{background:var(--soft);border-color:var(--soft);color:var(--mute)}
+.submit{margin-top:var(--s3)}
+.status{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s2);font-size:var(--t4);color:var(--mute)}
+.dm{width:8px;height:8px;border-radius:var(--pill);flex:none;background:var(--line)}
+.dm.ok{background:var(--lime)} .dm.wait{background:var(--plan)} .dm.no{background:var(--alarm)}
+.back{border:0;background:none;color:var(--mute);font-size:var(--t3);padding:0 0 var(--s3);font-weight:600}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px;margin-bottom:12px}
-.card .t{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.grid button{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-height:60px;padding:9px 4px;text-align:center;color:inherit;width:100%}
-.grid b{display:block;font-size:17px;font-weight:600;letter-spacing:-.03em}
-.grid b.good{color:var(--green)} .grid b.bad{color:var(--red)}
-.grid span{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
-.bar{height:6px;background:var(--surface-2);border-radius:var(--r);overflow:hidden;margin:8px 0 4px}
+/* ---------- карточки ---------- */
+.card{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--s4);margin-bottom:var(--s3)}
+.card .t{display:block;margin-bottom:var(--s3)}
+.sec{margin:var(--s5) 2px var(--s2)}
+.sec.warn{color:var(--alarm)}
+
+/* ---------- показатели ---------- */
+.nrow{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s2)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+.nrow button,.grid button,.grid div{background:var(--soft);border:0;border-radius:var(--r);
+  padding:var(--s3) var(--s1);text-align:center;color:inherit;width:100%}
+.nrow b,.grid b{display:block;font-size:var(--t2);font-weight:600;letter-spacing:-.02em;color:var(--plan)}
+.nrow b.good,.grid b.good{color:var(--ink)}
+.nrow b.bad,.grid b.bad{color:var(--alarm)}
+.nrow span,.grid span{display:block;font-size:var(--t4);color:var(--mute);margin-top:2px}
+.bar{height:6px;border-radius:var(--pill);background:var(--soft);overflow:hidden;margin:var(--s3) 0 var(--s2)}
 .bar i{display:block;height:100%;background:var(--lime)}
-.kv{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;color:var(--ink-2);padding:7px 0;border-bottom:1px solid var(--line)}
+
+/* ---------- строка «ключ — значение» ---------- */
+.kv{display:grid;grid-template-columns:1fr 76px 48px;align-items:baseline;gap:var(--s2);
+  padding:var(--s3) 0;border-bottom:1px solid var(--line);font-size:var(--t3)}
+.kv.two{grid-template-columns:1fr auto}
 .kv:last-child{border-bottom:0}
-.kv b{color:var(--ink);text-align:right;white-space:nowrap;font-weight:600}
-.kv b.g{color:var(--green)} .kv b.r{color:var(--red)} .kv b.s{color:var(--star)} .kv b.p{color:var(--plan)}
-.pf{display:flex;gap:6px;align-items:baseline;justify-content:flex-end;white-space:nowrap}
-.pf .f{font-weight:600;color:var(--green)} .pf .sl{color:var(--mute)} .pf .p{color:var(--plan)}
+.kv span:first-child{color:var(--mute)}
+.kv b,.kv .pf{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.kv .pct{text-align:right;font-size:var(--t4);color:var(--mute);font-variant-numeric:tabular-nums}
+.kv b.g{color:var(--ink)} .kv b.r{color:var(--alarm)} .kv b.s{color:var(--plan)} .kv b.p{color:var(--plan)}
+.pf .f{color:var(--ink)} .pf .sl{color:var(--mute);margin:0 2px} .pf .p{color:var(--plan)}
 
-.sec{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:18px 2px 8px;scroll-margin-top:12px}
-.sec.warn{color:var(--red)}
-.item{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 13px;margin-bottom:8px;display:flex;gap:12px;align-items:center;color:inherit}
-.item.done{background:var(--surface)}
-.item.alert{border-left:3px solid var(--red)}
-.item.mv{border-left:3px solid var(--star)}
-.item .ic{width:42px;height:42px;flex:none;border-radius:var(--r);background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:14px;font-weight:600}
+/* ---------- строка списка ---------- */
+.item{width:100%;display:flex;align-items:center;gap:var(--s3);text-align:left;color:inherit;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--s3) var(--s4);margin-bottom:var(--s2)}
+.item.done{background:var(--soft);border-color:var(--soft)}
+.item.alert{border-left:2px solid var(--alarm)}
+.item.mv{border-left:2px solid var(--mute)}
+.item .ic{width:40px;height:40px;flex:none;border-radius:var(--r);background:var(--soft);
+  display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:var(--t3);font-weight:600}
 .item .tx{flex:1;min-width:0}
-.item .tp{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
-.item .nm{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.item .sub{font-size:13.5px;color:var(--ink-2)}
-.item .rt{font-size:13px;font-weight:600;flex:none;text-align:right;max-width:42%}
-.rt.ok{color:var(--green)} .rt.mv{color:var(--star)} .rt.no{color:var(--red)} .rt.wait{color:var(--mute);font-weight:400}
-.hint{font-size:13.5px;color:var(--mute);margin:2px 4px 12px}
-.back{background:none;border:0;color:var(--mute);font-size:14.5px;padding:4px 0 10px;font-weight:600}
+.item .nm{font-size:var(--t2);font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .nm .tm{font-weight:400;color:var(--mute);margin-left:var(--s2)}
+.item .sub{font-size:var(--t4);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .tp{display:none}
+.item .rt{flex:none;font-size:var(--t4);font-weight:600;text-align:right;max-width:40%}
+.rt.ok{color:var(--ink)} .rt.no{color:var(--alarm)} .rt.mv{color:var(--mute)} .rt.wait{color:var(--mute);font-weight:400}
 
-details{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+/* ---------- сворачиваемые блоки ---------- */
+details{border:1px solid var(--line);border-radius:var(--r);margin-bottom:var(--s2);overflow:hidden}
 details[open]{border-color:var(--ink)}
-summary{list-style:none;cursor:pointer;padding:13px;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600}
+summary{list-style:none;cursor:pointer;padding:var(--s3) var(--s4);display:flex;align-items:center;
+  gap:var(--s2);font-size:var(--t2);font-weight:600}
 summary::-webkit-details-marker{display:none}
-summary .cnt{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--mute);font-weight:400}
-summary .arw{color:var(--mute);font-size:13px}
+summary .cnt{margin-left:auto;font-size:var(--t4);color:var(--mute);font-weight:400}
+summary .arw{display:none}
 details[open] summary{border-bottom:1px solid var(--line)}
-.dbody{padding:11px}
-.dbody .item{margin-bottom:6px}
-.dbody .item:last-child{margin-bottom:0}
+.dbody{padding:var(--s3) var(--s4)}
 
-.bottom{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--paper);border-top:1px solid var(--line)}
-.bottom .in{max-width:560px;margin:0 auto;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
-.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
-.nav button{background:none;border:0;color:var(--mute);font-size:11px;padding:6px 2px;width:100%}
-.nav button b{display:flex;justify-content:center;margin-bottom:3px;font-weight:400}
-.nav button.on{color:var(--ink);font-weight:600}
-.nav button.on b{color:var(--green)}
-
-.ovl{position:fixed;inset:0;background:rgba(16,16,16,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:flex-end;z-index:40}
-.ovl.on{display:flex}
-.sheet{background:var(--paper);width:calc(100% - 24px);max-width:536px;margin:0 auto 12px;border-radius:14px;padding:18px 16px 20px;max-height:88vh;min-height:52vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.18);display:flex;flex-direction:column}
-.sheet h3{margin:0 0 3px;font-size:19px;letter-spacing:-.03em}
-.sh{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
-.lbl{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:14px 2px 6px}
-.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+/* ---------- сегменты и чипы ---------- */
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s2)}
 .chips.three{grid-template-columns:repeat(3,1fr)}
-.chip{background:var(--card);border:1px solid var(--line);border-radius:var(--r);min-height:52px;padding:10px 8px;font-size:14.5px;color:var(--ink-2);display:flex;align-items:center;justify-content:center;text-align:center;width:100%}
-.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:600}
-.chip.on.g{background:var(--lime);color:var(--on-lime);border-color:var(--lime)}
-.chip.on.r{background:var(--red);color:#fff;border-color:var(--red)}
-input,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px;font-size:16px;font-family:inherit;color:var(--ink)}
-input[type=date]{padding:11px 12px;min-height:48px;-webkit-appearance:none;appearance:none}
-textarea{min-height:70px;resize:vertical}
-.sbtn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:18px;align-items:stretch}
-.sbtn .btn{min-height:54px;margin:0}
-.big{font-size:32px;font-weight:600;letter-spacing:-.03em;line-height:1.05}
-.big small{display:block;font-size:13.5px;font-weight:400;color:var(--ink-2);letter-spacing:0;margin-top:6px}
-.foot{margin-top:22px;padding-top:12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mute);text-align:center}
-.foot button{background:none;border:0;color:var(--mute);font-family:ui-monospace,Menlo,monospace;font-size:11px;text-decoration:underline;padding:6px}
+.chip{height:48px;border:1px solid var(--line);background:var(--bg);color:var(--mute);
+  border-radius:var(--r);font-size:var(--t3);font-weight:400;display:flex;align-items:center;
+  justify-content:center;gap:6px;text-align:center;padding:0 var(--s2)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:600}
+.chip.on.g{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
+.chip.on.r{background:var(--alarm);border-color:var(--alarm);color:#fff}
+.chip.on.s{background:var(--plan);border-color:var(--plan);color:#fff}
+
+/* ---------- поля ---------- */
+input,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--s3) var(--s4);font-size:16px}
+input[type=date],input[type=time]{height:52px;padding:0 var(--s3);-webkit-appearance:none;appearance:none}
+textarea{min-height:84px;resize:vertical;line-height:1.45}
+.lbl{display:block;margin:var(--s4) 2px var(--s2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+
+/* ---------- нижняя навигация ---------- */
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--bg);border-top:1px solid var(--line)}
+.bottom .in{max-width:560px;margin:0 auto;padding:var(--s2) var(--s3) calc(var(--s2) + env(safe-area-inset-bottom))}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.nav button{background:none;border:0;color:var(--mute);font-size:var(--t4);padding:6px 2px;width:100%}
+.nav button b{display:flex;justify-content:center;margin-bottom:var(--s1);font-weight:400}
+.nav button.on{color:var(--ink);font-weight:600}
+
+/* ---------- слой поверх ---------- */
+.ovl{position:fixed;inset:0;z-index:40;display:none;align-items:flex-end;
+  background:rgba(15,15,15,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.ovl.on{display:flex}
+.sheet{width:100%;max-width:560px;margin:0 auto;height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:var(--bg);border-radius:16px 16px 0 0;padding:var(--s5) var(--s4) 0;
+  display:flex;flex-direction:column}
+.sheet h3{margin:0 0 var(--s1);font-size:var(--t1);font-weight:600;letter-spacing:-.03em;line-height:1.15}
+.sh{display:block;margin-bottom:var(--s4)}
+.sbtn{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:auto;
+  padding:var(--s4) 0 calc(var(--s4) + env(safe-area-inset-bottom));position:sticky;bottom:0;background:var(--bg);z-index:2}
+.sbtn .btn{margin:0}
+
+/* ---------- мастер ---------- */
+.wiz{position:fixed;inset:0;z-index:30;display:none;overflow-y:auto;background:var(--bg)}
+.wiz.on{display:block}
+.wiz .in{max-width:560px;margin:0 auto;padding:var(--s4) var(--s4) 210px}
+.wtitle{font-size:var(--t1);font-weight:600;letter-spacing:-.03em;line-height:1.15;margin:0 0 var(--s1)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s1);margin-bottom:var(--s4)}
+.steps div{height:3px;border-radius:var(--pill);background:var(--soft)}
+.steps div.on{background:var(--lime)}
+.wizbar{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);
+  padding:var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom))}
+.wizbar .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.wizbar .btn{margin:0}
+
+/* ---------- вход ---------- */
+.login{max-width:420px;margin:0 auto;padding:64px var(--s4)}
+.login .mark{font-size:var(--t1);margin-bottom:var(--s2)}
+.login .sub{font-size:var(--t4);color:var(--mute);text-transform:uppercase;letter-spacing:.04em;margin-bottom:var(--s5)}
+.login h2{font-size:var(--t2);font-weight:600;margin:0 0 var(--s3)}
+.pick{width:100%;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--s3) var(--s4);margin-bottom:var(--s2);font-size:var(--t3);color:var(--mute)}
+.pick.on{border-color:var(--ink);color:var(--ink);font-weight:600}
+.note{font-size:var(--t4);color:var(--mute);margin-top:var(--s3);text-align:center}
+
+/* ---------- подвал ---------- */
+.foot{margin-top:var(--s5);padding-top:var(--s4);border-top:1px solid var(--line);
+  font-size:var(--t4);color:var(--mute);text-align:center}
+.foot button{background:none;border:0;color:var(--mute);font-size:var(--t4);text-decoration:underline;padding:6px}
+.party{background:var(--lime);color:var(--on-lime);border-radius:var(--r);padding:var(--s4);
+  text-align:center;font-weight:600;margin-bottom:var(--s3)}
+
+
+/* ---------- шапка: обёртка ряда ---------- */
+.hdr{display:block}
+.hdr .row{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3)}
+.who span{font-size:var(--t4);color:var(--mute)}
+.who .role{color:var(--on-lime)}
 </style>
 </head>
 <body>
@@ -189,7 +274,8 @@ function seed(){
   var T=function(cls,obj,cl,st,extra){ var o={cls:cls,obj:obj,cl:cl,st:st}; for(var k in (extra||{})) o[k]=extra[k]; return o; };
   return {
     user:null, date:t, dateY:y, seq:900, sentUp:false, comment:'', mytasks:'',
-    norm:{sdelka:3,pd:4,pokaz:20,ocenka:25,vstr:25,rekl:8,leads:40},
+    norm:{sdelka:4,pd:4,pokaz:20,ocenka:20,vstr:20,rekl:8,leads:40},
+    normW:{sdelka:1,pd:1,pokaz:5,ocenka:5,vstr:5,rekl:2,leads:10},
     agents:[
       ag(1,'Кастромина Ольга',true,null,[
         T('pd','Попова 72','Кондрева','done',{sum:98000,res:'Подписали, сделка 16-го'}),
@@ -299,7 +385,7 @@ var state=load()||seed();
 
 /* ================= расчёты ================= */
 function normM(k){ return state.norm[k]||0; }
-function normW(k){ return Math.ceil(normM(k)/4.33); }
+function normW(k){ return (state.normW&&state.normW[k])||0; }
 function agent(id){ for(var i=0;i<state.agents.length;i++) if(state.agents[i].id===id) return state.agents[i]; return null; }
 function sumBy(f){ var n=0; for(var i=0;i<state.agents.length;i++) n+=f(state.agents[i]); return n; }
 function teamW(k){ return sumBy(function(a){ return a.week[k]||0; }); }
@@ -347,7 +433,7 @@ function draw(){
            : nav==='rep'  ? repHTML()
            : setHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет РОПа v2.2 · прототип<br>Данные выдуманные, хранятся только на этом устройстве.<br>'+
+    '<div class="foot">ТОЧНО. · кабинет РОПа v4.0.0 · прототип<br>Данные выдуманные, хранятся только на этом устройстве.<br>'+
     '<button onclick="resetAll()">сбросить и начать заново</button></div></div>'+navHTML();
 }
 function navHTML(){
@@ -359,12 +445,12 @@ function nb(k,i,n){ return '<button class="'+(nav===k&&!openA?'on':'')+'" onclic
 function go(k){ nav=k; openA=null; render(); }
 function hdrHTML(){
   return '<div class="hdr"><div class="row">'+
-    '<div class="mark">ТОЧНО<i>.</i><small>план / факт · v2.2</small></div>'+
+    '<div class="mark">ТОЧНО<i>.</i><small>план / факт · v4.0.0</small></div>'+
     '<div class="who"><b>'+esc(state.user)+'</b><span>Отдел №2 · '+rud(state.date)+'</span>'+
     '<span class="role">РОП</span></div></div></div>';
 }
 function loginHTML(){
-  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет РОПа · v2.2</div><h2>Вход в кабинет</h2>';
+  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет РОПа · v4.0.0</div><h2>Вход в кабинет</h2>';
   for(var i=0;i<ROPS.length;i++)
     h+='<button class="pick'+(pickName===ROPS[i]?' on':'')+'" onclick="pickName=\''+ROPS[i]+'\';render()">'+ROPS[i]+'</button>';
   h+='<div class="lbl">Пароль</div><input type="password" id="pw" placeholder="••••••">'+
@@ -493,9 +579,9 @@ function agentHTML(){
 }
 function openAccept(){
   sheet('<h3>Приёмка отчёта</h3><div class="sh">'+esc(openA.name)+' · '+rud(state.dateY)+'</div>'+
-    '<div class="kv"><span>Сделано из плана</span><b>'+openA.done+' / '+openA.plan+'</b></div>'+
-    '<div class="kv"><span>Отказов</span><b class="'+(openA.refused?'r':'')+'">'+openA.refused+'</b></div>'+
-    '<div class="kv"><span>Переносов</span><b class="s">'+openA.moved+'</b></div>'+
+    '<div class="kv two"><span>Сделано из плана</span><b>'+openA.done+' / '+openA.plan+'</b></div>'+
+    '<div class="kv two"><span>Отказов</span><b class="'+(openA.refused?'r':'')+'">'+openA.refused+'</b></div>'+
+    '<div class="kv two"><span>Переносов</span><b class="s">'+openA.moved+'</b></div>'+
     '<div class="lbl">Решение</div><div class="chips">'+
     '<button class="chip" onclick="accept(\'accepted\')">Принять</button>'+
     '<button class="chip" onclick="accept(\'extra\')">Принять с задачей</button>'+
@@ -540,7 +626,7 @@ function teamHTML(){
   for(var j=0;j<NORMKEYS.length;j++){ var k=NORMKEYS[j].k, d=isW?teamW(k):teamM(k), n=isW?teamNW(k):teamNM(k);
     h+='<div class="kv"><span>'+NORMKEYS[j].l+'</span><span class="pf">'+
        '<span class="f" style="'+(d>=n?'':'color:var(--ink)')+'">'+d+'</span><span class="sl">/</span><span class="p">'+n+'</span>'+
-       '<span class="sl" style="margin-left:6px">'+Math.round(d/n*100)+'%</span></span></div>'; }
+       '</span><span class="pct">'+Math.round(d/n*100)+'%</span></div>'; }
   h+='</div>';
 
   h+='<div class="sec">Агенты · '+(isW?'неделя':'месяц')+'</div>';
@@ -571,10 +657,10 @@ function fcHTML(){
   var h='<div class="card"><div class="t">Прогноз отдела · задатки</div>'+
     '<div class="chips three" style="margin-bottom:12px">'+
     fcTab('week','Неделя')+fcTab('month',monthNom())+fcTab('future','Дальше')+'</div>'+
-    '<div class="big">'+money(factS)+' <span style="color:var(--mute);font-size:22px">/ '+money(planS+factS+lateS)+'</span>'+
+    '<div class="big">'+money(factS)+' <span style="color:var(--mute);font-size:17px">/ '+money(planS+factS+lateS)+'</span>'+
     '<small>факт / прогноз · '+s.fact.length+' из '+all+'</small></div>'+
     '<div class="bar"><i style="width:'+((planS+factS+lateS)?Math.min(Math.round(factS/(planS+factS+lateS)*100),100):0)+'%"></i></div>'+
-    (fcMode!=='future'?'<div class="kv"><span>Норма отдела</span><b class="p">'+
+    (fcMode!=='future'?'<div class="kv two"><span>Норма отдела</span><b class="p">'+
       (fcMode==='week'?teamNW('pd')+' задатков в неделю':teamNM('pd')+' в месяц')+'</b></div>':'')+
     '</div>';
   h+=fcBlock('Факт · закрытые',s.fact,'ok');
@@ -617,11 +703,11 @@ function repHTML(){
   var plan=sumBy(function(a){return a.plan;}), done=sumBy(function(a){return a.done;});
   var refs=collect('refuse').length, mvs=collect('moved').length;
   var h='<div class="card"><div class="t">Отчёт за '+rud(state.dateY)+' · собран сам</div>'+
-    '<div class="kv"><span>Дела</span><span class="pf"><span class="f">'+done+'</span><span class="sl">/</span><span class="p">'+plan+'</span></span></div>'+
-    '<div class="kv"><span>Отказов</span><b class="'+(refs?'r':'')+'">'+refs+'</b></div>'+
-    '<div class="kv"><span>Переносов</span><b class="s">'+mvs+'</b></div>'+
-    '<div class="kv"><span>Заявок</span><b>'+sumBy(function(a){return a.leads;})+'</b></div>'+
-    '<div class="kv"><span>Сдали до 10:00</span><b class="'+(s===n?'g':'r')+'">'+s+' из '+n+'</b></div></div>';
+    '<div class="kv two"><span>Дела</span><span class="pf"><span class="f">'+done+'</span><span class="sl">/</span><span class="p">'+plan+'</span></span></div>'+
+    '<div class="kv two"><span>Отказов</span><b class="'+(refs?'r':'')+'">'+refs+'</b></div>'+
+    '<div class="kv two"><span>Переносов</span><b class="s">'+mvs+'</b></div>'+
+    '<div class="kv two"><span>Заявок</span><b>'+sumBy(function(a){return a.leads;})+'</b></div>'+
+    '<div class="kv two"><span>Сдали до 10:00</span><b class="'+(s===n?'g':'r')+'">'+s+' из '+n+'</b></div></div>';
   h+='<div class="card"><div class="t">По классам · неделя · факт / план</div>';
   for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k, d=teamW(k), nn=teamNW(k);
     h+='<div class="kv"><span>'+NORMKEYS[i].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+nn+'</span></span></div>'; }
@@ -658,10 +744,10 @@ function repGroup(title,list,kind){
 function openReport(i){
   var r=state.reports[i], h='<h3>'+esc(r.label)+'</h3><div class="sh">'+ru(r.date)+'</div>';
   if(r.kind==='day'){
-    h+='<div class="card"><div class="kv"><span>Дела</span><span class="pf"><span class="f">'+r.fact+'</span><span class="sl">/</span><span class="p">'+r.plan+'</span></span></div>'+
-       '<div class="kv"><span>Отказов</span><b class="r">'+r.ref+'</b></div>'+
-       '<div class="kv"><span>Переносов</span><b class="s">'+r.mv+'</b></div>'+
-       '<div class="kv"><span>Заявок</span><b>'+r.leads+'</b></div></div>';
+    h+='<div class="card"><div class="kv two"><span>Дела</span><span class="pf"><span class="f">'+r.fact+'</span><span class="sl">/</span><span class="p">'+r.plan+'</span></span></div>'+
+       '<div class="kv two"><span>Отказов</span><b class="r">'+r.ref+'</b></div>'+
+       '<div class="kv two"><span>Переносов</span><b class="s">'+r.mv+'</b></div>'+
+       '<div class="kv two"><span>Заявок</span><b>'+r.leads+'</b></div></div>';
   } else {
     h+='<div class="card">';
     for(var j=0;j<NORMKEYS.length;j++){ var k=NORMKEYS[j].k, v=r.w[k]; if(!v) continue;
@@ -692,9 +778,9 @@ function setHTML(){
   }
   h+='<button class="btn" onclick="addAgent()">+ Добавить агента</button>';
   h+='<div class="card" style="margin-top:12px"><div class="t">Кабинет</div>'+
-     '<div class="kv"><span>РОП</span><b>'+esc(state.user)+'</b></div>'+
-     '<div class="kv"><span>Отдел</span><b>№2</b></div>'+
-     '<div class="kv"><span>Чужие отделы</span><b>не видны</b></div></div>'+
+     '<div class="kv two"><span>РОП</span><b>'+esc(state.user)+'</b></div>'+
+     '<div class="kv two"><span>Отдел</span><b>№2</b></div>'+
+     '<div class="kv two"><span>Чужие отделы</span><b>не видны</b></div></div>'+
      '<button class="btn ghost" onclick="logout()">Выйти из кабинета</button>';
   return h;
 }

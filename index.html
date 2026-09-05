@@ -15,32 +15,36 @@
   --line:#E6E6E6; --paper:#FFFFFF; --card:#FFFFFF;
   --surface:#FAFAFA; --surface-2:#F0F0F0;
   --lime:#AEEA00; --on-lime:#101010; --green:#0D7A46;
+  --t1:28px; --t2:17px; --t3:15px; --t4:12px;
   --star:#8A6100; --red:#B3261E; --r:6px;
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--paper);color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.55}
-.wrap{max-width:520px;margin:0 auto;padding:40px 16px 60px}
-.mark{font-size:26px;font-weight:600;letter-spacing:-.03em;line-height:1}
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:17px;line-height:1.3;letter-spacing:-.01em;line-height:1.55}
+.wrap{max-width:520px;margin:0 auto;padding:40px 16px 190px}
+.mark{font-size:17px;line-height:1.3;letter-spacing:-.01em;font-weight:600;letter-spacing:-.03em;line-height:1}
 .mark i{font-style:normal;color:var(--lime)}
-.sub{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin:7px 0 26px}
-h1{font-size:24px;letter-spacing:-.03em;margin:0 0 6px;font-weight:600}
-.lede{color:var(--ink-2);font-size:14.5px;margin:0 0 24px}
+.sub{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin:7px 0 26px}
+h1{font-size:17px;line-height:1.3;letter-spacing:-.01em;letter-spacing:-.03em;margin:0 0 6px;font-weight:600}
+.lede{color:var(--ink-2);font-size:15px;margin:0 0 24px}
 a.card{display:flex;gap:16px;align-items:center;text-decoration:none;color:inherit;
   background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:10px}
 a.card:active{border-color:var(--lime);border-width:2px;padding:15px}
 a.card.off{opacity:.55;pointer-events:none}
 .ic{width:56px;height:56px;flex:none;border-radius:6px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--lime)}
 .tx{flex:1;min-width:0}
-.tx b{display:block;font-size:16.5px;letter-spacing:-.01em}
-.tx span{font-size:13.5px;color:var(--ink-2)}
-.tag{font-family:ui-monospace,"SF Mono","Roboto Mono","Noto Sans Mono",Menlo,Consolas,monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-  background:var(--lime);color:var(--on-lime);border-radius:6px;padding:4px 9px;flex:none;font-weight:700}
+.tx b{display:block;font-size:17px;line-height:1.3;letter-spacing:-.01em;letter-spacing:-.01em}
+.tx span{font-size:15px;color:var(--ink-2)}
+.tag{font-size:12px;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--lime);color:var(--on-lime);border-radius:6px;padding:4px 9px;flex:none;font-weight:600}
 .tag.soon{background:var(--surface-2);color:var(--mute);font-weight:400}
-.note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--lime);border-radius:6px;padding:15px;margin-top:22px;font-size:13.5px;color:var(--ink-2)}
-.note b{color:var(--ink);display:block;margin-bottom:4px;font-size:14px}
-.foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mute)}
+.note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--lime);border-radius:6px;padding:15px;margin-top:22px;font-size:15px;color:var(--ink-2)}
+.note b{color:var(--ink);display:block;margin-bottom:4px;font-size:15px}
+.skyline{position:fixed;left:0;right:0;bottom:0;line-height:0;pointer-events:none;z-index:0}
+.skyline svg{display:block;width:100%}
+.wrap{position:relative;z-index:1}
+.foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--mute)}
 </style>
 </head>
 <body>
@@ -54,24 +58,58 @@ a.card.off{opacity:.55;pointer-events:none}
   <a class="card" href="agent.html">
     <span class="ic"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
     <span class="tx"><b>Агент</b><span>Семь классов, прогноз план-факт, неделя и месяц</span></span>
-    <span class="tag">v2.2</span>
+    <span class="tag">v4.0.4</span>
   </a>
 
   <a class="card" href="rop.html">
     <span class="ic"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.5"/><path d="M17.5 14a6 6 0 0 1 3 6"/></svg></span>
     <span class="tx"><b>РОП</b><span>Приёмка, отдел, прогноз, отчёты, настройки</span></span>
-    <span class="tag">v2.2</span>
+    <span class="tag">v4.0.0</span>
   </a>
 
   <a class="card" href="vladelec.html">
     <span class="ic"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7.5 20v-5M12 20v-9M16.5 20v-6"/></svg></span>
     <span class="tx"><b>Собственник</b><span>Отчёты, отделы, задатки и сделки, воронка</span></span>
-    <span class="tag">v2.2</span>
+    <span class="tag">v4.0.0</span>
   </a>
 
   <div class="note">
     <b>Что проверяем</b>
     Сколько времени занимает утренняя сдача факта и плана. В кабинете агента внизу тикает таймер, а после сдачи показывает итог. Две минуты — форма годится. Пять — режем поля.
+  </div>
+
+
+  <div class="skyline">
+    <svg viewBox="0 0 1200 150" width="100%" height="150" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g stroke="#DADADA" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke">
+        <path d="M0 140 L1200 140"/>
+        <path d="M34 140 L34 108 L66 90 L98 108 L98 140"/>
+        <path d="M126 140 L126 68 L160 68 L160 44 L182 44 L182 140"/>
+        <path d="M171 44 L171 18"/>
+        <path d="M212 140 L212 102 A 34 34 0 0 1 280 102 L280 140"/>
+        <path d="M306 140 L306 38 L330 38 L330 140"/>
+        <path d="M356 140 L356 96 L392 96 L392 74 L422 74 L422 140"/>
+        <path d="M448 140 Q 508 74 568 140"/>
+        <path d="M592 140 L592 58 Q 608 32 624 58 L624 140"/>
+        <path d="M648 140 L648 88 L704 88 L704 140"/>
+        <path d="M728 140 L728 58 L744 58 L744 140"/>
+        <path d="M756 140 L756 74 L772 74 L772 140"/>
+        <path d="M798 140 L798 106 L872 106 L872 140"/>
+        <path d="M898 140 C 898 78, 942 56, 964 56 L964 140"/>
+        <path d="M988 140 L988 64 L1018 64 L1018 44 L1044 44 L1044 140"/>
+        <path d="M1068 140 L1068 114 A 19 19 0 0 1 1106 114 L1106 140"/>
+        <path d="M1128 140 L1128 92 L1176 92 L1176 140"/>
+      </g>
+      <circle cx="171" cy="15" r="3.2" fill="var(--lime)"/>
+      <rect x="141" y="80" width="6" height="6" fill="var(--lime)"/>
+      <rect x="313" y="56" width="6" height="6" fill="var(--lime)"/>
+      <rect x="601" y="74" width="6" height="6" fill="var(--lime)"/>
+      <rect x="1025" y="58" width="6" height="6" fill="var(--lime)"/>
+      <rect x="1146" y="108" width="6" height="6" fill="var(--lime)"/>
+      <rect x="368" y="110" width="6" height="6" fill="#DADADA"/>
+      <rect x="668" y="102" width="6" height="6" fill="#DADADA"/>
+      <rect x="820" y="118" width="6" height="6" fill="#DADADA"/>
+    </svg>
   </div>
 
   <div class="foot">ТоПФ · прототип, не рабочая система. Настоящие данные вносить нельзя.<br>Если экран пустой — обновите страницу, кабинет предложит очистить старые данные.</div>
