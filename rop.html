@@ -198,23 +198,50 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 .party{background:var(--lime);color:var(--on-lime);border-radius:var(--r);padding:var(--s4);
   text-align:center;font-weight:600;margin-bottom:var(--s3)}
 
-
-/* ---------- шапка: обёртка ряда ---------- */
-.hdr{display:block}
+/* ---------- строка-таблица (общая для всех кабинетов) ---------- */
+.task{width:100%;display:grid;grid-template-columns:40px 58px 1fr auto;gap:var(--s3);align-items:center;
+  text-align:left;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--s3) var(--s4);margin-bottom:var(--s2)}
+.task.hassum{grid-template-columns:40px 58px 1fr auto auto}
+.task.noic{grid-template-columns:58px 1fr auto}
+.task.tap{cursor:pointer}
+.task.done{background:var(--soft);border-color:var(--soft)}
+.task.hi{border-left:2px solid var(--plan)}
+.task.bad{border-left:2px solid var(--alarm)}
+.task .ic{width:40px;height:40px;border-radius:var(--r);background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:var(--t3);font-weight:600}
+.task.done .ic{background:var(--bg)}
+.task .c{min-width:0}
+.task .c b{display:block;font-size:var(--t2);font-weight:600;letter-spacing:-.01em;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.task .c span{display:block;font-size:var(--t4);color:var(--mute);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task .c span.wrap{white-space:normal}
+.task .sum{font-size:var(--t2);font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.task .r{display:flex;align-items:center;justify-content:flex-end;gap:var(--s2)}
+.task .r:empty{display:none}
+.st{display:inline-flex;align-items:center;height:32px;padding:0 var(--s3);border-radius:var(--pill);font-size:var(--t3);font-weight:600;white-space:nowrap;border:0;font-family:inherit}
+.st.wait{background:rgba(240,124,0,.14);color:var(--plan)}
+.st.ok{background:var(--lime);color:var(--on-lime)}
+.st.no{background:rgba(224,58,47,.12);color:var(--alarm)}
+.st.mv{background:var(--soft);color:var(--mute)}
+.st.act{background:var(--ink);color:var(--bg)}
+.status.alarm{color:var(--alarm)}
 .hdr .row{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3)}
+.hdr{display:block}
 .who span{font-size:var(--t4);color:var(--mute)}
-.who .role{color:var(--on-lime)}
+.verdict{font-size:var(--t2);font-weight:600;letter-spacing:-.01em;line-height:1.3;margin:0 0 var(--s2)}
+.verdict.good{color:var(--ink)} .verdict.bad{color:var(--alarm)}
+.cmp{font-size:var(--t4);color:var(--mute)}
+.cmp b{font-weight:600;color:var(--ink)}
+.seg{display:grid;gap:var(--s2);margin-bottom:var(--s3)}
+.seg.two{grid-template-columns:1fr 1fr} .seg.three{grid-template-columns:repeat(3,1fr)}
+
 </style>
 </head>
 <body>
 <div id="root"></div>
 <div class="ovl" id="ovl" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
-
 <script>
-/* ================= иконки ================= */
 var IC={
 users:'<circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.5"/><path d="M17.5 14a6 6 0 0 1 3 6"/>',
-chart:'<path d="M4 20h16"/><path d="M7.5 20v-5M12 20v-9M16.5 20v-6"/>',
 home:'<path d="M4 11 12 4l8 7"/><path d="M6.5 10v10h11V10"/>',
 search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/>',
 money:'<rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="12" cy="12" r="2.5"/>',
@@ -227,620 +254,345 @@ inbox:'<path d="M3 13h5l2 3h4l2-3h5"/><path d="M4.5 5h15l1.5 8v6H3v-6z"/>',
 doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/>',
 pin:'<path d="M9 3h6l-1 5.2 3 2.8v2H7v-2l3-2.8z"/><path d="M12 13v8"/>',
 ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
-undo:'<path d="M4.5 9H13a6 6 0 1 1 0 12H8.5"/><path d="M8 4.5 4 9l4 4.5"/>',
-cross:'<circle cx="12" cy="12" r="8.5"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/>',
-tune:'<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15.5" cy="12" r="2"/><circle cx="7.5" cy="17" r="2"/>'
+tune:'<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15.5" cy="12" r="2"/><circle cx="7.5" cy="17" r="2"/>',
+send:'<path d="M20.5 3.5 3.5 10.8l7 2.9 2.9 7z"/><path d="M20.5 3.5 10.5 13.7"/>'
 };
-function ic(n,s){ s=s||24; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
-
-/* ================= хранилище ================= */
-var KEY='topf-rop-v22', mem=null;
+function ic(n,s){ s=s||22; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
+var KEY='topf-rop-v4', mem=null;
 function save(){ var s=JSON.stringify(state); try{ localStorage.setItem(KEY,s);}catch(e){ mem=s; } }
-function load(){ var s=null; try{ s=localStorage.getItem(KEY);}catch(e){ s=mem; } if(!s)s=mem;
-  if(!s) return null; try{ return JSON.parse(s);}catch(e){ return null; } }
-
-/* ================= справочники ================= */
+function load(){ var s=null; try{ s=localStorage.getItem(KEY);}catch(e){ s=mem; } if(!s)s=mem; if(!s) return null; try{ return JSON.parse(s);}catch(e){ return null; } }
 var ROPS=['Ковалёва Марина','Титов Сергей','Ершова Наталья'];
-var CLS=[{k:'sdelka',n:'Сделка',ic:'deal'},{k:'pd',n:'Задаток',ic:'money'},{k:'pokaz',n:'Показ',ic:'home'},
-         {k:'ocenka',n:'Оценка',ic:'search'},{k:'vstr',n:'Встреча',ic:'meet'},{k:'rekl',n:'Реклама',ic:'screen'},
-         {k:'other',n:'Другое',ic:'list'}];
-var NORMKEYS=[{k:'sdelka',l:'сделки'},{k:'pd',l:'задаток'},{k:'pokaz',l:'показы'},
-              {k:'ocenka',l:'оценки'},{k:'vstr',l:'встречи'},{k:'rekl',l:'реклама'},{k:'leads',l:'заявки'}];
+var CLS=[{k:'sdelka',n:'Сделка',ic:'deal'},{k:'pd',n:'Задаток',ic:'money'},{k:'pokaz',n:'Показ',ic:'home'},{k:'ocenka',n:'Оценка',ic:'search'},{k:'vstr',n:'Встреча',ic:'meet'},{k:'rekl',n:'Реклама',ic:'screen'},{k:'other',n:'Другое',ic:'list'}];
+var NK=[{k:'sdelka',l:'сделки'},{k:'pd',l:'задаток'},{k:'pokaz',l:'показы'},{k:'ocenka',l:'оценки'},{k:'vstr',l:'встречи'},{k:'rekl',l:'реклама'},{k:'leads',l:'заявки'}];
 function C(k){ for(var i=0;i<CLS.length;i++) if(CLS[i].k===k) return CLS[i]; return CLS[0]; }
 function money(n){ return Number(n||0).toLocaleString('ru-RU')+' ₽'; }
 function kk(n){ return Math.round(Number(n||0)/1000)+'к'; }
 function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
 function iso(d){ return d.toISOString().slice(0,10); }
 function plus(n){ return iso(new Date(Date.now()+n*864e5)); }
-var MN=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-var MNN=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-var WD=['вс','пн','вт','ср','чт','пт','сб'];
+var MN=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'], WD=['вс','пн','вт','ср','чт','пт','сб'];
 function ru(d){ var p=String(d).split('-'); return parseInt(p[2],10)+' '+MN[parseInt(p[1],10)-1]; }
 function rud(d){ var dt=new Date(d+'T00:00:00'); return WD[dt.getDay()]+', '+ru(d); }
 function weekStart(){ var d=new Date(), day=(d.getDay()+6)%7; return plus(-day); }
 function weekEnd(){ var d=new Date(), day=(d.getDay()+6)%7; return plus(6-day); }
-function monthNom(){ return MNN[new Date().getMonth()]; }
 function ini(n){ var p=n.split(' '); return (p[0]||'')[0]+((p[1]||'')[0]||''); }
+function warn(t){ flash(t,true); }
+function flash(txt,bad){ var e=document.createElement('div');
+  e.style.cssText='position:fixed;left:0;right:0;top:0;z-index:60;padding:16px 14px;text-align:center;font-weight:600;font-size:15px;'+(bad?'background:#E03A2F;color:#fff':'background:#AEEA00;color:#0F0F0F');
+  e.textContent=txt; document.body.appendChild(e); setTimeout(function(){ if(e.parentNode) e.parentNode.removeChild(e); },bad?2600:1800); }
 
 /* ================= данные ================= */
 function seed(){
   var t=iso(new Date()), y=plus(-1);
-  function ag(id,name,sent,st,tasks,week,month,fc,leads){
-    var done=0,ref=0,mv=0;
-    for(var i=0;i<tasks.length;i++){ if(tasks[i].st==='done')done++; else if(tasks[i].st==='refuse')ref++; else mv++; }
-    return {id:id,name:name,sent:sent,status:st,tasks:tasks,plan:tasks.length,done:done,refused:ref,moved:mv,
-            week:week,month:month,fc:fc,leads:leads,rop:[]};
+  var T=function(cls,obj,cl,st,x){ var o={cls:cls,obj:obj,cl:cl,st:st,time:''}; for(var k in (x||{})) o[k]=x[k]; return o; };
+  function ag(id,name,sent,tasks,week,month,fc,leads,prev){
+    var done=0,ref=0,mv=0; for(var i=0;i<tasks.length;i++){ if(tasks[i].st==='done')done++; else if(tasks[i].st==='refuse')ref++; else mv++; }
+    return {id:id,name:name,sent:sent,status:null,tasks:tasks,plan:tasks.length,done:done,refused:ref,moved:mv,week:week,month:month,fc:fc,leads:leads,prev:prev||{},rop:[],streakMove:0};
   }
-  var T=function(cls,obj,cl,st,extra){ var o={cls:cls,obj:obj,cl:cl,st:st}; for(var k in (extra||{})) o[k]=extra[k]; return o; };
   return {
-    user:null, date:t, dateY:y, seq:900, sentUp:false, comment:'', mytasks:'',
+    user:null,date:t,dateY:y,seq:900,sentUp:false,comment:'',mytasks:'',
     norm:{sdelka:4,pd:4,pokaz:20,ocenka:20,vstr:20,rekl:8,leads:40},
     normW:{sdelka:1,pd:1,pokaz:5,ocenka:5,vstr:5,rekl:2,leads:10},
     agents:[
-      ag(1,'Кастромина Ольга',true,null,[
-        T('pd','Попова 72','Кондрева','done',{sum:98000,res:'Подписали, сделка 16-го'}),
-        T('pokaz','Строителей 11','Кондрева','done',{res:'Думают до четверга'}),
-        T('pokaz','Мира 6','Сомова','done'),
-        T('ocenka','Мира 45','Сомов','refuse',{reason:'Продавец отказал',why:'Передумал продавать до весны'}),
-        T('vstr','Офис','Юлия','moved',{reason:'Покупатель перенёс',to:plus(1)}),
+      ag(1,'Кастромина Ольга',true,[
+        T('pd','Попова 72','Кондрева','done',{sum:98000,res:'Подписали, сделка 16-го',time:'11:00'}),
+        T('pokaz','Строителей 11','Кондрева','done',{res:'Думают до четверга',time:'18:00'}),
+        T('pokaz','Мира 6','Сомова','done',{time:'13:00'}),
+        T('ocenka','Мира 45','Сомов','refuse',{reason:'Продавец отказал',why:'Передумал продавать до весны',time:'15:00'}),
+        T('vstr','Офис','Юлия','moved',{reason:'Покупатель перенёс',to:plus(1),time:'16:00'}),
         T('rekl','Ладожская 146','Титов','done')],
-        {sdelka:0,pd:1,pokaz:8,ocenka:5,vstr:4,rekl:3,leads:19},
-        {sdelka:1,pd:3,pokaz:21,ocenka:14,vstr:12,rekl:6,leads:58},
-        [{obj:'Строителей 11',cl:'Кондрева',sum:105000,date:plus(1),done:false},
-         {obj:'Мира 6',cl:'Сомова',sum:112000,date:plus(9),done:false},
-         {obj:'Попова 72',cl:'Кондрева',sum:98000,date:plus(-1),done:true}],19),
-      ag(2,'Розанова Мария',true,null,[
-        T('sdelka','Кулакова 2','Гончаров','done',{res:'Сделка прошла'}),
-        T('pd','Тепличная 4','Маргарита','done',{sum:105000}),
-        T('pokaz','Онежская 19','Юлия','done'),
-        T('pokaz','Норвуд','Юлия','done'),
-        T('ocenka','Ладожская 35','Роза','done'),
-        T('vstr','Офис','Пётр','done'),
+        {sdelka:0,pd:1,pokaz:8,ocenka:5,vstr:4,rekl:3,leads:19},{sdelka:1,pd:3,pokaz:21,ocenka:14,vstr:12,rekl:6,leads:58},
+        [{obj:'Строителей 11',cl:'Кондрева',sum:105000,date:plus(1),done:false},{obj:'Мира 6',cl:'Сомова',sum:112000,date:plus(9),done:false},{obj:'Попова 72',cl:'Кондрева',sum:98000,date:plus(-1),done:true}],19,{pd:1,pokaz:6}),
+      ag(2,'Розанова Мария',true,[
+        T('sdelka','Кулакова 2','Гончаров','done',{res:'Сделка прошла',time:'10:00'}),
+        T('pd','Тепличная 4','Маргарита','done',{sum:105000,time:'12:00'}),
+        T('pokaz','Онежская 19','Юлия','done',{time:'14:00'}),T('pokaz','Норвуд','Юлия','done',{time:'15:30'}),
+        T('ocenka','Ладожская 35','Роза','done',{time:'17:00'}),T('vstr','Офис','Пётр','done',{time:'18:00'}),
         T('rekl','Мира 42','Титов','moved',{reason:'Продавец не на связи',to:plus(1)})],
-        {sdelka:1,pd:2,pokaz:9,ocenka:6,vstr:5,rekl:2,leads:22},
-        {sdelka:2,pd:4,pokaz:24,ocenka:17,vstr:15,rekl:5,leads:66},
-        [{obj:'Норвуд',cl:'Юлия',sum:95000,date:plus(2),done:false},
-         {obj:'Тепличная 4',cl:'Маргарита',sum:105000,date:plus(-1),done:true},
-         {obj:'Сити Квартал',cl:'Ольга',sum:120000,date:plus(12),done:false}],22),
-      ag(3,'Кондратьева Ирина',true,null,[
-        T('pokaz','Попова 72','Пётр','refuse',{reason:'Покупатель отказался',why:'Не понравился район'}),
-        T('pokaz','Мира 45','Пётр','done'),
-        T('ocenka','Тепличная 4','Маргарита','done'),
-        T('vstr','Офис','Пётр','moved',{reason:'Покупатель не на связи',to:plus(2)}),
+        {sdelka:1,pd:2,pokaz:9,ocenka:6,vstr:5,rekl:2,leads:22},{sdelka:2,pd:4,pokaz:24,ocenka:17,vstr:15,rekl:5,leads:66},
+        [{obj:'Норвуд',cl:'Юлия',sum:95000,date:plus(2),done:false},{obj:'Тепличная 4',cl:'Маргарита',sum:105000,date:plus(-1),done:true},{obj:'Сити Квартал',cl:'Ольга',sum:120000,date:plus(12),done:false}],22,{pd:2,pokaz:8}),
+      ag(3,'Кондратьева Ирина',true,[
+        T('pokaz','Попова 72','Пётр','refuse',{reason:'Покупатель отказался',why:'Не понравился район',time:'11:00'}),
+        T('pokaz','Мира 45','Пётр','done',{time:'13:00'}),T('ocenka','Тепличная 4','Маргарита','done',{time:'16:00'}),
+        T('vstr','Офис','Пётр','moved',{reason:'Покупатель не на связи',to:plus(2),time:'18:00'}),
         T('other','Разобрать документы по Мира 6','','done')],
-        {sdelka:0,pd:0,pokaz:6,ocenka:3,vstr:3,rekl:1,leads:14},
-        {sdelka:1,pd:2,pokaz:17,ocenka:10,vstr:9,rekl:3,leads:47},
-        [{obj:'Ладожская 35',cl:'Роза',sum:88000,date:plus(3),done:false},
-         {obj:'Мира 45',cl:'Пётр',sum:92000,date:plus(-2),done:false}],14),
-      ag(4,'Гончарова Елена',true,null,[
-        T('pd','Каменева 4','Екатерина','refuse',{reason:'Ушли мимо',why:'Посмотрели без меня и отдали задаток другому'}),
-        T('pokaz','Сити Квартал','Ольга','refuse',{reason:'Продавец отказал',why:'Не пустил в квартиру'}),
-        T('pokaz','Мира 42','Титов','done'),
-        T('ocenka','Онежская 19','Юлия','moved',{reason:'Продавец перенёс',to:plus(1)}),
+        {sdelka:0,pd:0,pokaz:6,ocenka:3,vstr:3,rekl:1,leads:14},{sdelka:1,pd:2,pokaz:17,ocenka:10,vstr:9,rekl:3,leads:47},
+        [{obj:'Ладожская 35',cl:'Роза',sum:88000,date:plus(3),done:false},{obj:'Мира 45',cl:'Пётр',sum:92000,date:plus(-2),done:false}],14,{pd:1,pokaz:7}),
+      ag(4,'Гончарова Елена',true,[
+        T('pd','Каменева 4','Екатерина','refuse',{reason:'Ушли мимо',why:'Посмотрели без меня и отдали задаток другому',lost:105000,time:'12:00'}),
+        T('pokaz','Сити Квартал','Ольга','refuse',{reason:'Продавец отказал',why:'Не пустил в квартиру',time:'14:00'}),
+        T('pokaz','Мира 42','Титов','done',{time:'16:00'}),
+        T('ocenka','Онежская 19','Юлия','moved',{reason:'Продавец перенёс',to:plus(1),time:'17:00'}),
         T('rekl','Кулакова 2','Гончаров','done')],
-        {sdelka:0,pd:0,pokaz:4,ocenka:2,vstr:2,rekl:2,leads:11},
-        {sdelka:0,pd:1,pokaz:13,ocenka:7,vstr:6,rekl:3,leads:41},
-        [{obj:'Каменева 4',cl:'Екатерина',sum:105000,date:plus(-1),done:false}],11),
-      ag(5,'Титова Вера',true,null,[
-        T('pokaz','Тепличная 4','Маргарита','done'),
-        T('pokaz','Ладожская 146','Титов','done'),
-        T('ocenka','Мира 6','Сомова','done'),
-        T('vstr','Офис','Сомова','done')],
-        {sdelka:0,pd:1,pokaz:7,ocenka:4,vstr:3,rekl:2,leads:16},
-        {sdelka:1,pd:2,pokaz:18,ocenka:12,vstr:8,rekl:4,leads:52},
-        [{obj:'Тепличная 4',cl:'Маргарита',sum:105000,date:plus(4),done:false}],16),
-      ag(6,'Ершова Дарья',true,null,[
-        T('sdelka','Мира 6','Сомова','done'),
-        T('pd','Онежская 19','Юлия','done',{sum:97000}),
-        T('pokaz','Строителей 68а','Пётр','done'),
-        T('ocenka','Попова 72','Кондрева','done'),
-        T('vstr','Офис','Юлия','done'),
-        T('rekl','Норвуд','Юлия','done')],
-        {sdelka:1,pd:2,pokaz:8,ocenka:5,vstr:5,rekl:3,leads:21},
-        {sdelka:2,pd:3,pokaz:22,ocenka:15,vstr:13,rekl:6,leads:60},
-        [{obj:'Мира 6',cl:'Сомова',sum:112000,date:plus(5),done:false},
-         {obj:'Онежская 19',cl:'Юлия',sum:97000,date:plus(-1),done:true}],21),
-      ag(7,'Лапина Ольга',true,null,[
-        T('rekl','Онежская 19','Юлия','refuse',{reason:'—',why:'Нет фото от собственника'}),
-        T('pokaz','Мира 45','Сомов','done'),
-        T('ocenka','Каменева 4','Екатерина','moved',{reason:'Продавец перенёс',to:plus(3)})],
-        {sdelka:0,pd:0,pokaz:3,ocenka:2,vstr:1,rekl:1,leads:8},
-        {sdelka:0,pd:1,pokaz:10,ocenka:6,vstr:4,rekl:2,leads:29},
-        [],8),
-      ag(8,'Зуева Светлана',true,null,[
-        T('pd','Ладожская 35','Роза','done',{sum:88000}),
-        T('pokaz','Тепличная 4','Маргарита','done'),
-        T('pokaz','Кулакова 2','Гончаров','done'),
-        T('ocenka','Мира 42','Титов','done'),
-        T('vstr','Офис','Роза','moved',{reason:'Покупатель перенёс',to:plus(1)})],
-        {sdelka:0,pd:1,pokaz:7,ocenka:5,vstr:4,rekl:2,leads:17},
-        {sdelka:1,pd:3,pokaz:19,ocenka:14,vstr:11,rekl:5,leads:54},
-        [{obj:'Попова 72',cl:'Кондрева',sum:97000,date:plus(6),done:false},
-         {obj:'Ладожская 35',cl:'Роза',sum:88000,date:plus(-1),done:true}],17),
-      ag(9,'Мельник Алина',false,null,[],
-        {sdelka:0,pd:0,pokaz:2,ocenka:1,vstr:0,rekl:0,leads:5},
-        {sdelka:0,pd:0,pokaz:7,ocenka:4,vstr:2,rekl:1,leads:22},[],0),
-      ag(10,'Сомова Ксения',false,null,[],
-        {sdelka:0,pd:0,pokaz:1,ocenka:0,vstr:0,rekl:0,leads:2},
-        {sdelka:0,pd:1,pokaz:10,ocenka:5,vstr:4,rekl:2,leads:31},[],0)
+        {sdelka:0,pd:0,pokaz:4,ocenka:2,vstr:2,rekl:2,leads:11},{sdelka:0,pd:1,pokaz:13,ocenka:7,vstr:6,rekl:3,leads:41},
+        [{obj:'Каменева 4',cl:'Екатерина',sum:105000,date:plus(-1),done:false}],11,{pd:1,pokaz:6}),
+      ag(5,'Титова Вера',true,[T('pokaz','Тепличная 4','Маргарита','done',{time:'11:00'}),T('pokaz','Ладожская 146','Титов','done',{time:'13:00'}),T('ocenka','Мира 6','Сомова','done',{time:'15:00'}),T('vstr','Офис','Сомова','done',{time:'17:00'})],
+        {sdelka:0,pd:1,pokaz:7,ocenka:4,vstr:3,rekl:2,leads:16},{sdelka:1,pd:2,pokaz:18,ocenka:12,vstr:8,rekl:4,leads:52},
+        [{obj:'Тепличная 4',cl:'Маргарита',sum:105000,date:plus(4),done:false}],16,{pd:1,pokaz:7}),
+      ag(6,'Ершова Дарья',true,[T('sdelka','Мира 6','Сомова','done',{time:'10:00'}),T('pd','Онежская 19','Юлия','done',{sum:97000,time:'12:00'}),T('pokaz','Строителей 68а','Пётр','done',{time:'14:00'}),T('ocenka','Попова 72','Кондрева','done',{time:'16:00'}),T('vstr','Офис','Юлия','done',{time:'17:30'}),T('rekl','Норвуд','Юлия','done')],
+        {sdelka:1,pd:2,pokaz:8,ocenka:5,vstr:5,rekl:3,leads:21},{sdelka:2,pd:3,pokaz:22,ocenka:15,vstr:13,rekl:6,leads:60},
+        [{obj:'Мира 6',cl:'Сомова',sum:112000,date:plus(5),done:false},{obj:'Онежская 19',cl:'Юлия',sum:97000,date:plus(-1),done:true}],21,{pd:1,pokaz:9}),
+      ag(7,'Лапина Ольга',true,[T('rekl','Онежская 19','Юлия','refuse',{reason:'—',why:'Нет фото от собственника'}),T('pokaz','Мира 45','Сомов','done',{time:'12:00'}),T('ocenka','Каменева 4','Екатерина','moved',{reason:'Продавец перенёс',to:plus(3),time:'15:00'})],
+        {sdelka:0,pd:0,pokaz:3,ocenka:2,vstr:1,rekl:1,leads:8},{sdelka:0,pd:1,pokaz:10,ocenka:6,vstr:4,rekl:2,leads:29},[],8,{pd:0,pokaz:5}),
+      ag(8,'Зуева Светлана',true,[T('pd','Ладожская 35','Роза','done',{sum:88000,time:'11:00'}),T('pokaz','Тепличная 4','Маргарита','done',{time:'13:00'}),T('pokaz','Кулакова 2','Гончаров','done',{time:'15:00'}),T('ocenka','Мира 42','Титов','done',{time:'16:30'}),T('vstr','Офис','Роза','moved',{reason:'Покупатель перенёс',to:plus(1),time:'18:00'})],
+        {sdelka:0,pd:1,pokaz:7,ocenka:5,vstr:4,rekl:2,leads:17},{sdelka:1,pd:3,pokaz:19,ocenka:14,vstr:11,rekl:5,leads:54},
+        [{obj:'Попова 72',cl:'Кондрева',sum:97000,date:plus(6),done:false},{obj:'Ладожская 35',cl:'Роза',sum:88000,date:plus(-1),done:true}],17,{pd:1,pokaz:6}),
+      ag(9,'Мельник Алина',false,[],{sdelka:0,pd:0,pokaz:2,ocenka:1,vstr:0,rekl:0,leads:5},{sdelka:0,pd:0,pokaz:7,ocenka:4,vstr:2,rekl:1,leads:22},[],0,{pd:0,pokaz:4}),
+      ag(10,'Сомова Ксения',false,[],{sdelka:0,pd:0,pokaz:1,ocenka:0,vstr:0,rekl:0,leads:2},{sdelka:0,pd:1,pokaz:10,ocenka:5,vstr:4,rekl:2,leads:31},[],0,{pd:1,pokaz:5})
     ],
     reports:[
       {kind:'day',date:plus(-1),label:'Вчера',plan:46,fact:34,ref:5,mv:5,leads:128,status:'sent'},
       {kind:'day',date:plus(-2),label:'Позавчера',plan:44,fact:36,ref:3,mv:5,leads:119,status:'accepted'},
-      {kind:'day',date:plus(-3),label:ru(plus(-3)),plan:42,fact:35,ref:4,mv:3,leads:112,status:'accepted'},
-      {kind:'week',date:plus(-7),label:'Прошлая неделя',
-       w:{sdelka:'4/10',pd:'9/10',pokaz:'61/50',ocenka:'38/60',vstr:'41/60',rekl:'17/20',leads:'241/100'}},
-      {kind:'month',date:plus(-32),label:'Прошлый месяц',
-       w:{sdelka:'11/30',pd:'26/40',pokaz:'214/200',ocenka:'132/250',vstr:'147/250',rekl:'61/80',leads:'932/400'}}
+      {kind:'week',date:plus(-7),label:'Прошлая неделя',w:{sdelka:'4/10',pd:'9/10',pokaz:'61/50',ocenka:'38/50',vstr:'41/50',rekl:'17/20',leads:'241/100'}},
+      {kind:'month',date:plus(-32),label:'Прошлый месяц',w:{sdelka:'11/40',pd:'26/40',pokaz:'214/200',ocenka:'132/200',vstr:'147/200',rekl:'61/80',leads:'932/400'}}
     ]
   };
 }
 var state=load()||seed();
-(function migrate(){
-  var d=seed();
-  for(var k in d){ if(typeof state[k]==='undefined') state[k]=d[k]; }
-  if(state.date!==iso(new Date())){ var u=state.user; state=seed(); state.user=u; }
-  save();
-})();
+(function(){ var d=seed(); for(var k in d){ if(typeof state[k]==='undefined') state[k]=d[k]; }
+  if(state.date!==iso(new Date())){ var u=state.user; state=seed(); state.user=u; } save(); })();
+// у Мельник третий перенос подряд — сигнал
+state.agents[2].streakMove=3;
 
 /* ================= расчёты ================= */
-function normM(k){ return state.norm[k]||0; }
-function normW(k){ return (state.normW&&state.normW[k])||0; }
+function normM(k){ return state.norm[k]||0; } function normW(k){ return state.normW[k]||0; }
 function agent(id){ for(var i=0;i<state.agents.length;i++) if(state.agents[i].id===id) return state.agents[i]; return null; }
 function sumBy(f){ var n=0; for(var i=0;i<state.agents.length;i++) n+=f(state.agents[i]); return n; }
 function teamW(k){ return sumBy(function(a){ return a.week[k]||0; }); }
 function teamM(k){ return sumBy(function(a){ return a.month[k]||0; }); }
-function teamNW(k){ return normW(k)*state.agents.length; }
-function teamNM(k){ return normM(k)*state.agents.length; }
+function teamNW(k){ return normW(k)*state.agents.length; } function teamNM(k){ return normM(k)*state.agents.length; }
 function sentCount(){ return sumBy(function(a){ return a.sent?1:0; }); }
 function acceptedCount(){ return sumBy(function(a){ return a.status?1:0; }); }
-function collect(st){
+function attention(a){
+  var r=[];
+  if(!a.sent) r.push('не сдал отчёт');
+  if(a.refused>=2) r.push(a.refused+' отказа за день');
+  for(var i=0;i<a.tasks.length;i++) if(a.tasks[i].lost) r.push('ушло мимо · '+kk(a.tasks[i].lost));
+  if(a.streakMove>=3) r.push('третий перенос подряд');
+  if(a.week.pd<normW('pd')&&a.week.pokaz<normW('pokaz')*0.5) r.push('ниже нормы по показам и задаткам');
+  return r;
+}
+function clean(a){ return a.sent&&!a.status&&attention(a).length===0; }
+function fcAll(mode){
   var o=[]; for(var i=0;i<state.agents.length;i++){ var a=state.agents[i];
-    for(var j=0;j<a.tasks.length;j++) if(a.tasks[j].st===st) o.push({who:a.name,id:a.id,t:a.tasks[j]}); }
-  return o;
+    for(var j=0;j<a.fc.length;j++){ var f=a.fc[j];
+      var inP = mode==='week'? f.date<=weekEnd() : (mode==='month'? f.date<=plus(30) : f.date>plus(30));
+      if(inP) o.push({who:a.name,id:a.id,f:f}); } }
+  o.sort(function(x,y){ return x.f.date<y.f.date?-1:1; }); return o;
 }
-function fcSplit(mode){
-  var we=weekEnd(), me=plus(30), t=state.date;
-  var out={plan:[],fact:[],late:[]};
-  for(var i=0;i<state.agents.length;i++){ var a=state.agents[i];
-    for(var j=0;j<a.fc.length;j++){ var f=a.fc[j], rec={who:a.name,id:a.id,f:f};
-      var inP = mode==='week'? f.date<=we : (mode==='month'? f.date<=me : f.date>me);
-      if(!inP) continue;
-      if(f.done) out.fact.push(rec);
-      else if(f.date<t) out.late.push(rec);
-      else out.plan.push(rec);
-    } }
-  return out;
-}
-function fcSum(list){ var s=0; for(var i=0;i<list.length;i++) s+=Number(list[i].f.sum||0); return s; }
 
 /* ================= рендер ================= */
-var nav='inbox', openA=null, pickName=null, fcMode='week', teamMode='week';
-function render(){
-  try{ draw(); }catch(e){
-    document.getElementById('root').innerHTML='<div class="app"><div class="card"><div class="t">Что-то пошло не так</div>'+
-      '<button class="btn" onclick="hardReset()">Очистить и открыть заново</button><div class="hint">'+esc(e.message)+'</div></div></div>';
-  }
-}
+var nav='inbox', openA=null, pickName=null, per='week', fcMode='week', showClean=false, taskTo=null;
+function render(){ try{ draw(); }catch(e){ document.getElementById('root').innerHTML='<div class="app"><div class="card"><span class="t">Что-то пошло не так</span><button class="btn" onclick="hardReset()">Очистить и открыть заново</button><div class="hint">'+esc(e.message)+'</div></div></div>'; } }
 function hardReset(){ try{ localStorage.removeItem(KEY);}catch(e){} mem=null; state=seed(); save(); location.reload(); }
 function draw(){
   var r=document.getElementById('root');
   if(!state.user){ r.innerHTML=loginHTML(); return; }
-  var body = openA? agentHTML()
-           : nav==='inbox'? inboxHTML()
-           : nav==='team' ? teamHTML()
-           : nav==='fc'   ? fcHTML()
-           : nav==='rep'  ? repHTML()
-           : setHTML();
+  var body = openA? agentHTML() : nav==='inbox'? inboxHTML() : nav==='team'? teamHTML() : nav==='fc'? fcHTML() : nav==='rep'? repHTML() : setHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет РОПа v4.0.0 · прототип<br>Данные выдуманные, хранятся только на этом устройстве.<br>'+
-    '<button onclick="resetAll()">сбросить и начать заново</button></div></div>'+navHTML();
-}
-function navHTML(){
-  return '<div class="bottom"><div class="in"><div class="nav">'+
-    nb('inbox','inbox','Приёмка')+nb('team','users','Отдел')+nb('fc','target','Прогноз')+
-    nb('rep','doc','Отчёт')+nb('set','tune','Настройки')+'</div></div></div>';
+    '<div class="foot">ТОЧНО. · кабинет РОПа v4.0.2 · прототип<br>Данные выдуманные.<br><button onclick="resetAll()">сбросить и начать заново</button></div></div>'+
+    '<div class="bottom"><div class="in"><div class="nav">'+nb('inbox','inbox','Приёмка')+nb('team','users','Отдел')+nb('fc','target','Прогноз')+nb('rep','doc','Отчёт')+nb('set','tune','Настройки')+'</div></div></div>';
 }
 function nb(k,i,n){ return '<button class="'+(nav===k&&!openA?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,24)+'</b>'+n+'</button>'; }
-function go(k){ nav=k; openA=null; render(); }
+function go(k){ nav=k; openA=null; render(); try{ window.scrollTo(0,0); }catch(e){} }
 function hdrHTML(){
-  return '<div class="hdr"><div class="row">'+
-    '<div class="mark">ТОЧНО<i>.</i><small>план / факт · v4.0.0</small></div>'+
-    '<div class="who"><b>'+esc(state.user)+'</b><span>Отдел №2 · '+rud(state.date)+'</span>'+
-    '<span class="role">РОП</span></div></div></div>';
+  var h='<div class="hdr"><div class="row"><div class="mark">ТОЧНО<i>.</i><small>план / факт · v4.0.2</small></div>'+
+    '<div class="who"><b>'+esc(state.user)+'</b><span>Отдел №2 · '+rud(state.date)+'</span><span class="role">РОП</span></div></div>';
+  if(!openA&&nav==='inbox'){
+    var n=state.agents.length, s=sentCount(), a=acceptedCount(), cl=state.agents.filter(clean).length;
+    if(cl>0) h+='<button class="btn pri submit" onclick="acceptClean()">'+ic('ok',20)+'Принять '+cl+' без отклонений</button>';
+    else h+='<button class="btn submit" disabled>'+ic('ok',20)+'Чистых отчётов нет</button>';
+    h+='<div class="status'+(s<n?' alarm':'')+'"><span class="dm '+(s<n?'no':'ok')+'"></span>Сдали '+s+' из '+n+' · принято '+a+' · срок 10:00</div>';
+  }
+  if(!openA&&nav==='rep') h+= state.sentUp? '<button class="btn submit" disabled>'+ic('ok',20)+'Отчёт отправлен</button>' : '<button class="btn pri submit" onclick="sendUp()">'+ic('send',20)+'Отправить собственнику · до 11:00</button>';
+  if(!openA&&nav==='team') h+='<button class="btn submit" onclick="taskTo=null;openTask()">+ Поставить задачу</button>';
+  return h+'</div>';
 }
 function loginHTML(){
-  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет РОПа · v4.0.0</div><h2>Вход в кабинет</h2>';
-  for(var i=0;i<ROPS.length;i++)
-    h+='<button class="pick'+(pickName===ROPS[i]?' on':'')+'" onclick="pickName=\''+ROPS[i]+'\';render()">'+ROPS[i]+'</button>';
-  h+='<div class="lbl">Пароль</div><input type="password" id="pw" placeholder="••••••">'+
-     '<div class="sbtn"><button class="btn" onclick="pickName=null;render()">Сброс</button>'+
-     '<button class="btn pri" onclick="doLogin()">Войти</button></div>'+
-     '<div class="note">Пароль в прототипе любой.</div></div>';
-  return h;
+  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет РОПа · v4.0.2</div><h2>Вход в кабинет</h2>';
+  for(var i=0;i<ROPS.length;i++) h+='<button class="pick'+(pickName===ROPS[i]?' on':'')+'" onclick="pickName=\''+ROPS[i]+'\';render()">'+ROPS[i]+'</button>';
+  return h+'<span class="lbl">Пароль</span><input type="password" id="pw" placeholder="••••••"><div class="sbtn"><button class="btn" onclick="pickName=null;render()">Сброс</button><button class="btn pri" onclick="doLogin()">Войти</button></div><div class="note">Пароль в прототипе любой.</div></div>';
 }
-function doLogin(){
-  var pw=document.getElementById('pw');
-  if(!pickName){ alert('Выберите себя из списка'); return; }
-  if(!pw.value){ alert('Введите пароль'); return; }
-  state.user=pickName; save(); render();
-}
-function scrollTo(id){ var e=document.getElementById(id); if(e) e.scrollIntoView({behavior:'smooth',block:'start'}); }
+function doLogin(){ var pw=document.getElementById('pw'); if(!pickName){ warn('Выберите себя'); return; } if(!pw.value){ warn('Введите пароль'); return; } state.user=pickName; save(); render(); }
 
 /* ================= ПРИЁМКА ================= */
+function agentRow(a){
+  var att=attention(a), meta = a.sent? 'сделано '+a.done+' из '+a.plan+(a.refused?' · отказов '+a.refused:'')+(a.moved?' · переносов '+a.moved:'') : 'отчёта нет';
+  var right;
+  if(!a.sent) right='<span class="st no">не сдал</span>';
+  else if(a.status) right='<span class="st ok">'+({accepted:'принят',extra:'с задачей',rejected:'возвращён'}[a.status])+'</span>';
+  else right='<button class="st act" onclick="event.stopPropagation();quickAccept('+a.id+')">принять</button>';
+  return '<div class="task noic tap'+(att.length?' bad':'')+(a.status?' done':'')+'" onclick="showAgent('+a.id+')">'+
+    '<div class="c"><b>'+ini(a.name)+'</b><span>'+(a.week.pd||0)+'/'+normW('pd')+' зд</span></div>'+
+    '<div class="c"><b>'+esc(a.name)+'</b><span class="wrap">'+esc(att.length?att.join(' · '):meta)+'</span></div>'+
+    '<div class="r">'+right+'</div></div>';
+}
 function inboxHTML(){
-  var n=state.agents.length, s=sentCount(), a=acceptedCount(), refs=collect('refuse'), mvs=collect('moved');
-  var h='<div class="card"><div class="t">Утро · срок сдачи 10:00</div><div class="grid">'+
-    '<button onclick="scrollTo(\'s-late\')"><b class="'+(s===n?'good':'bad')+'">'+s+'/'+n+'</b><span>сдали</span></button>'+
-    '<button onclick="scrollTo(\'s-wait\')"><b class="'+(a===s?'good':'')+'">'+a+'/'+s+'</b><span>принято</span></button>'+
-    '<button onclick="scrollTo(\'s-ref\')"><b class="'+(refs.length?'bad':'')+'">'+refs.length+'</b><span>отказов</span></button>'+
-    '</div><div class="hint" style="margin:9px 0 0">Тап по цифре — переход к нужному списку ниже.</div></div>';
-
-  var late=[],wait=[],done=[];
-  for(var i=0;i<state.agents.length;i++){ var ag=state.agents[i];
-    if(!ag.sent) late.push(ag); else if(!ag.status) wait.push(ag); else done.push(ag); }
-
-  h+='<div class="sec warn" id="s-late">Не сдали · '+late.length+'</div>';
-  if(!late.length) h+='<div class="hint">Все сдали вовремя.</div>';
-  for(var j=0;j<late.length;j++) h+=agentRow(late[j],'late');
-  if(late.length) h+='<button class="btn warn" onclick="poke()">Написать всем, кто не сдал</button>';
-
-  h+='<div class="sec" id="s-wait">Ждут приёмки · '+wait.length+'</div>';
-  if(!wait.length) h+='<div class="hint">Все отчёты приняты.</div>';
-  for(var k=0;k<wait.length;k++) h+=agentRow(wait[k],'wait');
-
-  if(done.length){
-    h+='<div class="sec">Принято · '+done.length+'</div>';
-    for(var m=0;m<done.length;m++) h+=agentRow(done[m],'done');
-  }
-
-  h+='<div class="sec warn" id="s-ref">Отказы за вчера · '+refs.length+'</div>';
-  if(!refs.length) h+='<div class="hint">Отказов нет.</div>';
-  for(var r=0;r<refs.length;r++) h+=factRow(refs[r]);
-  h+='<div class="sec" style="color:var(--star)">Переносы · '+mvs.length+'</div>';
-  for(var v=0;v<mvs.length;v++) h+=factRow(mvs[v]);
+  var need=[],cl=[],done=[];
+  for(var i=0;i<state.agents.length;i++){ var a=state.agents[i];
+    if(a.status) done.push(a); else if(attention(a).length) need.push(a); else cl.push(a); }
+  var h='';
+  h+='<div class="sec warn">Требует внимания · '+need.length+'</div>';
+  if(!need.length) h+='<div class="hint">Отклонений нет.</div>';
+  for(var j=0;j<need.length;j++) h+=agentRow(need[j]);
+  h+='<div class="sec">Без отклонений · '+cl.length+'</div>';
+  if(!cl.length) h+='<div class="hint">Все чистые отчёты приняты.</div>';
+  else if(!showClean) h+='<button class="btn" onclick="showClean=true;render()">Показать список · '+cl.length+'</button>';
+  else { for(var k=0;k<cl.length;k++) h+=agentRow(cl[k]); h+='<button class="btn ghost" onclick="showClean=false;render()">Свернуть</button>'; }
+  if(done.length){ h+='<div class="sec">Принято · '+done.length+'</div>'; for(var m=0;m<done.length;m++) h+=agentRow(done[m]); }
+  h+='<div class="hint">Отклонения система ищет сама: отказы, срывы прогноза, третий перенос подряд, отставание по норме. Остальное можно принять одной кнопкой.</div>';
   return h;
 }
-function agentRow(a,kind){
-  var rt = kind==='late'? '<span class="rt no">не сдала</span>'
-        : kind==='wait'? '<span class="rt mv">принять</span>'
-        : '<span class="rt ok">'+({accepted:'принят',extra:'с задачами',rejected:'возвращён'}[a.status])+'</span>';
-  var sub = a.sent? 'сделано '+a.done+' из '+a.plan+(a.refused?' · отказов '+a.refused:'')+(a.moved?' · переносов '+a.moved:'') : 'нет отчёта за вчера';
-  return '<button class="item'+(kind==='late'?' alert':(kind==='done'?' done':''))+'" onclick="showAgent('+a.id+')">'+
-    '<div class="ic">'+ini(a.name)+'</div><div class="tx"><div class="tp">заявок '+a.leads+' · задатки '+a.month.pd+'/'+normM('pd')+'</div>'+
-    '<div class="nm">'+esc(a.name)+'</div><div class="sub">'+sub+'</div></div>'+rt+'</button>';
-}
-function factRow(x){
-  var c=C(x.t.cls), sub=[];
-  if(x.t.cl) sub.push(x.t.cl);
-  if(x.t.reason&&x.t.reason!=='—') sub.push(x.t.reason);
-  if(x.t.why) sub.push('«'+x.t.why+'»');
-  if(x.t.to) sub.push('на '+ru(x.t.to));
-  if(x.t.sum) sub.push(money(x.t.sum));
-  if(x.t.res) sub.push(x.t.res);
-  return '<div class="item '+(x.t.st==='refuse'?'alert':(x.t.st==='moved'?'mv':''))+'"><div class="ic">'+ic(c.ic)+'</div>'+
-    '<div class="tx"><div class="tp">'+c.n+' · '+esc(x.who)+'</div><div class="nm">'+esc(x.t.obj)+'</div>'+
-    '<div class="sub" style="white-space:normal">'+esc(sub.join(' · '))+'</div></div></div>';
-}
-function poke(){ sheet('<h3>Напоминание</h3><div class="sh">тем, кто не сдал</div>'+
-  '<div class="hint">В рабочей версии откроется Телеграм с готовым сообщением.</div>'+
-  '<div class="sbtn"><button class="btn" onclick="closeSheet()">Закрыть</button><button class="btn pri" onclick="closeSheet()">Понятно</button></div>'); }
+function quickAccept(id){ var a=agent(id); if(a){ a.status='accepted'; save(); flash('Принято: '+a.name.split(' ')[0]); render(); } }
+function acceptClean(){ var n=0; for(var i=0;i<state.agents.length;i++) if(clean(state.agents[i])){ state.agents[i].status='accepted'; n++; } save(); flash('Принято без отклонений: '+n); render(); }
 
 /* ================= КАРТОЧКА АГЕНТА ================= */
-function showAgent(id){ openA=agent(id); render(); }
+function showAgent(id){ openA=agent(id); render(); try{ window.scrollTo(0,0); }catch(e){} }
+function factRow(t){
+  var c=C(t.cls), meta=[];
+  if(t.cl) meta.push(t.cl); if(t.reason&&t.reason!=='—') meta.push(t.reason); if(t.to) meta.push('на '+ru(t.to));
+  if(t.res) meta.push(t.res); if(t.why) meta.push('«'+t.why+'»');
+  var st = t.st==='done'?'<span class="st ok">сделано</span>':(t.st==='refuse'?'<span class="st no">отказ</span>':'<span class="st mv">перенос</span>');
+  return '<div class="task'+(t.sum||t.lost?' hassum':'')+(t.st==='refuse'?' bad':'')+'"><div class="ic">'+ic(c.ic)+'</div>'+
+    '<div class="c"><b>'+(t.time||'—')+'</b><span>'+c.n+'</span></div>'+
+    '<div class="c"><b>'+esc(t.obj)+'</b><span class="wrap">'+esc(meta.join(' · '))+'</span></div>'+
+    (t.sum?'<div class="sum">'+money(t.sum)+'</div>':(t.lost?'<div class="sum" style="color:var(--alarm)">−'+money(t.lost)+'</div>':''))+
+    '<div class="r">'+st+'</div></div>';
+}
 function agentHTML(){
-  var a=openA;
-  var h='<button class="back" onclick="openA=null;render()">← К списку</button>'+
-    '<div class="card"><div class="t">'+esc(a.name)+'</div><div class="grid">'+
-    '<button><b>'+a.done+'/'+a.plan+'</b><span>вчера</span></button>'+
-    '<button><b class="'+(a.refused?'bad':'')+'">'+a.refused+'</b><span>отказов</span></button>'+
-    '<button><b class="'+(a.moved?'':'')+'">'+a.moved+'</b><span>переносов</span></button></div>'+
-    '<div class="kv" style="margin-top:10px"><span>Статус отчёта</span><b class="'+(a.sent?(a.status?'g':'s'):'r')+'">'+
-      (a.sent?(a.status?({accepted:'принят',extra:'принят с задачами',rejected:'возвращён'}[a.status]):'ждёт приёмки'):'не сдан')+'</b></div></div>';
-
-  if(a.tasks.length){
-    h+='<div class="sec">Факт за вчера · все дела плана</div>';
-    for(var i=0;i<a.tasks.length;i++){ var t=a.tasks[i], c=C(t.cls), sub=[];
-      if(t.cl) sub.push(t.cl);
-      if(t.reason&&t.reason!=='—') sub.push(t.reason);
-      if(t.why) sub.push('«'+t.why+'»');
-      if(t.to) sub.push('на '+ru(t.to));
-      if(t.sum) sub.push(money(t.sum));
-      if(t.res) sub.push(t.res);
-      var rt = t.st==='done'? '<span class="rt ok">сделано</span>'
-             : t.st==='refuse'? '<span class="rt no">отказ</span>' : '<span class="rt mv">перенос</span>';
-      h+='<div class="item '+(t.st==='refuse'?'alert':(t.st==='moved'?'mv':'done'))+'"><div class="ic">'+ic(c.ic)+'</div>'+
-         '<div class="tx"><div class="tp">'+c.n+'</div><div class="nm">'+esc(t.obj)+'</div>'+
-         (sub.length?'<div class="sub" style="white-space:normal">'+esc(sub.join(' · '))+'</div>':'')+'</div>'+rt+'</div>';
-    }
-  } else h+='<div class="hint">Отчёта за вчера нет.</div>';
-
-  h+='<div class="sec">Неделя · норма на агента</div><div class="card">';
-  for(var j=0;j<NORMKEYS.length;j++){ var k=NORMKEYS[j].k, d=a.week[k]||0, n=normW(k);
-    h+='<div class="kv"><span>'+NORMKEYS[j].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+n+'</span></span></div>'; }
+  var a=openA, att=attention(a);
+  var h='<button class="back" onclick="openA=null;render()">← К приёмке</button>';
+  h+='<div class="card"><div class="verdict'+(att.length?' bad':' good')+'">'+esc(a.name)+(att.length?' — '+att.join(', '):' — без отклонений')+'</div>'+
+     '<div class="cmp">На прошлой неделе: задатков '+(a.prev.pd||0)+', показов '+(a.prev.pokaz||0)+'</div></div>';
+  h+='<div class="grid"><div><b class="'+(a.done>=a.plan?'good':'')+'">'+a.done+'/'+a.plan+'</b><span>вчера</span></div>'+
+     '<div><b class="'+(a.refused?'bad':'good')+'">'+a.refused+'</b><span>отказов</span></div>'+
+     '<div><b>'+a.moved+'</b><span>переносов</span></div></div>';
+  if(a.sent&&!a.status) h+='<div class="seg two" style="margin-top:12px"><button class="btn pri" onclick="accept(\'accepted\')">Принять</button><button class="btn" onclick="accept(\'extra\')">С задачей</button></div><button class="btn ghost" onclick="accept(\'rejected\')">Вернуть на доработку</button>';
+  if(a.tasks.length){ h+='<div class="sec">Факт за вчера</div>'; for(var i=0;i<a.tasks.length;i++) h+=factRow(a.tasks[i]); }
+  else h+='<div class="hint">Отчёта за вчера нет.</div>';
+  h+='<div class="sec">Неделя · факт / план</div><div class="card">';
+  for(var j=0;j<NK.length;j++){ var k=NK[j].k, d=a.week[k]||0, n=normW(k);
+    h+='<div class="kv"><span>'+NK[j].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+n+'</span></span><span class="pct">'+Math.round(d/n*100)+'%</span></div>'; }
   h+='</div>';
-
-  if(a.fc.length){
-    h+='<div class="sec">Прогноз по задаткам</div>';
+  if(a.fc.length){ h+='<div class="sec">Прогноз по задаткам</div>';
     for(var q=0;q<a.fc.length;q++){ var f=a.fc[q];
-      var stt = f.done? '<span class="rt ok">факт</span>' : (f.date<state.date? '<span class="rt no">просрочен</span>':'<span class="rt wait">план</span>');
-      h+='<div class="item'+(f.date<state.date&&!f.done?' alert':'')+'"><div class="ic">'+ic('money')+'</div><div class="tx">'+
-         '<div class="tp">'+ru(f.date)+'</div><div class="nm">'+esc(f.obj)+'</div><div class="sub">'+esc(f.cl)+' · '+money(f.sum)+'</div></div>'+stt+'</div>'; }
-  }
-  if(a.rop.length){
-    h+='<div class="sec">Мои задачи ей</div>';
-    for(var w=0;w<a.rop.length;w++){ var rt2=a.rop[w];
-      h+='<div class="item"><div class="ic">'+ic('pin')+'</div><div class="tx"><div class="nm" style="white-space:normal">'+esc(rt2.text)+'</div>'+
-         '<div class="sub">'+(rt2.done===null?'ждёт ответа':(rt2.done?'сделано':'не сделано: '+esc(rt2.why)))+'</div></div></div>'; }
-  }
-  if(a.sent&&!a.status) h+='<button class="btn pri" onclick="openAccept()">Принять отчёт</button>';
-  h+='<button class="btn" onclick="openTask()">+ Поставить задачу</button>';
+      var stt=f.done?'<span class="st ok">факт</span>':(f.date<state.date?'<span class="st no">просрочен</span>':'<span class="st wait">план</span>');
+      h+='<div class="task hassum"><div class="ic">'+ic('money')+'</div><div class="c"><b>'+ru(f.date)+'</b><span>задаток</span></div><div class="c"><b>'+esc(f.obj)+'</b><span>'+esc(f.cl)+'</span></div><div class="sum">'+money(f.sum)+'</div><div class="r">'+stt+'</div></div>'; } }
+  if(a.rop.length){ h+='<div class="sec">Мои задачи</div>';
+    for(var w=0;w<a.rop.length;w++){ var t=a.rop[w];
+      h+='<div class="task noic"><div class="c"><b>'+ru(t.date)+'</b><span>задача</span></div><div class="c"><b>'+esc(t.text)+'</b><span>'+(t.done===null?'ждёт ответа':(t.done?'сделано':'не сделано: '+esc(t.why)))+'</span></div><div class="r"></div></div>'; } }
+  h+='<button class="btn" onclick="taskTo='+a.id+';openTask()">+ Поставить задачу</button>';
   return h;
 }
-function openAccept(){
-  sheet('<h3>Приёмка отчёта</h3><div class="sh">'+esc(openA.name)+' · '+rud(state.dateY)+'</div>'+
-    '<div class="kv two"><span>Сделано из плана</span><b>'+openA.done+' / '+openA.plan+'</b></div>'+
-    '<div class="kv two"><span>Отказов</span><b class="'+(openA.refused?'r':'')+'">'+openA.refused+'</b></div>'+
-    '<div class="kv two"><span>Переносов</span><b class="s">'+openA.moved+'</b></div>'+
-    '<div class="lbl">Решение</div><div class="chips">'+
-    '<button class="chip" onclick="accept(\'accepted\')">Принять</button>'+
-    '<button class="chip" onclick="accept(\'extra\')">Принять с задачей</button>'+
-    '<button class="chip" style="grid-column:1/-1" onclick="accept(\'rejected\')">Вернуть на доработку</button></div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-    '<button class="btn ghost" onclick="closeSheet()">Позже</button></div>');
-}
-function accept(st){ openA.status=st; save(); if(st==='extra'){ closeSheet(); return openTask(); } closeSheet(); render(); }
-function openTask(who){
-  var target = who||(openA?openA.id:null);
-  var h='<h3>Задача агенту</h3><div class="sh">появится сверху в его плане</div>';
-  if(!target||!openA){
-    h+='<div class="lbl">Кому</div><div class="chips">';
-    for(var i=0;i<state.agents.length;i++)
-      h+='<button class="chip'+(taskTo===state.agents[i].id?' on':'')+'" onclick="taskTo='+state.agents[i].id+';openTask()">'+esc(state.agents[i].name.split(' ')[0])+'</button>';
-    h+='</div>';
-  }
-  h+='<div class="lbl">Что сделать</div><input id="tTx" placeholder="Разобрать портфель">'+
-     '<div class="lbl">На какой день</div><input type="date" id="tDate" value="'+state.date+'" min="'+state.date+'">'+
-     '<div class="hint">Агент отчитается «да» или «нет», и в случае «нет» напишет почему.</div>'+
-     '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-     '<button class="btn pri" onclick="saveTask()">Поставить</button></div>';
+function accept(st){ openA.status=st; save(); if(st==='extra'){ taskTo=openA.id; return openTask(); } flash(st==='rejected'?'Возвращён на доработку':'Принято'); render(); }
+
+/* ================= ЗАДАЧА ================= */
+function openTask(){
+  var h='<h3>Задача агенту</h3><span class="sh">появится сверху в его плане</span>';
+  if(!taskTo){ h+='<span class="lbl">Кому</span><div class="chips">';
+    for(var i=0;i<state.agents.length;i++) h+='<button class="chip" onclick="taskTo='+state.agents[i].id+';openTask()">'+esc(state.agents[i].name.split(' ')[0])+'</button>';
+    h+='</div>'; }
+  else h+='<div class="card"><span class="t">Кому</span><b>'+esc(agent(taskTo).name)+'</b></div>';
+  h+='<span class="lbl">Что сделать</span><input id="tTx" placeholder="Разобрать портфель"><span class="lbl">На какой день</span><input type="date" id="tDate" value="'+state.date+'" min="'+state.date+'">'+
+     '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="saveTask()">Поставить</button></div>';
   sheet(h);
 }
-var taskTo=null;
-function saveTask(){
-  var t=document.getElementById('tTx'), dd=document.getElementById('tDate');
-  var a=openA||agent(taskTo);
-  if(!a){ alert('Выберите агента'); return; }
-  if(!t.value){ alert('Напишите задачу'); return; }
-  a.rop.push({id:++state.seq,text:t.value,date:dd.value,done:null,why:''});
-  save(); closeSheet(); render();
-}
+function saveTask(){ var t=document.getElementById('tTx'), d=document.getElementById('tDate'), a=agent(taskTo);
+  if(!a){ warn('Выберите агента'); return; } if(!t||!t.value){ warn('Напишите задачу'); return; }
+  a.rop.push({id:++state.seq,text:t.value,date:d.value,done:null,why:''}); save(); closeSheet(); flash('Задача поставлена'); render(); }
 
 /* ================= ОТДЕЛ ================= */
 function teamHTML(){
-  var isW=teamMode==='week';
-  var h='<div class="card"><div class="t">Период</div><div class="chips">'+
-    '<button class="chip'+(isW?' on':'')+'" onclick="teamMode=\'week\';render()">Неделя</button>'+
-    '<button class="chip'+(!isW?' on':'')+'" onclick="teamMode=\'month\';render()">'+monthNom()+'</button></div></div>';
-  h+='<div class="card"><div class="t">Отдел · '+state.agents.length+' человек · факт / план</div>';
-  for(var j=0;j<NORMKEYS.length;j++){ var k=NORMKEYS[j].k, d=isW?teamW(k):teamM(k), n=isW?teamNW(k):teamNM(k);
-    h+='<div class="kv"><span>'+NORMKEYS[j].l+'</span><span class="pf">'+
-       '<span class="f" style="'+(d>=n?'':'color:var(--ink)')+'">'+d+'</span><span class="sl">/</span><span class="p">'+n+'</span>'+
-       '</span><span class="pct">'+Math.round(d/n*100)+'%</span></div>'; }
-  h+='</div>';
-
-  h+='<div class="sec">Агенты · '+(isW?'неделя':'месяц')+'</div>';
-  for(var m=0;m<state.agents.length;m++){ var a=state.agents[m], dd=isW?a.week:a.month;
-    var det='<details><summary>'+ini(a.name)+' · '+esc(a.name)+
-      '<span class="cnt">задатки '+(dd.pd||0)+'/'+(isW?normW('pd'):normM('pd'))+'</span><span class="arw">▾</span></summary><div class="dbody">';
-    for(var q=0;q<NORMKEYS.length;q++){ var key=NORMKEYS[q].k, dv=dd[key]||0, nv=isW?normW(key):normM(key);
-      det+='<div class="kv"><span>'+NORMKEYS[q].l+'</span><span class="pf"><span class="f">'+dv+'</span><span class="sl">/</span><span class="p">'+nv+'</span></span></div>'; }
-    det+='<button class="btn" style="margin-top:10px" onclick="showAgent('+a.id+')">Открыть карточку</button>'+
-         '<button class="btn ghost" onclick="taskTo='+a.id+';openA=null;openTask()">Поставить задачу</button></div></details>';
-    h+=det;
+  var isW=per==='week';
+  var h='<div class="seg two"><button class="chip'+(isW?' on':'')+'" onclick="per=\'week\';render()">Неделя</button><button class="chip'+(!isW?' on':'')+'" onclick="per=\'month\';render()">Месяц</button></div>';
+  var pd=isW?teamW('pd'):teamM('pd'), pdn=isW?teamNW('pd'):teamNM('pd');
+  h+='<div class="card"><div class="verdict'+(pd>=pdn*0.7?' good':' bad')+'">Отдел идёт на '+Math.round(pd/pdn*100)+'% от нормы по задаткам</div><div class="cmp">Прошлая неделя в этот же день: <b>'+sumBy(function(a){return a.prev.pd||0;})+'</b> задатков против <b>'+teamW('pd')+'</b> сейчас</div></div>';
+  h+='<div class="card">';
+  for(var j=0;j<NK.length;j++){ var k=NK[j].k, d=isW?teamW(k):teamM(k), n=isW?teamNW(k):teamNM(k);
+    h+='<div class="kv"><span>'+NK[j].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+n+'</span></span><span class="pct">'+Math.round(d/n*100)+'%</span></div>'; }
+  h+='</div><div class="sec">Агенты · задатки · показы · норма</div>';
+  var list=state.agents.slice().sort(function(a,b){ return (b[per].pd||0)-(a[per].pd||0); });
+  for(var m=0;m<list.length;m++){ var a=list[m], dd=a[per];
+    var tot=0,nd=0; for(var q=0;q<NK.length;q++){ tot+=dd[NK[q].k]||0; nd+=(isW?normW(NK[q].k):normM(NK[q].k)); }
+    var p=Math.round(tot/nd*100);
+    h+='<button class="task noic" onclick="showAgent('+a.id+')"><div class="c"><b>'+ini(a.name)+'</b><span>'+(dd.pd||0)+' зд</span></div>'+
+       '<div class="c"><b>'+esc(a.name)+'</b><span>показов '+(dd.pokaz||0)+' · оценок '+(dd.ocenka||0)+' · встреч '+(dd.vstr||0)+'</span></div>'+
+       '<div class="r"><span class="st '+(p>=100?'ok':(p<60?'no':'wait'))+'">'+p+'%</span></div></button>';
   }
-  var refs=collect('refuse'), mvs=collect('moved');
-  h+='<div class="sec warn">Отказы · '+refs.length+'</div>';
-  for(var r=0;r<refs.length;r++) h+=factRow(refs[r]);
-  if(!refs.length) h+='<div class="hint">Отказов нет.</div>';
-  h+='<div class="sec" style="color:var(--star)">Переносы · '+mvs.length+'</div>';
-  for(var v=0;v<mvs.length;v++) h+=factRow(mvs[v]);
-  h+='<div class="hint">Отказ в норму не идёт, но время потрачено — поэтому он виден отдельно и поимённо.</div>';
   return h;
 }
 
 /* ================= ПРОГНОЗ ================= */
 function fcHTML(){
-  var s=fcSplit(fcMode);
-  var planS=fcSum(s.plan), factS=fcSum(s.fact), lateS=fcSum(s.late);
-  var all=s.plan.length+s.fact.length+s.late.length;
-  var h='<div class="card"><div class="t">Прогноз отдела · задатки</div>'+
-    '<div class="chips three" style="margin-bottom:12px">'+
-    fcTab('week','Неделя')+fcTab('month',monthNom())+fcTab('future','Дальше')+'</div>'+
-    '<div class="big">'+money(factS)+' <span style="color:var(--mute);font-size:17px">/ '+money(planS+factS+lateS)+'</span>'+
-    '<small>факт / прогноз · '+s.fact.length+' из '+all+'</small></div>'+
-    '<div class="bar"><i style="width:'+((planS+factS+lateS)?Math.min(Math.round(factS/(planS+factS+lateS)*100),100):0)+'%"></i></div>'+
-    (fcMode!=='future'?'<div class="kv two"><span>Норма отдела</span><b class="p">'+
-      (fcMode==='week'?teamNW('pd')+' задатков в неделю':teamNM('pd')+' в месяц')+'</b></div>':'')+
-    '</div>';
-  h+=fcBlock('Факт · закрытые',s.fact,'ok');
-  h+=fcBlock('Прогноз · впереди',s.plan,'wait');
-  h+=fcBlock('Просрочены · дата прошла',s.late,'no');
-  h+='<div class="sec">По агентам</div>';
-  for(var i=0;i<state.agents.length;i++){ var a=state.agents[i];
-    var cnt=0,sm=0,fn=0;
-    for(var j=0;j<a.fc.length;j++){ var f=a.fc[j];
-      var inP = fcMode==='week'? f.date<=weekEnd() : (fcMode==='month'? f.date<=plus(30) : f.date>plus(30));
-      if(!inP) continue; cnt++; sm+=Number(f.sum||0); if(f.done) fn++; }
-    if(!cnt) continue;
-    h+='<div class="item"><div class="ic">'+ini(a.name)+'</div><div class="tx">'+
-       '<div class="tp">задатков '+cnt+' · закрыто '+fn+'</div><div class="nm">'+esc(a.name)+'</div></div>'+
-       '<span class="rt ok">'+kk(sm)+'</span></div>';
-  }
-  h+='<div class="hint">Опоздавший задаток — промах недели, но попадание месяца. Поэтому периоды считаются раздельно, а просроченные вынесены отдельным блоком.</div>';
+  var it=fcAll(fcMode), plan=[],fact=[],late=[];
+  for(var i=0;i<it.length;i++){ var f=it[i].f; if(f.done) fact.push(it[i]); else if(f.date<state.date) late.push(it[i]); else plan.push(it[i]); }
+  var S=function(l){ var s=0; for(var i=0;i<l.length;i++) s+=Number(l[i].f.sum||0); return s; };
+  var ps=S(plan),fs=S(fact),ls=S(late), all=ps+fs+ls;
+  var h='<div class="seg three"><button class="chip'+(fcMode==='week'?' on':'')+'" onclick="fcMode=\'week\';render()">Неделя</button><button class="chip'+(fcMode==='month'?' on':'')+'" onclick="fcMode=\'month\';render()">Месяц</button><button class="chip'+(fcMode==='future'?' on':'')+'" onclick="fcMode=\'future\';render()">Дальше</button></div>';
+  h+='<div class="card"><div class="big">'+money(fs)+'<small>факт · из прогноза '+money(all)+' · '+fact.length+' из '+it.length+'</small></div>'+
+     '<div class="bar"><i style="width:'+(all?Math.min(Math.round(fs/all*100),100):0)+'%"></i></div>'+
+     (late.length?'<div class="cmp" style="color:var(--alarm)">Просрочено: '+late.length+' на '+money(ls)+'</div>':'<div class="cmp">Просроченных нет</div>')+'</div>';
+  var blk=function(title,list,cls){ if(!list.length) return ''; var x='<div class="sec">'+title+' · '+list.length+' · '+kk(S(list))+'</div>';
+    for(var i=0;i<list.length;i++){ var r=list[i];
+      x+='<button class="task hassum'+(cls==='no'?' bad':'')+'" onclick="showAgent('+r.id+')"><div class="ic">'+ic('money')+'</div><div class="c"><b>'+ru(r.f.date)+'</b><span>'+esc(r.who.split(' ')[0])+'</span></div><div class="c"><b>'+esc(r.f.obj)+'</b><span>'+esc(r.f.cl)+'</span></div><div class="sum">'+money(r.f.sum)+'</div><div class="r"><span class="st '+cls+'">'+(cls==='ok'?'факт':(cls==='no'?'просрочен':'план'))+'</span></div></button>'; }
+    return x; };
+  h+=blk('Просрочены',late,'no')+blk('Впереди',plan,'wait')+blk('Закрыты',fact,'ok');
+  h+='<div class="hint">Опоздавший задаток — промах недели, попадание месяца. Периоды считаются раздельно.</div>';
   return h;
-}
-function fcTab(m,n){ return '<button class="chip'+(fcMode===m?' on':'')+'" onclick="fcMode=\''+m+'\';render()">'+n+'</button>'; }
-function fcBlock(title,list,cls){
-  if(!list.length) return '';
-  var sum=fcSum(list);
-  var h='<details'+(cls==='no'?' open':'')+'><summary>'+title+'<span class="cnt">'+list.length+' · '+kk(sum)+'</span><span class="arw">▾</span></summary><div class="dbody">';
-  for(var i=0;i<list.length;i++){ var x=list[i];
-    h+='<div class="item'+(cls==='no'?' alert':'')+'"><div class="ic">'+ic('money')+'</div><div class="tx">'+
-       '<div class="tp">'+ru(x.f.date)+' · '+esc(x.who)+'</div><div class="nm">'+esc(x.f.obj)+'</div>'+
-       '<div class="sub">'+esc(x.f.cl)+'</div></div><span class="rt '+cls+'">'+money(x.f.sum)+'</span></div>'; }
-  return h+'</div></details>';
 }
 
 /* ================= ОТЧЁТ ================= */
 function repHTML(){
-  var n=state.agents.length, s=sentCount();
-  if(state.sentUp){
-    return '<div class="card" style="text-align:center"><div class="big">Отчёт отправлен</div>'+
-      '<div class="hint" style="margin-top:12px">Собственник получил факт за вчера и план на сегодня.</div></div>'+
-      '<button class="btn ghost" onclick="state.sentUp=false;save();render()">Показать отчёт снова</button>'+repArchive();
-  }
-  var plan=sumBy(function(a){return a.plan;}), done=sumBy(function(a){return a.done;});
-  var refs=collect('refuse').length, mvs=collect('moved').length;
-  var h='<div class="card"><div class="t">Отчёт за '+rud(state.dateY)+' · собран сам</div>'+
-    '<div class="kv two"><span>Дела</span><span class="pf"><span class="f">'+done+'</span><span class="sl">/</span><span class="p">'+plan+'</span></span></div>'+
-    '<div class="kv two"><span>Отказов</span><b class="'+(refs?'r':'')+'">'+refs+'</b></div>'+
-    '<div class="kv two"><span>Переносов</span><b class="s">'+mvs+'</b></div>'+
-    '<div class="kv two"><span>Заявок</span><b>'+sumBy(function(a){return a.leads;})+'</b></div>'+
-    '<div class="kv two"><span>Сдали до 10:00</span><b class="'+(s===n?'g':'r')+'">'+s+' из '+n+'</b></div></div>';
-  h+='<div class="card"><div class="t">По классам · неделя · факт / план</div>';
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k, d=teamW(k), nn=teamNW(k);
-    h+='<div class="kv"><span>'+NORMKEYS[i].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+nn+'</span></span></div>'; }
+  var n=state.agents.length, s=sentCount(), plan=sumBy(function(a){return a.plan;}), done=sumBy(function(a){return a.done;});
+  var refs=sumBy(function(a){return a.refused;}), mvs=sumBy(function(a){return a.moved;});
+  var h='<div class="card"><div class="verdict">За вчера сделано '+done+' из '+plan+' дел · отказов '+refs+' · переносов '+mvs+'</div><div class="cmp">Сдали до 10:00: <b>'+s+' из '+n+'</b> · заявок '+sumBy(function(a){return a.leads;})+'</div></div>';
+  h+='<div class="card"><span class="t">Неделя · факт / план</span>';
+  for(var i=0;i<NK.length;i++){ var k=NK[i].k, d=teamW(k), nn=teamNW(k);
+    h+='<div class="kv"><span>'+NK[i].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+nn+'</span></span><span class="pct">'+Math.round(d/nn*100)+'%</span></div>'; }
   h+='</div>';
-  h+='<div class="sec">Комментарий по отделу</div>'+
-     '<div class="card" style="padding:11px"><textarea id="cm" placeholder="Объяснить то, что требует контекста" oninput="state.comment=this.value">'+esc(state.comment)+'</textarea></div>'+
-     '<div class="sec">Мои основные задачи на сегодня</div>'+
-     '<div class="card" style="padding:11px"><textarea id="mt" placeholder="Что я сам делаю сегодня" oninput="state.mytasks=this.value">'+esc(state.mytasks)+'</textarea></div>'+
-     '<button class="btn pri" onclick="sendUp()">Отправить собственнику · до 11:00</button>';
-  return h+repArchive();
-}
-function repArchive(){
-  var days=[],weeks=[],months=[];
-  for(var i=0;i<state.reports.length;i++){ var r=state.reports[i];
-    (r.kind==='day'?days:(r.kind==='week'?weeks:months)).push(r); }
-  var h='<div class="sec">Прошлые отчёты · только просмотр</div>';
-  h+=repGroup('Ежедневные',days,'day');
-  h+=repGroup('Еженедельные',weeks,'week');
-  h+=repGroup('Ежемесячные',months,'month');
-  h+='<div class="hint">Недельные и месячные считаются сами по показателям. Изменить сданный отчёт нельзя.</div>';
+  h+='<span class="lbl">Комментарий по отделу</span><textarea placeholder="Объяснить то, что требует контекста" oninput="state.comment=this.value">'+esc(state.comment)+'</textarea>'+
+     '<span class="lbl">Мои основные задачи на сегодня</span><textarea placeholder="Что я сам делаю сегодня" oninput="state.mytasks=this.value">'+esc(state.mytasks)+'</textarea>';
+  h+='<div class="sec">Прошлые отчёты · только просмотр</div>';
+  var grp=function(title,kind){ var l=[]; for(var i=0;i<state.reports.length;i++) if(state.reports[i].kind===kind) l.push(i); if(!l.length) return '';
+    var x='<details><summary>'+title+'<span class="cnt">'+l.length+'</span></summary><div class="dbody">';
+    for(var j=0;j<l.length;j++){ var r=state.reports[l[j]];
+      x+='<button class="task noic" onclick="openReport('+l[j]+')"><div class="c"><b>'+ru(r.date)+'</b><span>'+kind+'</span></div><div class="c"><b>'+esc(r.label)+'</b><span>'+(kind==='day'?'сделано '+r.fact+' из '+r.plan:'задаток '+r.w.pd+' · показы '+r.w.pokaz)+'</span></div><div class="r"><span class="st mv">открыть</span></div></button>'; }
+    return x+'</div></details>'; };
+  h+=grp('Ежедневные','day')+grp('Еженедельные','week')+grp('Ежемесячные','month');
   return h;
 }
-function repGroup(title,list,kind){
-  if(!list.length) return '';
-  var h='<details><summary>'+title+'<span class="cnt">'+list.length+'</span><span class="arw">▾</span></summary><div class="dbody">';
-  for(var i=0;i<list.length;i++){ var r=list[i], idx=state.reports.indexOf(r);
-    var sub = kind==='day'? 'сделано '+r.fact+' из '+r.plan+' · отказов '+r.ref+' · заявок '+r.leads
-            : 'задаток '+r.w.pd+' · показы '+r.w.pokaz;
-    h+='<button class="item" onclick="openReport('+idx+')"><div class="ic">'+ic(kind==='day'?'ok':'chart')+'</div>'+
-       '<div class="tx"><div class="tp">'+ru(r.date)+'</div><div class="nm">'+esc(r.label)+'</div>'+
-       '<div class="sub" style="white-space:normal">'+esc(sub)+'</div></div><span class="rt wait">открыть</span></button>'; }
-  return h+'</div></details>';
-}
-function openReport(i){
-  var r=state.reports[i], h='<h3>'+esc(r.label)+'</h3><div class="sh">'+ru(r.date)+'</div>';
-  if(r.kind==='day'){
-    h+='<div class="card"><div class="kv two"><span>Дела</span><span class="pf"><span class="f">'+r.fact+'</span><span class="sl">/</span><span class="p">'+r.plan+'</span></span></div>'+
-       '<div class="kv two"><span>Отказов</span><b class="r">'+r.ref+'</b></div>'+
-       '<div class="kv two"><span>Переносов</span><b class="s">'+r.mv+'</b></div>'+
-       '<div class="kv two"><span>Заявок</span><b>'+r.leads+'</b></div></div>';
-  } else {
-    h+='<div class="card">';
-    for(var j=0;j<NORMKEYS.length;j++){ var k=NORMKEYS[j].k, v=r.w[k]; if(!v) continue;
-      var p=String(v).split('/');
-      h+='<div class="kv"><span>'+NORMKEYS[j].l+'</span><span class="pf"><span class="f">'+p[0]+'</span><span class="sl">/</span><span class="p">'+p[1]+'</span>'+
-         '<span class="sl" style="margin-left:6px">'+Math.round(p[0]/p[1]*100)+'%</span></span></div>'; }
-    h+='</div>';
-  }
-  h+='<div class="hint">Отчёт закрыт для правок.</div>'+
-     '<div class="sbtn"><button class="btn" onclick="closeSheet()">Закрыть</button><button class="btn pri" onclick="closeSheet()">Понятно</button></div>';
-  sheet(h);
-}
-function sendUp(){ state.sentUp=true; save(); render(); }
+function openReport(i){ var r=state.reports[i], h='<h3>'+esc(r.label)+'</h3><span class="sh">'+ru(r.date)+'</span><div class="card">';
+  if(r.kind==='day') h+='<div class="kv"><span>Дела</span><span class="pf"><span class="f">'+r.fact+'</span><span class="sl">/</span><span class="p">'+r.plan+'</span></span><span></span></div><div class="kv two"><span>Отказов</span><b class="r">'+r.ref+'</b></div><div class="kv two"><span>Переносов</span><b>'+r.mv+'</b></div><div class="kv two"><span>Заявок</span><b>'+r.leads+'</b></div>';
+  else for(var j=0;j<NK.length;j++){ var v=r.w[NK[j].k]; if(!v) continue; var p=v.split('/'); h+='<div class="kv"><span>'+NK[j].l+'</span><span class="pf"><span class="f">'+p[0]+'</span><span class="sl">/</span><span class="p">'+p[1]+'</span></span><span class="pct">'+Math.round(p[0]/p[1]*100)+'%</span></div>'; }
+  h+='</div><div class="hint">Отчёт закрыт для правок.</div><div class="sbtn" style="grid-template-columns:1fr"><button class="btn pri" onclick="closeSheet()">Понятно</button></div>'; sheet(h); }
+function sendUp(){ state.sentUp=true; save(); flash('Отчёт ушёл собственнику'); render(); }
 
 /* ================= НАСТРОЙКИ ================= */
 function setHTML(){
-  var h='<div class="card"><div class="t">Нормы на агента · факт задаёт собственник</div>';
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k;
-    h+='<div class="kv"><span>'+NORMKEYS[i].l+'</span><span class="pf"><span class="p">'+normW(k)+' в неделю</span>'+
-       '<span class="sl">·</span><span class="p">'+normM(k)+' в месяц</span></span></div>'; }
-  h+='</div><button class="btn" onclick="openNorms()">Изменить нормы</button>'+
-     '<div class="hint" style="margin-top:10px">Задаётся месячная, недельная считается автоматически: месячная ÷ 4,33 вверх.</div>';
+  var h='<div class="card"><span class="t">Нормы на агента · неделя / месяц</span>';
+  for(var i=0;i<NK.length;i++){ var k=NK[i].k; h+='<div class="kv"><span>'+NK[i].l+'</span><b>'+normW(k)+'</b><b style="color:var(--mute)">'+normM(k)+'</b></div>'; }
+  h+='</div><button class="btn" onclick="openNorms()">Изменить нормы</button>';
   h+='<div class="sec">Агенты · '+state.agents.length+'</div>';
   for(var j=0;j<state.agents.length;j++){ var a=state.agents[j];
-    h+='<details><summary>'+ini(a.name)+' · '+esc(a.name)+'<span class="arw">▾</span></summary><div class="dbody">'+
-       '<button class="btn" onclick="resetPw('+a.id+')">Сбросить пароль</button>'+
-       '<button class="btn warn" onclick="delAgent('+a.id+')">Удалить из отдела</button></div></details>';
-  }
-  h+='<button class="btn" onclick="addAgent()">+ Добавить агента</button>';
-  h+='<div class="card" style="margin-top:12px"><div class="t">Кабинет</div>'+
-     '<div class="kv two"><span>РОП</span><b>'+esc(state.user)+'</b></div>'+
-     '<div class="kv two"><span>Отдел</span><b>№2</b></div>'+
-     '<div class="kv two"><span>Чужие отделы</span><b>не видны</b></div></div>'+
-     '<button class="btn ghost" onclick="logout()">Выйти из кабинета</button>';
+    h+='<details><summary>'+esc(a.name)+'</summary><div class="dbody"><button class="btn" onclick="resetPw('+a.id+')">Сбросить пароль</button><button class="btn warn" onclick="delAgent('+a.id+')">Удалить из отдела</button></div></details>'; }
+  h+='<button class="btn" onclick="addAgent()">+ Добавить агента</button><button class="btn ghost" onclick="logout()">Выйти из кабинета</button>';
   return h;
 }
-function openNorms(){
-  var h='<h3>Нормы на агента</h3><div class="sh">месяц · неделя считается сама</div>';
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k;
-    h+='<div class="lbl">'+NORMKEYS[i].l+' · сейчас '+normW(k)+' в неделю</div><input type="number" inputmode="numeric" id="n_'+k+'" value="'+normM(k)+'">'; }
-  h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-     '<button class="btn pri" onclick="saveNorms()">Сохранить</button></div>';
-  sheet(h);
-}
-function saveNorms(){
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k, e=document.getElementById('n_'+k);
-    if(e&&e.value!=='') state.norm[k]=Number(e.value); }
-  save(); closeSheet(); render();
-}
-function resetPw(id){
-  var a=agent(id);
-  sheet('<h3>Сбросить пароль?</h3><div class="sh">'+esc(a.name)+'</div>'+
-    '<div class="hint">Агент получит новый пароль в Телеграме, все его сессии закроются.</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-    '<button class="btn pri" onclick="closeSheet()">Сбросить</button></div>');
-}
-function delAgent(id){
-  var a=agent(id);
-  sheet('<h3>Удалить из отдела?</h3><div class="sh">'+esc(a.name)+'</div>'+
-    '<div class="hint">Доступ закроется, а все его записи останутся в отчётах — иначе статистика прошлых месяцев поедет.</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-    '<button class="btn warn" onclick="doDel('+id+')">Удалить</button></div>');
-}
-function doDel(id){
-  var n=[]; for(var i=0;i<state.agents.length;i++) if(state.agents[i].id!==id) n.push(state.agents[i]);
-  state.agents=n; save(); closeSheet(); render();
-}
-function addAgent(){
-  sheet('<h3>Новый агент</h3><div class="sh">в отдел №2</div>'+
-    '<div class="lbl">Фамилия и имя</div><input id="aName" placeholder="Иванова Мария">'+
-    '<div class="hint">Пароль придёт ему в Телеграм, при первом входе система попросит его сменить.</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-    '<button class="btn pri" onclick="saveAgent()">Добавить</button></div>');
-}
-function saveAgent(){
-  var e=document.getElementById('aName');
-  if(!e.value){ alert('Укажите имя'); return; }
-  var z={sdelka:0,pd:0,pokaz:0,ocenka:0,vstr:0,rekl:0,leads:0};
-  state.agents.push({id:++state.seq,name:e.value,sent:false,status:null,tasks:[],plan:0,done:0,refused:0,moved:0,
-    week:JSON.parse(JSON.stringify(z)),month:JSON.parse(JSON.stringify(z)),fc:[],leads:0,rop:[]});
-  save(); closeSheet(); render();
-}
+function openNorms(){ var h='<h3>Нормы</h3><span class="sh">неделя и месяц задаются отдельно</span>';
+  for(var i=0;i<NK.length;i++){ var k=NK[i].k; h+='<span class="lbl">'+NK[i].l+'</span><div class="row2"><input type="number" inputmode="numeric" id="w_'+k+'" value="'+normW(k)+'" placeholder="неделя"><input type="number" inputmode="numeric" id="m_'+k+'" value="'+normM(k)+'" placeholder="месяц"></div>'; }
+  h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="saveNorms()">Сохранить</button></div>'; sheet(h); }
+function saveNorms(){ for(var i=0;i<NK.length;i++){ var k=NK[i].k, w=document.getElementById('w_'+k), m=document.getElementById('m_'+k); if(w&&w.value!=='') state.normW[k]=Number(w.value); if(m&&m.value!=='') state.norm[k]=Number(m.value); } save(); closeSheet(); render(); }
+function resetPw(id){ sheet('<h3>Сбросить пароль?</h3><span class="sh">'+esc(agent(id).name)+'</span><div class="hint">Новый пароль придёт агенту в Телеграм, сессии закроются.</div><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="closeSheet();flash(\'Пароль сброшен\')">Сбросить</button></div>'); }
+function delAgent(id){ sheet('<h3>Удалить из отдела?</h3><span class="sh">'+esc(agent(id).name)+'</span><div class="hint">Доступ закроется, записи останутся в отчётах.</div><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn warn" onclick="doDel('+id+')">Удалить</button></div>'); }
+function doDel(id){ state.agents=state.agents.filter(function(a){ return a.id!==id; }); save(); closeSheet(); render(); }
+function addAgent(){ sheet('<h3>Новый агент</h3><span class="sh">в отдел №2</span><span class="lbl">Фамилия и имя</span><input id="aName" placeholder="Иванова Мария"><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="saveAgent()">Добавить</button></div>'); }
+function saveAgent(){ var e=document.getElementById('aName'); if(!e.value){ warn('Укажите имя'); return; } var z={sdelka:0,pd:0,pokaz:0,ocenka:0,vstr:0,rekl:0,leads:0};
+  state.agents.push({id:++state.seq,name:e.value,sent:false,status:null,tasks:[],plan:0,done:0,refused:0,moved:0,week:JSON.parse(JSON.stringify(z)),month:JSON.parse(JSON.stringify(z)),fc:[],leads:0,prev:{},rop:[],streakMove:0}); save(); closeSheet(); render(); }
 function logout(){ state.user=null; pickName=null; save(); render(); }
-
-/* ================= общее ================= */
 function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on'); }
 function closeSheet(){ document.getElementById('ovl').classList.remove('on'); }
-function resetAll(){
-  sheet('<h3>Сбросить прототип?</h3><div class="sh">данные вернутся к исходным</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-    '<button class="btn pri" onclick="doReset()">Сбросить</button></div>');
-}
-function doReset(){ var u=state.user; state=seed(); state.user=u; save(); nav='inbox'; openA=null; closeSheet(); render(); }
+function resetAll(){ sheet('<h3>Сбросить прототип?</h3><span class="sh">данные вернутся к исходным</span><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="doReset()">Сбросить</button></div>'); }
+function doReset(){ var u=state.user; state=seed(); state.user=u; state.agents[2].streakMove=3; save(); nav='inbox'; openA=null; closeSheet(); render(); }
 render();
 </script>
 </body>

@@ -198,429 +198,246 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 .party{background:var(--lime);color:var(--on-lime);border-radius:var(--r);padding:var(--s4);
   text-align:center;font-weight:600;margin-bottom:var(--s3)}
 
-/* ---------- тёмная тема кабинета собственника ---------- */
-:root{
-  --ink:#F2F2F2; --mute:#8C8C8C; --line:#242424; --soft:#161616; --bg:#0B0B0B;
-  --lime:#AEEA00; --on-lime:#0B0B0B; --plan:#FF9838; --alarm:#FF6B5C;
-  color-scheme:dark;
-}
-.item .ic{color:var(--lime)}
-.nrow b.good,.grid b.good{color:var(--lime)}
-.kv b.g{color:var(--lime)}
-.pf .f{color:var(--lime)}
-.rt.ok{color:var(--lime)}
+/* ---------- строка-таблица (общая для всех кабинетов) ---------- */
+.task{width:100%;display:grid;grid-template-columns:40px 58px 1fr auto;gap:var(--s3);align-items:center;
+  text-align:left;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--s3) var(--s4);margin-bottom:var(--s2)}
+.task.hassum{grid-template-columns:40px 58px 1fr auto auto}
+.task.noic{grid-template-columns:58px 1fr auto}
+.task.done{background:var(--soft);border-color:var(--soft)}
+.task.hi{border-left:2px solid var(--plan)}
+.task.bad{border-left:2px solid var(--alarm)}
+.task .ic{width:40px;height:40px;border-radius:var(--r);background:var(--soft);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:var(--t3);font-weight:600}
+.task.done .ic{background:var(--bg)}
+.task .c{min-width:0}
+.task .c b{display:block;font-size:var(--t2);font-weight:600;letter-spacing:-.01em;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.task .c span{display:block;font-size:var(--t4);color:var(--mute);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task .c span.wrap{white-space:normal}
+.task .sum{font-size:var(--t2);font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.task .r{display:flex;align-items:center;justify-content:flex-end;gap:var(--s2)}
+.task .r:empty{display:none}
+.st{display:inline-flex;align-items:center;height:32px;padding:0 var(--s3);border-radius:var(--pill);font-size:var(--t3);font-weight:600;white-space:nowrap;border:0;font-family:inherit}
+.st.wait{background:rgba(240,124,0,.14);color:var(--plan)}
+.st.ok{background:var(--lime);color:var(--on-lime)}
+.st.no{background:rgba(224,58,47,.12);color:var(--alarm)}
+.st.mv{background:var(--soft);color:var(--mute)}
+.st.act{background:var(--ink);color:var(--bg)}
+.status.alarm{color:var(--alarm)}
+.hdr .row{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3)}
+.hdr{display:block}
+.who span{font-size:var(--t4);color:var(--mute)}
+.verdict{font-size:var(--t2);font-weight:600;letter-spacing:-.01em;line-height:1.3;margin:0 0 var(--s2)}
+.verdict.good{color:var(--ink)} .verdict.bad{color:var(--alarm)}
+.cmp{font-size:var(--t4);color:var(--mute)}
+.cmp b{font-weight:600;color:var(--ink)}
+.seg{display:grid;gap:var(--s2);margin-bottom:var(--s3)}
+.seg.two{grid-template-columns:1fr 1fr} .seg.three{grid-template-columns:repeat(3,1fr)}
+
+/* ---------- тёмная тема ---------- */
+:root{--ink:#F2F2F2;--mute:#8C8C8C;--line:#242424;--soft:#161616;--bg:#0B0B0B;--lime:#AEEA00;--on-lime:#0B0B0B;--plan:#FF9838;--alarm:#FF6B5C;color-scheme:dark}
+.nrow b.good,.grid b.good,.kv b.g,.pf .f,.rt.ok{color:var(--lime)}
+.task .ic{color:var(--lime)}
 .ovl{background:rgba(0,0,0,.6)}
 .sheet{border:1px solid var(--line);border-bottom:0}
+.st.wait{background:rgba(255,152,56,.18)} .st.no{background:rgba(255,107,92,.16)}
 
-
-/* ---------- шапка: обёртка ряда ---------- */
-.hdr{display:block}
-.hdr .row{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3)}
-.who span{font-size:var(--t4);color:var(--mute)}
-.who .role{color:var(--on-lime)}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <div class="ovl" id="ovl" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
-
 <script>
 var IC={
 users:'<circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.5"/><path d="M17.5 14a6 6 0 0 1 3 6"/>',
-chart:'<path d="M4 20h16"/><path d="M7.5 20v-5M12 20v-9M16.5 20v-6"/>',
 money:'<rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="12" cy="12" r="2.5"/>',
-deal:'<path d="M3.5 11 8 6.5l3.5 2.5L16 6l4.5 5"/><path d="M4 13.5 9 19l4-3 4 3 3-4"/>',
 doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/>',
-funnel:'<path d="M3 4h18l-7 8v7l-4 2v-9z"/>',
 tune:'<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15.5" cy="12" r="2"/><circle cx="7.5" cy="17" r="2"/>',
-ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
-alert:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.5v.01"/>'
+ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>'
 };
-function ic(n,s){ s=s||24; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
-
-var KEY='topf-owner-v22', mem=null;
+function ic(n,s){ s=s||22; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
+var KEY='topf-owner-v4', mem=null;
 function save(){ var s=JSON.stringify(state); try{ localStorage.setItem(KEY,s);}catch(e){ mem=s; } }
-function load(){ var s=null; try{ s=localStorage.getItem(KEY);}catch(e){ s=mem; } if(!s)s=mem;
-  if(!s) return null; try{ return JSON.parse(s);}catch(e){ return null; } }
-
-var NORMKEYS=[{k:'sdelka',l:'сделки'},{k:'pd',l:'задаток'},{k:'pokaz',l:'показы'},
-              {k:'ocenka',l:'оценки'},{k:'vstr',l:'встречи'},{k:'rekl',l:'реклама'},{k:'leads',l:'заявки'}];
+function load(){ var s=null; try{ s=localStorage.getItem(KEY);}catch(e){ s=mem; } if(!s)s=mem; if(!s) return null; try{ return JSON.parse(s);}catch(e){ return null; } }
+var NK=[{k:'sdelka',l:'сделки'},{k:'pd',l:'задаток'},{k:'pokaz',l:'показы'},{k:'ocenka',l:'оценки'},{k:'vstr',l:'встречи'},{k:'rekl',l:'реклама'},{k:'leads',l:'заявки'}];
 function money(n){ return Number(n||0).toLocaleString('ru-RU')+' ₽'; }
-function mln(n){ return (n/1000000).toFixed(1)+' млн'; }
+function mln(n){ return (n/1000000).toFixed(1).replace('.',',')+' млн'; }
 function kk(n){ return Math.round(n/1000)+'к'; }
 function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
 function iso(d){ return d.toISOString().slice(0,10); }
 function plus(n){ return iso(new Date(Date.now()+n*864e5)); }
-var MN=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-var MNN=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-var WD=['вс','пн','вт','ср','чт','пт','сб'];
+var MN=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'], WD=['вс','пн','вт','ср','чт','пт','сб'];
 function ru(d){ var p=String(d).split('-'); return parseInt(p[2],10)+' '+MN[parseInt(p[1],10)-1]; }
 function rud(d){ var dt=new Date(d+'T00:00:00'); return WD[dt.getDay()]+', '+ru(d); }
-function monthNom(){ return MNN[new Date().getMonth()]; }
 function ini(n){ var p=n.split(' '); return (p[0]||'')[0]+((p[1]||'')[0]||''); }
+function warn(t){ flash(t,true); }
+function flash(txt,bad){ var e=document.createElement('div'); e.style.cssText='position:fixed;left:0;right:0;top:0;z-index:60;padding:16px 14px;text-align:center;font-weight:600;font-size:15px;'+(bad?'background:#E03A2F;color:#fff':'background:#AEEA00;color:#0F0F0F'); e.textContent=txt; document.body.appendChild(e); setTimeout(function(){ if(e.parentNode) e.parentNode.removeChild(e); },bad?2600:1800); }
 
 /* ================= данные ================= */
 function seed(){
   var t=iso(new Date()), y=plus(-1);
-  function agent(name,w,m,pd,sd){ return {name:name,week:w,month:m,pdSum:pd,deals:sd}; }
-  function dep(id,name,rop,agents,sent,got){
-    return {id:id,name:name,rop:rop,agents:agents,sent:sent,got:got};
-  }
-  var A=function(n,k){ return agent(n,
-    {sdelka:k[0],pd:k[1],pokaz:k[2],ocenka:k[3],vstr:k[4],rekl:k[5],leads:k[6]},
-    {sdelka:k[0]*3,pd:k[1]*3,pokaz:k[2]*4,ocenka:k[3]*4,vstr:k[4]*4,rekl:k[5]*4,leads:k[6]*4},
-    k[1]*100000, k[0]*3); };
+  var A=function(n,k,prev){ return {name:n,week:{sdelka:k[0],pd:k[1],pokaz:k[2],ocenka:k[3],vstr:k[4],rekl:k[5],leads:k[6]},
+    month:{sdelka:k[0]*3,pd:k[1]*3,pokaz:k[2]*4,ocenka:k[3]*4,vstr:k[4]*4,rekl:k[5]*4,leads:k[6]*4},pdSum:k[1]*100000,low:!!prev}; };
+  function dep(id,name,rop,agents,sent,got,prevPd){ return {id:id,name:name,rop:rop,agents:agents,sent:sent,got:got,prevPd:prevPd}; }
   return {
-    user:null, date:t, dateY:y,
-    norm:{sdelka:4,pd:4,pokaz:20,ocenka:20,vstr:20,rekl:8,leads:40},
-    normW:{sdelka:1,pd:1,pokaz:5,ocenka:5,vstr:5,rekl:2,leads:10},
+    user:null,date:t,dateY:y,
+    norm:{sdelka:4,pd:4,pokaz:20,ocenka:20,vstr:20,rekl:8,leads:40}, normW:{sdelka:1,pd:1,pokaz:5,ocenka:5,vstr:5,rekl:2,leads:10},
+    monthPlan:14000000, signedMonth:2100000, signedPrevSame:2600000, daysPassed:4, daysTotal:22,
     deps:[
-      dep(1,'Отдел №1','Ковалёва Марина',[A('Кастромина Ольга',[1,2,8,5,4,3,19]),A('Розанова Мария',[1,2,9,6,5,2,22]),
-        A('Титова Вера',[0,1,7,4,3,2,16]),A('Зуева Светлана',[0,1,7,5,4,2,17]),A('Ершова Дарья',[1,2,8,5,5,3,21]),
-        A('Лапина Ольга',[0,0,3,2,1,1,8]),A('Мельник Алина',[0,0,2,1,0,0,5]),A('Сомова Ксения',[0,0,1,0,0,0,2]),
-        A('Гончарова Елена',[0,0,4,2,2,2,11]),A('Кондратьева Ирина',[0,0,6,3,3,1,14]),A('Панова Ирина',[0,1,5,3,2,1,12])],11,true),
-      dep(2,'Отдел №2','Титов Сергей',[A('Агеева Лидия',[1,1,7,4,4,2,18]),A('Белова Юлия',[0,1,6,4,3,2,15]),
-        A('Волкова Дарья',[1,2,8,5,4,3,20]),A('Громова Инна',[0,0,4,2,2,1,10]),A('Дьякова Анна',[0,1,5,3,3,2,13]),
-        A('Ежова Мария',[0,0,3,2,1,1,9]),A('Жукова Ольга',[1,1,6,4,3,2,16]),A('Зорина Вера',[0,0,2,1,1,0,6]),
-        A('Ильина Софья',[0,1,5,3,2,1,12]),A('Кузина Алла',[0,0,4,2,2,1,11])],8,true),
-      dep(3,'Отдел №3','Ершова Наталья',[A('Лебедева Ника',[0,1,4,2,2,1,10]),A('Мишина Раиса',[0,0,3,1,1,1,7]),
-        A('Носова Нина',[0,0,2,1,1,0,5]),A('Орлова Вера',[0,1,4,2,2,1,9]),A('Панина Зоя',[0,0,3,2,1,1,8]),
-        A('Рыжова Таисия',[0,0,2,1,0,0,4]),A('Седова Кира',[0,0,3,1,1,1,6])],6,false)
+      dep(1,'Отдел №1','Ковалёва Марина',[A('Кастромина Ольга',[1,2,8,5,4,3,19]),A('Розанова Мария',[1,2,9,6,5,2,22]),A('Титова Вера',[0,1,7,4,3,2,16]),A('Зуева Светлана',[0,1,7,5,4,2,17]),A('Ершова Дарья',[1,2,8,5,5,3,21]),A('Лапина Ольга',[0,0,3,2,1,1,8],true),A('Мельник Алина',[0,0,2,1,0,0,5],true),A('Сомова Ксения',[0,0,1,0,0,0,2]),A('Гончарова Елена',[0,0,4,2,2,2,11]),A('Кондратьева Ирина',[0,0,6,3,3,1,14]),A('Панова Ирина',[0,1,5,3,2,1,12])],11,true,8),
+      dep(2,'Отдел №2','Титов Сергей',[A('Агеева Лидия',[1,1,7,4,4,2,18]),A('Белова Юлия',[0,1,6,4,3,2,15]),A('Волкова Дарья',[1,2,8,5,4,3,20]),A('Громова Инна',[0,0,4,2,2,1,10],true),A('Дьякова Анна',[0,1,5,3,3,2,13]),A('Ежова Мария',[0,0,3,2,1,1,9]),A('Жукова Ольга',[1,1,6,4,3,2,16]),A('Зорина Вера',[0,0,2,1,1,0,6],true),A('Ильина Софья',[0,1,5,3,2,1,12]),A('Кузина Алла',[0,0,4,2,2,1,11])],8,true,6),
+      dep(3,'Отдел №3','Ершова Наталья',[A('Лебедева Ника',[0,1,4,2,2,1,10]),A('Мишина Раиса',[0,0,3,1,1,1,7]),A('Носова Нина',[0,0,2,1,1,0,5],true),A('Орлова Вера',[0,1,4,2,2,1,9]),A('Панина Зоя',[0,0,3,2,1,1,8]),A('Рыжова Таисия',[0,0,2,1,0,0,4]),A('Седова Кира',[0,0,3,1,1,1,6])],6,false,4)
     ],
     reports:[
-      {kind:'day',date:plus(-1),label:'Вчера',signed:512000,deals:2,pd:6,plan:128,fact:96,ref:11,mv:14,leads:341,disc:'27 из 30'},
-      {kind:'day',date:plus(-2),label:'Позавчера',signed:398000,deals:1,pd:4,plan:124,fact:101,ref:8,mv:9,leads:318,disc:'29 из 30'},
-      {kind:'week',date:plus(-7),label:'Прошлая неделя',signed:2410000,deals:7,pd:23,leads:1620,disc:'92%'},
-      {kind:'month',date:plus(-32),label:'Прошлый месяц',signed:9800000,deals:26,pd:94,leads:6240,disc:'88%'}
-    ],
-    today:{signed:512000,pd:6,deals:2,planPd:8,leads:341}
+      {kind:'day',date:plus(-1),label:'Вчера',signed:512000,pd:6,deals:2,leads:341,disc:'25 из 28'},
+      {kind:'day',date:plus(-2),label:'Позавчера',signed:398000,pd:4,deals:1,leads:318,disc:'27 из 28'},
+      {kind:'week',date:plus(-7),label:'Прошлая неделя',signed:2410000,pd:23,deals:7,leads:1620,disc:'92%'},
+      {kind:'month',date:plus(-32),label:'Прошлый месяц',signed:9800000,pd:94,deals:26,leads:6240,disc:'88%'}
+    ]
   };
 }
 var state=load()||seed();
-(function migrate(){
-  var d=seed();
-  for(var k in d){ if(typeof state[k]==='undefined') state[k]=d[k]; }
-  if(state.date!==iso(new Date())){ var u=state.user; state=seed(); state.user=u; }
-  save();
-})();
+(function(){ var d=seed(); for(var k in d){ if(typeof state[k]==='undefined') state[k]=d[k]; } if(state.date!==iso(new Date())){ var u=state.user; state=seed(); state.user=u; } save(); })();
 
 /* ================= расчёты ================= */
-function normM(k){ return state.norm[k]||0; }
-function normW(k){ return (state.normW&&state.normW[k])||0; }
-function allAgents(){ var o=[]; for(var i=0;i<state.deps.length;i++) o=o.concat(state.deps[i].agents); return o; }
-function depSum(dep,per,k){ var n=0; for(var i=0;i<dep.agents.length;i++) n+=dep.agents[i][per][k]||0; return n; }
-function coSum(per,k){ var n=0; for(var i=0;i<state.deps.length;i++) n+=depSum(state.deps[i],per,k); return n; }
-function coNorm(per,k){ return (per==='week'?normW(k):normM(k))*allAgents().length; }
-function depNorm(dep,per,k){ return (per==='week'?normW(k):normM(k))*dep.agents.length; }
+function normM(k){ return state.norm[k]||0; } function normW(k){ return state.normW[k]||0; }
+function agents(){ var o=[]; for(var i=0;i<state.deps.length;i++) o=o.concat(state.deps[i].agents); return o; }
+function depSum(d,p,k){ var n=0; for(var i=0;i<d.agents.length;i++) n+=d.agents[i][p][k]||0; return n; }
+function coSum(p,k){ var n=0; for(var i=0;i<state.deps.length;i++) n+=depSum(state.deps[i],p,k); return n; }
+function coNorm(p,k){ return (p==='week'?normW(k):normM(k))*agents().length; }
+function depNorm(d,p,k){ return (p==='week'?normW(k):normM(k))*d.agents.length; }
 function sentAll(){ var s=0,n=0; for(var i=0;i<state.deps.length;i++){ s+=state.deps[i].sent; n+=state.deps[i].agents.length; } return [s,n]; }
+function pace(){ var expected=state.monthPlan*state.daysPassed/state.daysTotal; return Math.round((state.signedMonth/expected-1)*100); }
 
 /* ================= рендер ================= */
-var nav='rep', openD=null, pickName=null, per='week', fMode='week';
+var nav='today', openD=null, pickName=null, per='week';
 var OWNER='Прохорова Елена';
-function render(){
-  try{ draw(); }catch(e){
-    document.getElementById('root').innerHTML='<div class="app"><div class="card"><div class="t">Что-то пошло не так</div>'+
-      '<button class="btn" onclick="hardReset()">Очистить и открыть заново</button><div class="hint">'+esc(e.message)+'</div></div></div>';
-  }
-}
+function render(){ try{ draw(); }catch(e){ document.getElementById('root').innerHTML='<div class="app"><div class="card"><span class="t">Что-то пошло не так</span><button class="btn" onclick="hardReset()">Очистить и открыть заново</button><div class="hint">'+esc(e.message)+'</div></div></div>'; } }
 function hardReset(){ try{ localStorage.removeItem(KEY);}catch(e){} mem=null; state=seed(); save(); location.reload(); }
 function draw(){
   var r=document.getElementById('root');
   if(!state.user){ r.innerHTML=loginHTML(); return; }
-  var body = openD? depHTML()
-           : nav==='rep'? repHTML()
-           : nav==='deps'? depsHTML()
-           : nav==='money'? moneyHTML()
-           : nav==='funnel'? funnelHTML()
-           : setHTML();
+  var body = openD? depHTML() : nav==='today'? todayHTML() : nav==='money'? moneyHTML() : nav==='people'? peopleHTML() : setHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет собственника v4.0.0 · прототип<br>Данные выдуманные.<br>'+
-    '<button onclick="resetAll()">сбросить и начать заново</button></div></div>'+navHTML();
-}
-function navHTML(){
-  return '<div class="bottom"><div class="in"><div class="nav">'+
-    nb('rep','doc','Отчёты')+nb('deps','users','Отделы')+nb('money','money','Задатки')+
-    nb('funnel','funnel','Воронка')+nb('set','tune','Настройки')+'</div></div></div>';
+    '<div class="foot">ТОЧНО. · кабинет собственника v4.0.1 · прототип<br>Данные выдуманные.<br><button onclick="resetAll()">сбросить и начать заново</button></div></div>'+
+    '<div class="bottom"><div class="in"><div class="nav" style="grid-template-columns:repeat(4,1fr)">'+nb('today','doc','Сегодня')+nb('money','money','Деньги')+nb('people','users','Люди')+nb('set','tune','Настройки')+'</div></div></div>';
 }
 function nb(k,i,n){ return '<button class="'+(nav===k&&!openD?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,24)+'</b>'+n+'</button>'; }
-function go(k){ nav=k; openD=null; render(); }
+function go(k){ nav=k; openD=null; render(); try{ window.scrollTo(0,0); }catch(e){} }
 function hdrHTML(){
-  return '<div class="hdr"><div class="row">'+
-    '<div class="mark">ТОЧНО<i>.</i><small>план / факт · v4.0.0</small></div>'+
-    '<div class="who"><b>'+esc(state.user)+'</b><span class="dt">'+state.deps.length+(state.deps.length===1?' отдел':(state.deps.length<5?' отдела':' отделов'))+' · '+rud(state.date)+'</span>'+
-    '<span class="role">Собственник</span></div></div></div>';
+  var n=state.deps.length;
+  return '<div class="hdr"><div class="row"><div class="mark">ТОЧНО<i>.</i><small>план / факт · v4.0.1</small></div>'+
+    '<div class="who"><b>'+esc(state.user)+'</b><span>'+n+(n===1?' отдел':(n<5?' отдела':' отделов'))+' · '+rud(state.date)+'</span><span class="role">Собственник</span></div></div></div>';
 }
 function loginHTML(){
-  return '<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет собственника · v4.0.0</div>'+
-    '<h2>Вход в кабинет</h2>'+
+  return '<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет собственника · v4.0.1</div><h2>Вход в кабинет</h2>'+
     '<button class="pick'+(pickName===OWNER?' on':'')+'" onclick="pickName=\''+OWNER+'\';render()">'+OWNER+'</button>'+
-    '<div class="lbl">Пароль</div><input type="password" id="pw" placeholder="••••••">'+
-    '<div class="sbtn"><button class="btn" onclick="pickName=null;render()">Сброс</button>'+
-    '<button class="btn pri" onclick="doLogin()">Войти</button></div>'+
-    '<div class="note">Пароль в прототипе любой.</div></div>';
+    '<span class="lbl">Пароль</span><input type="password" id="pw" placeholder="••••••"><div class="sbtn"><button class="btn" onclick="pickName=null;render()">Сброс</button><button class="btn pri" onclick="doLogin()">Войти</button></div><div class="note">Пароль в прототипе любой.</div></div>';
 }
-function doLogin(){
-  var pw=document.getElementById('pw');
-  if(!pickName){ alert('Выберите себя'); return; }
-  if(!pw.value){ alert('Введите пароль'); return; }
-  state.user=pickName; save(); render();
-}
+function doLogin(){ var pw=document.getElementById('pw'); if(!pickName){ warn('Выберите себя'); return; } if(!pw.value){ warn('Введите пароль'); return; } state.user=pickName; save(); render(); }
 
-/* ================= ОТЧЁТЫ ================= */
-function repHTML(){
-  var s=sentAll(), t=state.today;
-  var h='<div class="card"><div class="t">Пришло от РОПов до 11:00</div>'+
-    '<div class="big">'+money(t.signed)+'<small>подписано за '+rud(state.dateY)+'</small></div>'+
-    '<div class="grid" style="margin-top:12px">'+
-    '<button><b class="good">'+t.pd+'</b><span>задатков</span></button>'+
-    '<button><b>'+t.deals+'</b><span>сделок</span></button>'+
-    '<button><b class="'+(s[0]===s[1]?'good':'bad')+'">'+s[0]+'/'+s[1]+'</b><span>сдали</span></button>'+
-    '</div><div class="hint" style="margin:9px 0 0">Дисциплина стоит рядом с деньгами: если сдала половина, проценты ниже — фикция.</div></div>';
-  h+='<div class="sec">Отчёты отделов за вчера</div>';
+/* ================= СЕГОДНЯ ================= */
+function todayHTML(){
+  var p=pace(), s=sentAll(), r=state.reports[0];
+  var h='<div class="card"><div class="verdict'+(p>=0?' good':' bad')+'">За '+state.daysPassed+' дня месяца подписано '+mln(state.signedMonth)+' из '+mln(state.monthPlan)+' — темп '+(p>=0?'выше плана на '+p+'%':'ниже плана на '+Math.abs(p)+'%')+'</div>'+
+    '<div class="cmp">В прошлом месяце к этому дню было <b>'+mln(state.signedPrevSame)+'</b></div>'+
+    '<div class="bar"><i style="width:'+Math.min(Math.round(state.signedMonth/state.monthPlan*100),100)+'%"></i></div></div>';
+  h+='<div class="grid"><div><b class="good">'+money(r.signed).replace(' ₽','')+'</b><span>подписано вчера</span></div><div><b>'+r.pd+'</b><span>задатков</span></div><div><b class="'+(s[0]===s[1]?'good':'bad')+'">'+s[0]+'/'+s[1]+'</b><span>сдали</span></div></div>';
+  h+='<div class="sec warn">Отклонения</div>';
+  var dev=[];
   for(var i=0;i<state.deps.length;i++){ var d=state.deps[i];
-    var pct=Math.round(d.sent/d.agents.length*100);
-    h+='<button class="item'+(d.got?'':' alert')+'" onclick="openDep('+d.id+')"><div class="ic">'+d.id+'</div>'+
-       '<div class="tx"><div class="tp">'+esc(d.rop)+' · '+d.agents.length+' человек</div>'+
-       '<div class="nm">'+esc(d.name)+'</div>'+
-       '<div class="sub">агенты сдали '+d.sent+' из '+d.agents.length+' · '+pct+'%</div></div>'+
-       '<span class="rt '+(d.got?'ok':'no')+'">'+(d.got?'отчёт есть':'отчёта нет')+'</span></button>';
+    if(!d.got) dev.push({d:d,why:'нет отчёта от РОПа'});
+    var pd=depSum(d,'week','pd'), pn=depNorm(d,'week','pd'); if(pd<pn*0.5) dev.push({d:d,why:'задатки '+pd+' из '+pn+' — меньше половины нормы'});
+    if(d.sent<d.agents.length*0.8) dev.push({d:d,why:'сдали '+d.sent+' из '+d.agents.length});
   }
+  if(!dev.length) h+='<div class="hint">Отклонений нет — можно не заходить.</div>';
+  for(var j=0;j<dev.length;j++) h+='<button class="task noic bad" onclick="openDep('+dev[j].d.id+')"><div class="c"><b>'+dev[j].d.id+'</b><span>отдел</span></div><div class="c"><b>'+esc(dev[j].d.name)+'</b><span class="wrap">'+esc(dev[j].why)+'</span></div><div class="r"><span class="st no">смотреть</span></div></button>';
+  h+='<div class="sec">Отделы за вчера</div>';
+  for(var k=0;k<state.deps.length;k++){ var dp=state.deps[k], pct=Math.round(dp.sent/dp.agents.length*100);
+    h+='<button class="task noic'+(dp.got?'':' bad')+'" onclick="openDep('+dp.id+')"><div class="c"><b>'+dp.id+'</b><span>'+dp.agents.length+' чел</span></div><div class="c"><b>'+esc(dp.name)+'</b><span>'+esc(dp.rop)+' · сдали '+dp.sent+' из '+dp.agents.length+' · '+pct+'%</span></div><div class="r"><span class="st '+(dp.got?'ok':'no')+'">'+(dp.got?'отчёт есть':'отчёта нет')+'</span></div></button>'; }
   h+='<div class="sec">Архив · только просмотр</div>';
-  h+=repGroup('Ежедневные','day');
-  h+=repGroup('Еженедельные','week');
-  h+=repGroup('Ежемесячные','month');
-  h+='<div class="hint">Недельные и месячные своды считаются автоматически по показателям.</div>';
-  return h;
+  var grp=function(t,kind){ var l=[]; for(var i=0;i<state.reports.length;i++) if(state.reports[i].kind===kind) l.push(i); if(!l.length) return '';
+    var x='<details><summary>'+t+'<span class="cnt">'+l.length+'</span></summary><div class="dbody">';
+    for(var j=0;j<l.length;j++){ var rr=state.reports[l[j]]; x+='<button class="task noic" onclick="openRep('+l[j]+')"><div class="c"><b>'+ru(rr.date)+'</b><span>'+kind+'</span></div><div class="c"><b>'+esc(rr.label)+'</b><span>'+money(rr.signed)+' · задатков '+rr.pd+'</span></div><div class="r"><span class="st mv">открыть</span></div></button>'; }
+    return x+'</div></details>'; };
+  return h+grp('Ежедневные','day')+grp('Еженедельные','week')+grp('Ежемесячные','month');
 }
-function repGroup(title,kind){
-  var list=[]; for(var i=0;i<state.reports.length;i++) if(state.reports[i].kind===kind) list.push({r:state.reports[i],i:i});
-  if(!list.length) return '';
-  var h='<details><summary>'+title+'<span class="cnt">'+list.length+'</span></summary><div class="dbody">';
-  for(var j=0;j<list.length;j++){ var r=list[j].r;
-    h+='<button class="item" onclick="openRep('+list[j].i+')"><div class="ic">'+ic(kind==='day'?'ok':'chart')+'</div>'+
-       '<div class="tx"><div class="tp">'+ru(r.date)+'</div><div class="nm">'+esc(r.label)+'</div>'+
-       '<div class="sub">'+money(r.signed)+' · задатков '+r.pd+' · дисциплина '+r.disc+'</div></div>'+
-       '<span class="rt wait">открыть</span></button>'; }
-  return h+'</div></details>';
-}
-function openRep(i){
-  var r=state.reports[i];
-  var h='<h3>'+esc(r.label)+'</h3><div class="sh">'+ru(r.date)+'</div><div class="card">'+
-    '<div class="kv two"><span>Подписано</span><b class="g">'+money(r.signed)+'</b></div>'+
-    '<div class="kv two"><span>Задатков</span><b>'+r.pd+'</b></div>'+
-    '<div class="kv two"><span>Сделок</span><b>'+r.deals+'</b></div>'+
-    (r.plan?'<div class="kv two"><span>Дела</span><span class="pf"><span class="f">'+r.fact+'</span><span class="sl">/</span><span class="p">'+r.plan+'</span></span></div>':'')+
-    (r.ref!=null?'<div class="kv two"><span>Отказов</span><b class="r">'+r.ref+'</b></div>':'')+
-    (r.mv!=null?'<div class="kv two"><span>Переносов</span><b class="s">'+r.mv+'</b></div>':'')+
-    '<div class="kv two"><span>Заявок</span><b>'+r.leads+'</b></div>'+
-    '<div class="kv two"><span>Дисциплина</span><b>'+r.disc+'</b></div></div>'+
-    '<div class="hint">Отчёт закрыт для правок.</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Закрыть</button><button class="btn pri" onclick="closeSheet()">Понятно</button></div>';
-  sheet(h);
-}
+function openRep(i){ var r=state.reports[i]; sheet('<h3>'+esc(r.label)+'</h3><span class="sh">'+ru(r.date)+'</span><div class="card"><div class="kv two"><span>Подписано</span><b class="g">'+money(r.signed)+'</b></div><div class="kv two"><span>Задатков</span><b>'+r.pd+'</b></div><div class="kv two"><span>Сделок</span><b>'+r.deals+'</b></div><div class="kv two"><span>Заявок</span><b>'+r.leads+'</b></div><div class="kv two"><span>Дисциплина</span><b>'+r.disc+'</b></div></div><div class="hint">Отчёт закрыт для правок.</div><div class="sbtn" style="grid-template-columns:1fr"><button class="btn pri" onclick="closeSheet()">Понятно</button></div>'); }
 
-/* ================= ОТДЕЛЫ ================= */
-function depsHTML(){
-  var isW=per==='week';
-  var h='<div class="card"><div class="t">Период</div><div class="chips">'+
-    '<button class="chip'+(isW?' on':'')+'" onclick="per=\'week\';render()">Неделя</button>'+
-    '<button class="chip'+(!isW?' on':'')+'" onclick="per=\'month\';render()">'+monthNom()+'</button></div></div>';
-  h+='<div class="card"><div class="t">Компания · факт / план</div>';
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k, d=coSum(per,k), n=coNorm(per,k);
-    h+='<div class="kv"><span>'+NORMKEYS[i].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span>'+
-       '<span class="p">'+n+'</span></span><span class="pct">'+Math.round(d/n*100)+'%</span></div>'; }
-  h+='</div>';
-  h+='<div class="sec">Отделы · на одного агента</div>';
-  for(var j=0;j<state.deps.length;j++){ var dp=state.deps[j];
-    var pd=depSum(dp,per,'pd'), pdn=depNorm(dp,per,'pd');
-    var perAg=(depSum(dp,per,'pd')/dp.agents.length).toFixed(1);
-    h+='<button class="item" onclick="openDep('+dp.id+')"><div class="ic">'+dp.id+'</div><div class="tx">'+
-       '<div class="tp">'+esc(dp.rop)+' · '+dp.agents.length+' человек</div><div class="nm">'+esc(dp.name)+'</div>'+
-       '<div class="sub">задатков на агента '+perAg+'</div></div>'+
-       '<span class="rt '+(pd>=pdn?'ok':(pd<pdn*0.6?'no':'mv'))+'">'+Math.round(pd/pdn*100)+'%</span></button>';
-  }
-  h+='<div class="hint">Отделы разного размера, поэтому сравнение всегда на одного агента.</div>';
-  return h;
-}
-function openDep(id){ for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) openD=state.deps[i]; nav='deps'; render(); }
-function depHTML(){
-  var d=openD, isW=per==='week';
-  var h='<button class="back" onclick="openD=null;render()">← К отделам</button>'+
-    '<div class="card"><div class="t">'+esc(d.name)+' · '+esc(d.rop)+'</div><div class="chips" style="margin-bottom:12px">'+
-    '<button class="chip'+(isW?' on':'')+'" onclick="per=\'week\';render()">Неделя</button>'+
-    '<button class="chip'+(!isW?' on':'')+'" onclick="per=\'month\';render()">'+monthNom()+'</button></div>';
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k, v=depSum(d,per,k), n=depNorm(d,per,k);
-    h+='<div class="kv"><span>'+NORMKEYS[i].l+'</span><span class="pf"><span class="f">'+v+'</span><span class="sl">/</span>'+
-       '<span class="p">'+n+'</span></span><span class="pct">'+Math.round(v/n*100)+'%</span></div>'; }
-  h+='</div>';
-  h+='<div class="sec">Агенты · '+(isW?'неделя':'месяц')+'</div>';
-  var list=d.agents.slice().sort(function(a,b){ return (b[per].pd||0)-(a[per].pd||0); });
-  for(var j=0;j<list.length;j++){ var a=list[j], dd=a[per];
-    var tot=0,nd=0;
-    for(var q=0;q<NORMKEYS.length;q++){ var key=NORMKEYS[q].k; tot+=dd[key]||0; nd+=(isW?normW(key):normM(key)); }
-    var pct=Math.round(tot/nd*100);
-    var det='<details><summary>'+ini(a.name)+' · '+esc(a.name)+'<span class="cnt">'+pct+'%</span></summary><div class="dbody">';
-    for(var z=0;z<NORMKEYS.length;z++){ var kz=NORMKEYS[z].k, vz=dd[kz]||0, nz=isW?normW(kz):normM(kz);
-      det+='<div class="kv"><span>'+NORMKEYS[z].l+'</span><span class="pf"><span class="f">'+vz+'</span><span class="sl">/</span><span class="p">'+nz+'</span></span></div>'; }
-    det+='</div></details>';
-    h+=det;
-  }
-  h+='<div class="hint">Прошлые недели и месяцы доступны в архиве отчётов — сданные периоды не пересчитываются.</div>';
-  return h;
-}
-
-/* ================= ЗАДАТКИ И СДЕЛКИ ================= */
+/* ================= ДЕНЬГИ ================= */
 function moneyHTML(){
-  var isW=per==='week';
-  var pd=coSum(per,'pd'), pdn=coNorm(per,'pd'), sd=coSum(per,'sdelka'), sdn=coNorm(per,'sdelka');
-  var sum=0; var ag=allAgents();
-  for(var i=0;i<ag.length;i++) sum+=ag[i].pdSum*(isW?1:3);
-  var h='<div class="card"><div class="t">Период</div><div class="chips">'+
-    '<button class="chip'+(isW?' on':'')+'" onclick="per=\'week\';render()">Неделя</button>'+
-    '<button class="chip'+(!isW?' on':'')+'" onclick="per=\'month\';render()">'+monthNom()+'</button></div></div>';
-  h+='<div class="card"><div class="t">Задатки · с суммами</div>'+
-    '<div class="big">'+mln(sum)+'<small>подписанная комиссия · '+pd+' задатков</small></div>'+
-    '<div class="bar"><i style="width:'+Math.min(Math.round(pd/pdn*100),100)+'%"></i></div>'+
-    '<div class="kv two"><span>Задатков</span><span class="pf"><span class="f">'+pd+'</span><span class="sl">/</span><span class="p">'+pdn+'</span></span></div>'+
-    '<div class="kv two"><span>Средняя комиссия</span><b>'+money(pd?Math.round(sum/pd):0)+'</b></div></div>';
-  h+='<div class="card"><div class="t">Сделки · без сумм</div>'+
-    '<div class="big">'+sd+'<small>закрытых сделок за период</small></div>'+
-    '<div class="bar"><i style="width:'+Math.min(Math.round(sd/sdn*100),100)+'%"></i></div>'+
-    '<div class="kv two"><span>Сделки</span><span class="pf"><span class="f">'+sd+'</span><span class="sl">/</span><span class="p">'+sdn+'</span></span></div>'+
-    '<div class="hint" style="margin:9px 0 0">Деньги живут в задатке — у сделки суммы нет. Она подтверждает, что задаток дошёл до конца.</div></div>';
+  var isW=per==='week', pd=coSum(per,'pd'), pdn=coNorm(per,'pd'), sd=coSum(per,'sdelka'), sdn=coNorm(per,'sdelka');
+  var sum=0, ag=agents(); for(var i=0;i<ag.length;i++) sum+=ag[i].pdSum*(isW?1:3);
+  var prev=isW? 2410000 : 9800000;
+  var h='<div class="seg two"><button class="chip'+(isW?' on':'')+'" onclick="per=\'week\';render()">Неделя</button><button class="chip'+(!isW?' on':'')+'" onclick="per=\'month\';render()">Месяц</button></div>';
+  h+='<div class="card"><div class="big">'+mln(sum)+'<small>подписанная комиссия · '+pd+' задатков из '+pdn+' по норме</small></div><div class="bar"><i style="width:'+Math.min(Math.round(pd/pdn*100),100)+'%"></i></div>'+
+     '<div class="cmp">'+(isW?'Прошлая неделя':'Прошлый месяц')+': <b>'+mln(prev)+'</b> · '+(sum>=prev?'больше на '+Math.round((sum/prev-1)*100)+'%':'меньше на '+Math.round((1-sum/prev)*100)+'%')+'</div></div>';
+  h+='<div class="grid"><div><b class="'+(sd>=sdn?'good':'')+'">'+sd+'/'+sdn+'</b><span>сделки</span></div><div><b class="'+(pd>=pdn?'good':'')+'">'+pd+'/'+pdn+'</b><span>задатки</span></div><div><b>'+money(pd?Math.round(sum/pd):0).replace(' ₽','')+'</b><span>средняя</span></div></div>';
+  h+='<div class="sec">Воронка · факт / норма</div><div class="card">';
+  for(var j=0;j<NK.length;j++){ var k=NK[j].k, d=coSum(per,k), n=coNorm(per,k);
+    h+='<div class="kv"><span>'+NK[j].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+n+'</span></span><span class="pct">'+Math.round(d/n*100)+'%</span></div>'; }
+  var lead=coSum('month','leads'), pok=coSum('month','pokaz'), pdm=coSum('month','pd'), sdm=coSum('month','sdelka');
+  h+='</div><div class="card"><span class="t">Конверсии · месяц</span><div class="kv two"><span>Заявка → показ</span><b>'+Math.round(pok/lead*100)+'%</b></div><div class="kv two"><span>Показ → задаток</span><b>'+(pdm/pok*100).toFixed(1)+'%</b></div><div class="kv two"><span>Задаток → сделка</span><b>'+(pdm?Math.round(sdm/pdm*100):0)+'%</b></div></div>';
   h+='<div class="sec">По отделам</div>';
-  for(var j=0;j<state.deps.length;j++){ var d=state.deps[j];
-    var dpd=depSum(d,per,'pd'), dsd=depSum(d,per,'sdelka'), ds=0;
-    for(var q=0;q<d.agents.length;q++) ds+=d.agents[q].pdSum*(isW?1:3);
-    h+='<div class="item"><div class="ic">'+d.id+'</div><div class="tx"><div class="tp">задатков '+dpd+' · сделок '+dsd+'</div>'+
-       '<div class="nm">'+esc(d.name)+'</div><div class="sub">'+esc(d.rop)+'</div></div>'+
-       '<span class="rt ok">'+kk(ds)+'</span></div>'; }
+  for(var q=0;q<state.deps.length;q++){ var dp=state.deps[q], dpd=depSum(dp,per,'pd'), ds=0; for(var z=0;z<dp.agents.length;z++) ds+=dp.agents[z].pdSum*(isW?1:3);
+    h+='<button class="task noic hassum" style="grid-template-columns:58px 1fr auto" onclick="openDep('+dp.id+')"><div class="c"><b>'+dp.id+'</b><span>'+dp.agents.length+' чел</span></div><div class="c"><b>'+esc(dp.name)+'</b><span>задатков '+dpd+' · сделок '+depSum(dp,per,'sdelka')+' · на агента '+(dpd/dp.agents.length).toFixed(1)+'</span></div><div class="sum">'+kk(ds)+'</div></button>'; }
+  h+='<div class="hint">Деньги живут в задатке; у сделки суммы нет — она подтверждает, что задаток дошёл до конца.</div>';
   return h;
 }
 
-/* ================= ВОРОНКА ================= */
-function funnelHTML(){
-  var h='<div class="card"><div class="t">Период</div><div class="chips three">'+
-    fTab('day','День')+fTab('week','Неделя')+fTab('month','Месяц')+'</div></div>';
-  var mul = fMode==='day'? 0.2 : (fMode==='week'? 1 : 4.33);
-  var pk = fMode==='month'?'month':'week';
-  h+='<div class="card"><div class="t">Воронка компании · факт / прогноз / норма</div>';
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k;
-    var fact=Math.round(coSum(pk,k)*(fMode==='day'?0.2:1));
-    var norm=Math.round(coNorm(pk,k)*(fMode==='day'?0.2:1));
-    var fcv=Math.round(norm*0.9);
-    h+='<div class="kv"><span>'+NORMKEYS[i].l+'</span><span class="pf">'+
-       '<span class="f">'+fact+'</span><span class="sl">/</span>'+
-       '<span style="color:var(--star)">'+fcv+'</span><span class="sl">/</span>'+
-       '<span class="p">'+norm+'</span></span></div>';
-  }
-  h+='<div class="hint" style="margin-top:10px">Зелёное — факт, янтарное — прогноз, серое — норма.</div></div>';
-  var lead=coSum('month','leads'), pok=coSum('month','pokaz'), pdm=coSum('month','pd'), sdm=coSum('month','sdelka');
-  h+='<div class="card"><div class="t">Конверсии · месяц</div>'+
-    '<div class="kv two"><span>Заявка → показ</span><b>'+Math.round(pok/lead*100)+'%</b></div>'+
-    '<div class="kv two"><span>Показ → задаток</span><b>'+(pdm/pok*100).toFixed(1)+'%</b></div>'+
-    '<div class="kv two"><span>Задаток → сделка</span><b>'+(pdm?Math.round(sdm/pdm*100):0)+'%</b></div></div>';
-  h+='<div class="hint">Дневной срез — расчётный: месячная норма, делённая на рабочие дни. Он нужен для контроля темпа, а не для оценки конкретного дня.</div>';
+/* ================= ЛЮДИ ================= */
+function peopleHTML(){
+  var isW=per==='week', all=agents(), low=all.filter(function(a){ return a.low; });
+  var h='<div class="seg two"><button class="chip'+(isW?' on':'')+'" onclick="per=\'week\';render()">Неделя</button><button class="chip'+(!isW?' on':'')+'" onclick="per=\'month\';render()">Месяц</button></div>';
+  h+='<div class="card"><div class="verdict'+(low.length>4?' bad':' good')+'">'+all.length+' агентов · ниже нормы три месяца подряд — '+low.length+'</div><div class="cmp">Сравнение отделов — всегда на одного агента: они разного размера</div></div>';
+  h+='<div class="sec">Отделы · задатков на агента</div>';
+  for(var i=0;i<state.deps.length;i++){ var d=state.deps[i], pd=depSum(d,per,'pd'), pn=depNorm(d,per,'pd'), pct=Math.round(pd/pn*100);
+    h+='<button class="task noic" onclick="openDep('+d.id+')"><div class="c"><b>'+d.id+'</b><span>'+d.agents.length+' чел</span></div><div class="c"><b>'+esc(d.name)+'</b><span>'+esc(d.rop)+' · на агента '+(pd/d.agents.length).toFixed(1)+' · ниже нормы '+d.agents.filter(function(a){return a.low;}).length+'</span></div><div class="r"><span class="st '+(pct>=100?'ok':(pct<60?'no':'wait'))+'">'+pct+'%</span></div></button>'; }
+  h+='<div class="sec warn">Ниже нормы три месяца подряд</div>';
+  for(var j=0;j<low.length;j++) h+='<div class="task noic bad"><div class="c"><b>'+ini(low[j].name)+'</b><span>агент</span></div><div class="c"><b>'+esc(low[j].name)+'</b><span>сигнал к разговору, не приговор</span></div><div class="r"></div></div>';
   return h;
 }
-function fTab(m,n){ return '<button class="chip'+(fMode===m?' on':'')+'" onclick="fMode=\''+m+'\';render()">'+n+'</button>'; }
+function openDep(id){ for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) openD=state.deps[i]; render(); try{ window.scrollTo(0,0); }catch(e){} }
+function depHTML(){
+  var d=openD, isW=per==='week', pd=depSum(d,per,'pd'), pn=depNorm(d,per,'pd');
+  var h='<button class="back" onclick="openD=null;render()">← Назад</button>';
+  h+='<div class="seg two"><button class="chip'+(isW?' on':'')+'" onclick="per=\'week\';render()">Неделя</button><button class="chip'+(!isW?' on':'')+'" onclick="per=\'month\';render()">Месяц</button></div>';
+  h+='<div class="card"><div class="verdict'+(pd>=pn*0.7?' good':' bad')+'">'+esc(d.name)+' · задатки '+pd+' из '+pn+' · '+Math.round(pd/pn*100)+'%</div><div class="cmp">'+esc(d.rop)+' · прошлая неделя: <b>'+d.prevPd+'</b> задатков · сдали '+d.sent+' из '+d.agents.length+'</div></div>';
+  h+='<div class="card">';
+  for(var i=0;i<NK.length;i++){ var k=NK[i].k, v=depSum(d,per,k), n=depNorm(d,per,k); h+='<div class="kv"><span>'+NK[i].l+'</span><span class="pf"><span class="f">'+v+'</span><span class="sl">/</span><span class="p">'+n+'</span></span><span class="pct">'+Math.round(v/n*100)+'%</span></div>'; }
+  h+='</div><div class="sec">Агенты</div>';
+  var list=d.agents.slice().sort(function(a,b){ return (b[per].pd||0)-(a[per].pd||0); });
+  for(var j=0;j<list.length;j++){ var a=list[j], dd=a[per], tot=0,nd=0; for(var q=0;q<NK.length;q++){ tot+=dd[NK[q].k]||0; nd+=(isW?normW(NK[q].k):normM(NK[q].k)); } var p=Math.round(tot/nd*100);
+    h+='<div class="task noic'+(a.low?' bad':'')+'"><div class="c"><b>'+ini(a.name)+'</b><span>'+(dd.pd||0)+' зд</span></div><div class="c"><b>'+esc(a.name)+'</b><span>показов '+(dd.pokaz||0)+' · оценок '+(dd.ocenka||0)+' · встреч '+(dd.vstr||0)+(a.low?' · ниже нормы 3 мес':'')+'</span></div><div class="r"><span class="st '+(p>=100?'ok':(p<60?'no':'wait'))+'">'+p+'%</span></div></div>'; }
+  return h;
+}
 
 /* ================= НАСТРОЙКИ ================= */
 function setHTML(){
-  var h='<div class="card"><div class="t">Нормы компании · на агента</div>';
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k;
-    h+='<div class="kv"><span>'+NORMKEYS[i].l+'</span><span class="pf"><span class="p">'+normW(k)+' в неделю</span>'+
-       '<span class="sl">·</span><span class="p">'+normM(k)+' в месяц</span></span></div>'; }
-  h+='</div><button class="btn" onclick="openNorms()">Изменить нормы компании</button>'+
-     '<div class="hint" style="margin-top:10px">РОП может задать своему отделу другую норму — отклонение будет видно здесь.</div>';
+  var h='<div class="card"><span class="t">Нормы компании · неделя / месяц</span>';
+  for(var i=0;i<NK.length;i++){ var k=NK[i].k; h+='<div class="kv"><span>'+NK[i].l+'</span><b>'+normW(k)+'</b><b style="color:var(--mute)">'+normM(k)+'</b></div>'; }
+  h+='</div><button class="btn" onclick="openNorms()">Изменить нормы</button><div class="hint">РОП может задать отделу свою норму — отклонение будет видно здесь.</div>';
   h+='<div class="sec">Отделы и РОПы</div>';
-  for(var j=0;j<state.deps.length;j++){ var d=state.deps[j];
-    h+='<details><summary>'+d.id+' · '+esc(d.name)+'<span class="cnt">'+d.agents.length+' чел.</span></summary><div class="dbody">'+
-       '<div class="kv two"><span>РОП</span><b>'+esc(d.rop)+'</b></div>'+
-       '<div class="kv two"><span>Агентов</span><b>'+d.agents.length+'</b></div>'+
-       '<button class="btn" style="margin-top:10px" onclick="editRop('+d.id+')">Сменить РОПа</button>'+
-       '<button class="btn ghost" onclick="delDep('+d.id+')">Удалить отдел</button></div></details>'; }
-  h+='<button class="btn pri" onclick="addDep()">+ Добавить отдел и РОПа</button>'+
-     '<div class="hint" style="margin-top:10px">Агентов в отдел заводит его РОП — так у собственника не появляется работы, которой у него быть не должно.</div>';
-  h+='<div class="sec">Данные</div>'+
-     '<button class="btn" onclick="exportX()">Выгрузить в таблицу</button>'+
-     '<div class="hint" style="margin-top:10px">Выгрузка в том же формате, что и нынешняя таблица — чтобы старые отчёты продолжали собираться.</div>';
-  h+='<div class="card"><div class="t">Кабинет</div>'+
-     '<div class="kv two"><span>Собственник</span><b>'+esc(state.user)+'</b></div>'+
-     '<div class="kv two"><span>Отделов</span><b>'+state.deps.length+'</b></div>'+
-     '<div class="kv two"><span>Агентов</span><b>'+allAgents().length+'</b></div></div>'+
-     '<button class="btn ghost" onclick="logout()">Выйти из кабинета</button>';
+  for(var j=0;j<state.deps.length;j++){ var d=state.deps[j]; h+='<details><summary>'+esc(d.name)+'<span class="cnt">'+d.agents.length+' чел</span></summary><div class="dbody"><div class="kv two"><span>РОП</span><b>'+esc(d.rop)+'</b></div><button class="btn" style="margin-top:12px" onclick="editRop('+d.id+')">Сменить РОПа</button><button class="btn warn" onclick="delDep('+d.id+')">Удалить отдел</button></div></details>'; }
+  h+='<button class="btn pri" onclick="addDep()">+ Добавить отдел и РОПа</button><div class="hint">Агентов в отдел заводит его РОП.</div>';
+  h+='<div class="sec">Данные</div><button class="btn" onclick="sheet(\'<h3>Выгрузка</h3><span class=&quot;sh&quot;>формат вашей таблицы</span><div class=&quot;hint&quot;>Соберётся файл с теми же листами и колонками, что вы ведёте сейчас.</div><div class=&quot;sbtn&quot; style=&quot;grid-template-columns:1fr&quot;><button class=&quot;btn pri&quot; onclick=&quot;closeSheet()&quot;>Понятно</button></div>\')">Выгрузить в таблицу</button>';
+  h+='<button class="btn ghost" onclick="logout()">Выйти из кабинета</button>';
   return h;
 }
-function openNorms(){
-  var h='<h3>Нормы компании</h3><div class="sh">на агента · месяц</div>';
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k;
-    h+='<div class="lbl">'+NORMKEYS[i].l+' · сейчас '+normW(k)+' в неделю</div><input type="number" inputmode="numeric" id="n_'+k+'" value="'+normM(k)+'">'; }
-  h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-     '<button class="btn pri" onclick="saveNorms()">Сохранить версию</button></div>';
-  sheet(h);
-}
-function saveNorms(){
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k, e=document.getElementById('n_'+k);
-    if(e&&e.value!=='') state.norm[k]=Number(e.value); }
-  save(); closeSheet(); render();
-}
-function addDep(){
-  sheet('<h3>Новый отдел</h3><div class="sh">и его руководитель</div>'+
-    '<div class="lbl">Название отдела</div><input id="dName" placeholder="Отдел №4">'+
-    '<div class="lbl">Фамилия и имя РОПа</div><input id="dRop" placeholder="Соколова Ирина">'+
-    '<div class="hint">РОП получит доступ в Телеграм и дальше сам заведёт своих агентов.</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-    '<button class="btn pri" onclick="saveDep()">Создать</button></div>');
-}
-function saveDep(){
-  var n=document.getElementById('dName'), r=document.getElementById('dRop');
-  if(!n.value||!r.value){ alert('Заполните название и РОПа'); return; }
-  var id=1; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id>=id) id=state.deps[i].id+1;
-  state.deps.push({id:id,name:n.value,rop:r.value,agents:[],sent:0,got:false});
-  save(); closeSheet(); render();
-}
-function editRop(id){
-  var d=null; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) d=state.deps[i];
-  sheet('<h3>Сменить РОПа</h3><div class="sh">'+esc(d.name)+'</div>'+
-    '<div class="lbl">Сейчас</div><div class="kv two"><span>Руководитель</span><b>'+esc(d.rop)+'</b></div>'+
-    '<div class="lbl">Новый РОП</div><input id="rName" placeholder="Фамилия и имя">'+
-    '<div class="hint">Прежний доступ закроется, записи отдела останутся.</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-    '<button class="btn pri" onclick="saveRop('+id+')">Сменить</button></div>');
-}
-function saveRop(id){
-  var e=document.getElementById('rName');
-  if(!e.value){ alert('Укажите имя'); return; }
-  for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) state.deps[i].rop=e.value;
-  save(); closeSheet(); render();
-}
-function delDep(id){
-  var d=null; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) d=state.deps[i];
-  sheet('<h3>Удалить отдел?</h3><div class="sh">'+esc(d.name)+' · '+d.agents.length+' человек</div>'+
-    '<div class="hint">Доступы закроются, записи останутся в отчётах — иначе статистика прошлых месяцев поедет.</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-    '<button class="btn pri" onclick="doDelDep('+id+')">Удалить</button></div>');
-}
-function doDelDep(id){
-  var n=[]; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id!==id) n.push(state.deps[i]);
-  state.deps=n; save(); closeSheet(); render();
-}
-function exportX(){
-  sheet('<h3>Выгрузка</h3><div class="sh">формат существующей таблицы</div>'+
-    '<div class="hint">В рабочей версии соберётся файл с теми же листами и колонками, что вы ведёте сейчас: по дням, агентам и классам.</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Закрыть</button><button class="btn pri" onclick="closeSheet()">Понятно</button></div>');
-}
+function openNorms(){ var h='<h3>Нормы компании</h3><span class="sh">неделя и месяц задаются отдельно</span>';
+  for(var i=0;i<NK.length;i++){ var k=NK[i].k; h+='<span class="lbl">'+NK[i].l+'</span><div class="row2"><input type="number" inputmode="numeric" id="w_'+k+'" value="'+normW(k)+'"><input type="number" inputmode="numeric" id="m_'+k+'" value="'+normM(k)+'"></div>'; }
+  h+='<div class="hint">Прошлые периоды пересчитаны не будут.</div><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="saveNorms()">Сохранить версию</button></div>'; sheet(h); }
+function saveNorms(){ for(var i=0;i<NK.length;i++){ var k=NK[i].k, w=document.getElementById('w_'+k), m=document.getElementById('m_'+k); if(w&&w.value!=='') state.normW[k]=Number(w.value); if(m&&m.value!=='') state.norm[k]=Number(m.value); } save(); closeSheet(); flash('Новая версия норм сохранена'); render(); }
+function addDep(){ sheet('<h3>Новый отдел</h3><span class="sh">и его руководитель</span><span class="lbl">Название</span><input id="dName" placeholder="Отдел №4"><span class="lbl">РОП · фамилия и имя</span><input id="dRop" placeholder="Соколова Ирина"><div class="hint">РОП получит доступ и сам заведёт агентов.</div><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="saveDep()">Создать</button></div>'); }
+function saveDep(){ var n=document.getElementById('dName'), r=document.getElementById('dRop'); if(!n.value||!r.value){ warn('Заполните название и РОПа'); return; } var id=1; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id>=id) id=state.deps[i].id+1; state.deps.push({id:id,name:n.value,rop:r.value,agents:[],sent:0,got:false,prevPd:0}); save(); closeSheet(); render(); }
+function editRop(id){ var d=null; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) d=state.deps[i]; sheet('<h3>Сменить РОПа</h3><span class="sh">'+esc(d.name)+'</span><div class="card"><div class="kv two"><span>Сейчас</span><b>'+esc(d.rop)+'</b></div></div><span class="lbl">Новый РОП</span><input id="rName" placeholder="Фамилия и имя"><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="saveRop('+id+')">Сменить</button></div>'); }
+function saveRop(id){ var e=document.getElementById('rName'); if(!e.value){ warn('Укажите имя'); return; } for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) state.deps[i].rop=e.value; save(); closeSheet(); render(); }
+function delDep(id){ sheet('<h3>Удалить отдел?</h3><span class="sh">записи останутся в отчётах</span><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn warn" onclick="doDelDep('+id+')">Удалить</button></div>'); }
+function doDelDep(id){ state.deps=state.deps.filter(function(d){ return d.id!==id; }); save(); closeSheet(); render(); }
 function logout(){ state.user=null; pickName=null; save(); render(); }
-
 function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on'); }
 function closeSheet(){ document.getElementById('ovl').classList.remove('on'); }
-function resetAll(){
-  sheet('<h3>Сбросить прототип?</h3><div class="sh">данные вернутся к исходным</div>'+
-    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
-    '<button class="btn pri" onclick="doReset()">Сбросить</button></div>');
-}
-function doReset(){ var u=state.user; state=seed(); state.user=u; save(); nav='rep'; openD=null; closeSheet(); render(); }
+function resetAll(){ sheet('<h3>Сбросить прототип?</h3><span class="sh">данные вернутся к исходным</span><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="doReset()">Сбросить</button></div>'); }
+function doReset(){ var u=state.user; state=seed(); state.user=u; save(); nav='today'; openD=null; closeSheet(); render(); }
 render();
 </script>
 </body>
