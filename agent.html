@@ -164,14 +164,17 @@ function load(){ var s=null; try{ s=localStorage.getItem(KEY);}catch(e){ s=mem; 
 var STAFF=['Брыкина Александра','Кастромина Ольга','Кондратьева Ирина','Розанова Мария','Смирнова Анна'];
 /* cl: сторона клиента · sides: чьи причины показываем · free: причины текстом */
 var TYPES=[
+ {k:'sdelka',n:'Сделка',  ic:'deal',   cl:'any',    sides:'both', dayoff:true},
+ {k:'pd',    n:'Задаток', ic:'money',  cl:'any',    sides:'both', money:true},
  {k:'pokaz', n:'Показ',   ic:'home',   cl:'buyer',  sides:'both'},
  {k:'ocenka',n:'Оценка',  ic:'search', cl:'seller', sides:'seller'},
  {k:'vstr',  n:'Встреча', ic:'meet',   cl:'buyer',  sides:'buyer'},
  {k:'rekl',  n:'Реклама', ic:'screen', cl:'seller', sides:'free'},
- {k:'pd',    n:'Задаток', ic:'money',  cl:'any',    sides:'both', money:true},
- {k:'sdelka',n:'Сделка',  ic:'deal',   cl:'any',    sides:'both', dayoff:true}
+ {k:'other', n:'Другое',  ic:'list',   cl:'none',   sides:'free'}
 ];
-var NORMKEYS=[{k:'pd',l:'задаток'},{k:'sdelka',l:'сделки'},{k:'pokaz',l:'показы'},
+var ORDER={sdelka:1,pd:2,pokaz:3,ocenka:4,vstr:5,rekl:6,other:7};
+function byOrder(a,b){ var x=(ORDER[a.type]||9)-(ORDER[b.type]||9); return x||(a.time<b.time?-1:1); }
+var NORMKEYS=[{k:'sdelka',l:'сделки'},{k:'pd',l:'задаток'},{k:'pokaz',l:'показы'},
               {k:'ocenka',l:'оценки'},{k:'vstr',l:'встречи'},{k:'rekl',l:'реклама'},{k:'leads',l:'заявки'}];
 var MOVE={buyer:[{k:'buyer_move',n:'Покупатель перенёс'},{k:'buyer_nc',n:'Покупатель не на связи'}],
           seller:[{k:'seller_move',n:'Продавец перенёс'},{k:'seller_nc',n:'Продавец не на связи'}]};
@@ -227,7 +230,7 @@ function seed(){
   var t=iso(new Date()), y=plus(-1);
   return {
     user:null, date:t, dateY:y, seq:200,
-    monthNorm:{pd:4,sdelka:3,pokaz:20,ocenka:16,vstr:16,rekl:6,leads:24},
+    monthNorm:{sdelka:3,pd:4,pokaz:20,ocenka:25,vstr:25,rekl:8,leads:40},
     tasks:[
       /* вчера · все шесть классов, ничего не отмечено */
       {id:1,type:'pokaz', obj:'Строителей 11', cl:'Кондрева', clt:'buyer', date:y,time:'18:00',status:null},
@@ -283,7 +286,7 @@ function normM(k){ return state.monthNorm[k]||0; }
 function normW(k){ return Math.ceil(normM(k)/4.33); }
 
 /* ================= выборки ================= */
-function byDate(d){ var o=[]; for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].date===d) o.push(state.tasks[i]); return o; }
+function byDate(d){ var o=[]; for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].date===d) o.push(state.tasks[i]); o.sort(byOrder); return o; }
 function task(id){ for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].id===id) return state.tasks[i]; return null; }
 function futureTasks(){ var o=[]; for(var i=0;i<state.tasks.length;i++) if(state.tasks[i].date>state.date) o.push(state.tasks[i]);
   o.sort(function(a,b){ return a.date<b.date?-1:1; }); return o; }
@@ -352,7 +355,7 @@ function draw(){
            : nav==='fc'   ? fcHTML()
            : meHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет агента v2.1 · прототип<br>Данные хранятся только на этом устройстве.<br>'+
+    '<div class="foot">ТОЧНО. · кабинет агента v2.2 · прототип<br>Данные хранятся только на этом устройстве.<br>'+
     '<button onclick="resetAll()">сбросить и начать заново</button></div></div>'+navHTML();
 }
 function navHTML(){
@@ -367,7 +370,7 @@ function go(k){ nav=k; render(); }
 function hdrHTML(){
   var st=state.today;
   var h='<div class="hdr"><div class="row">'+
-    '<div class="mark">ТОЧНО<i>.</i><small>план / факт · v2.1</small></div>'+
+    '<div class="mark">ТОЧНО<i>.</i><small>план / факт · v2.2</small></div>'+
     '<div class="who"><b>'+esc(state.user)+'</b><span>'+rud(state.date)+'</span></div></div>';
   if(!st.sent){
     h+='<button class="btn pri submit" onclick="openWiz()">'+ic('send',20)+'Сдать план и факт</button>'+
@@ -386,7 +389,7 @@ function cycleStatus(){ var o=['sent','accepted','extra','rejected'],i=o.indexOf
   state.today.status=o[(i+1)%o.length]; save(); render(); }
 
 function loginHTML(){
-  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">план / факт · v2.1</div><h2>Вход в кабинет</h2>';
+  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">план / факт · v2.2</div><h2>Вход в кабинет</h2>';
   for(var i=0;i<STAFF.length;i++)
     h+='<button class="pick'+(pickName===STAFF[i]?' on':'')+'" onclick="pickName=\''+STAFF[i]+'\';render()">'+STAFF[i]+'</button>';
   h+='<div class="lbl">Пароль</div><input type="password" id="pw" placeholder="••••••">'+
@@ -549,12 +552,7 @@ function meHTML(){
     '<button class="chip'+(meMode==='week'?' on':'')+'" onclick="meMode=\'week\';render()">Неделя</button>'+
     '<button class="chip'+(meMode==='month'?' on':'')+'" onclick="meMode=\'month\';render()">Месяц</button></div></div>';
   var isW=meMode==='week';
-  var sum=0,need=0;
-  for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k;
-    sum+=(isW?cntW(k):cntM(k)); need+=(isW?normW(k):normM(k)); }
-  h+='<div class="card"><div class="t">'+(isW?'Неделя '+ru(weekStart())+' – '+ru(weekEnd()):'Месяц с 1 '+monthName())+'</div>'+
-     '<div class="kv"><span>Исполнение</span><b class="'+(sum>=need?'g':'')+'">'+Math.round(sum/need*100)+'%</b></div>'+
-     '<div class="bar"><i style="width:'+Math.min(Math.round(sum/need*100),100)+'%"></i></div>';
+  h+='<div class="card"><div class="t">'+(isW?'Неделя '+ru(weekStart())+' – '+ru(weekEnd()):monthNom()+' · с 1 числа')+'</div>';
   for(var j=0;j<NORMKEYS.length;j++){ var kk=NORMKEYS[j].k, d=isW?cntW(kk):cntM(kk), n=isW?normW(kk):normM(kk);
     h+='<div class="kv"><span>'+NORMKEYS[j].l.charAt(0).toUpperCase()+NORMKEYS[j].l.slice(1)+'</span>'+
        '<b class="'+(d>=n?'g':'')+'">'+d+' / '+n+' · '+Math.round(d/n*100)+'%</b></div>';
@@ -626,7 +624,7 @@ function drawTask(){
 
   if(cSt==='done'){
     if(t.money) h+='<div class="lbl">Подтвердите сумму · обязательно</div><input type="number" inputmode="numeric" id="fSum" value="'+(cur.sum||'')+'" placeholder="105000">';
-    h+='<div class="lbl">Результат</div><textarea id="fRes"'+(t.k==='ocenka'?'':' placeholder="Что решили"')+'>'+esc(cur.res)+'</textarea>';
+    h+='<div class="lbl">Результат</div><textarea id="fRes" placeholder="Итог, комментарий">'+esc(cur.res)+'</textarea>';
     if(t.k==='pd'){
       h+='<div class="lbl">Сделка</div><div class="chips">'+
          '<button class="chip'+(cDeal?' on g':'')+'" onclick="grabTask();cDeal=true;drawTask()">Назначить</button>'+
@@ -725,17 +723,21 @@ function openAdd(date,star,editId,type){
   fixClt(); drawAdd();
 }
 function openVague(){ frm={id:0,type:'pokaz',obj:'',cl:'',clt:'',date:state.date,time:'',sum:'',star:false,vague:true}; fixClt(); drawAdd(); }
-function fixClt(){ var t=T(frm.type); if(t.cl!=='any') frm.clt=t.cl; }
+function fixClt(){ var t=T(frm.type); if(t.cl==='none') frm.clt=''; else if(t.cl!=='any') frm.clt=t.cl; }
 function drawAdd(){
+  if(frm.type==='lead') return drawLead();
   var t=T(frm.type);
   var h='<h3>'+(frm.id?'Дело':(frm.vague?'Назначить новое':(frm.star?'Дело вне плана':'Новое дело')))+'</h3>'+
     '<div class="sh">'+(frm.vague?'без адреса и клиента':rud(frm.date))+'</div>'+
     '<div class="lbl">Класс</div><div class="chips three">';
   for(var i=0;i<TYPES.length;i++)
     h+='<button class="chip'+(frm.type===TYPES[i].k?' on':'')+'" onclick="grabAdd();frm.type=\''+TYPES[i].k+'\';fixClt();drawAdd()">'+TYPES[i].n+'</button>';
+  h+='<button class="chip'+(frm.type==='lead'?' on':'')+'" onclick="frm.type=\'lead\';drawAdd()">Заявки</button>';
   h+='</div><div class="row2"><div><div class="lbl">Дата</div><input type="date" id="aDate" value="'+frm.date+'"></div>'+
      '<div><div class="lbl">Время</div><input type="time" id="aTime" value="'+(frm.time||'')+'"></div></div>';
-  if(!frm.vague){
+  if(t.k==='other'){
+    h+='<div class="lbl">Задача · своими словами</div><input id="aObj" value="'+esc(frm.obj)+'" placeholder="Собрать документы по Мира 6">';
+  } else if(!frm.vague){
     h+='<div class="lbl">Объект · адрес</div><input id="aObj" value="'+esc(frm.obj)+'" placeholder="Строителей 11">'+
        '<div class="lbl">Клиент · имя без фамилии</div><input id="aCl" value="'+esc(frm.cl)+'" placeholder="Кондрева">'+
        '<div class="lbl">Тип клиента</div><div class="chips">';
@@ -755,6 +757,34 @@ function drawAdd(){
   sheet(h);
   setTimeout(function(){ var o=document.getElementById('aObj'); if(o&&!frm.obj) o.focus(); },60);
 }
+function drawLead(){
+  var cur=leadOn(frm.date);
+  var h='<h3>Новые заявки</h3><div class="sh">'+rud(frm.date)+'</div>'+
+    '<div class="lbl">Класс</div><div class="chips three">';
+  for(var i=0;i<TYPES.length;i++)
+    h+='<button class="chip" onclick="frm.type=\''+TYPES[i].k+'\';fixClt();drawAdd()">'+TYPES[i].n+'</button>';
+  h+='<button class="chip on">Заявки</button></div>'+
+    '<div class="lbl">Дата</div><input type="date" id="aDate" value="'+frm.date+'">'+
+    '<div class="lbl">Сколько новых заявок пришло</div><input type="number" inputmode="numeric" id="aLead" value="'+(cur===null?'':cur)+'" placeholder="0">'+
+    '<div class="hint">Это входящий поток, а не дело. Итог дня и недели считается сам.</div>'+
+    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
+    '<button class="btn pri" onclick="saveLead()">Сохранить</button></div>';
+  sheet(h);
+}
+function leadOn(d){
+  for(var i=0;i<state.leads.length;i++) if(state.leads[i].date===d) return state.leads[i].n;
+  if(d===state.dateY&&state.leadsY!==null) return state.leadsY;
+  return null;
+}
+function saveLead(){
+  var dd=document.getElementById('aDate'), v=document.getElementById('aLead');
+  if(!v||v.value===''){ alert('Укажите количество заявок'); return; }
+  var d=dd?dd.value:state.date, n=Number(v.value), found=false;
+  for(var i=0;i<state.leads.length;i++) if(state.leads[i].date===d){ state.leads[i].n=n; found=true; }
+  if(!found) state.leads.push({date:d,n:n});
+  if(d===state.dateY) state.leadsY=n;
+  save(); closeSheet(); afterChange();
+}
 function grabAdd(){
   var g=function(id){ var e=document.getElementById(id); return e?e.value:null; },v;
   if((v=g('aObj'))!==null) frm.obj=v;
@@ -766,7 +796,7 @@ function grabAdd(){
 function saveAdd(again){
   grabAdd(); fixClt();
   var t=T(frm.type);
-  if(!frm.vague&&!frm.obj){ alert('Укажите адрес объекта'); return; }
+  if(!frm.vague&&!frm.obj){ alert(t.k==='other'?'Опишите задачу':'Укажите адрес объекта'); return; }
   if(!frm.vague&&t.cl==='any'&&!frm.clt){ alert('Выберите: покупатель или продавец'); return; }
   if(t.money&&!frm.vague&&!frm.sum){ alert('Для задатка сумма комиссии обязательна'); return; }
   if(frm.id){
@@ -795,7 +825,8 @@ function openWiz(){ step=0; wLeads=(state.leadsY===null?'':String(state.leadsY))
 function closeWiz(){ document.getElementById('wiz').classList.remove('on'); render(); }
 function afterChange(){ if(document.getElementById('wiz').classList.contains('on')) drawWiz(); else render(); }
 function drawWiz(){
-  var h='<div class="steps">'+[0,1,2,3].map(function(i){ return '<div class="'+(i<=step?'on':'')+'"></div>'; }).join('')+'</div>', bar='', one=false;
+  var h='<div class="steps">'+[0,1,2,3].map(function(i){ return '<div class="'+(i<=step?'on':'')+'"></div>'; }).join('')+'</div>'+
+        '<div class="sh" style="margin:-6px 0 12px">Шаг '+(step+1)+' из 4</div>', bar='', one=false;
   if(step===0){
     var y=byDate(state.dateY), left=yestLeft();
     h+='<div class="wtitle">Факт за вчера</div><div class="sh">'+rud(state.dateY)+'</div>'+
