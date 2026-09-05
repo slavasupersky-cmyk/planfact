@@ -36,10 +36,10 @@ button{font-family:inherit}
 .mark{font-size:20px;font-weight:600;letter-spacing:-.03em;line-height:1}
 .mark i{font-style:normal;color:var(--lime)}
 .mark small{display:block;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:400;margin-top:5px}
-.who{text-align:right}
-.who b{display:block;font-size:14px;font-weight:600}
-.who span{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mute)}
-.role{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:var(--lime);color:var(--on-lime);padding:2px 8px;border-radius:var(--r);margin-top:4px;font-weight:700}
+.who{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:0}
+.who b{font-size:14px;font-weight:600;white-space:nowrap}
+.who .dt{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mute);white-space:nowrap}
+.role{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:var(--lime);color:var(--on-lime);padding:3px 8px;border-radius:var(--r);font-weight:700;white-space:nowrap}
 
 .btn{width:100%;min-height:54px;border-radius:var(--r);padding:14px;font-size:15.5px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:9px}
 .btn.pri{background:var(--lime);color:var(--on-lime);border-color:var(--lime)}
@@ -238,7 +238,7 @@ function go(k){ nav=k; openD=null; render(); }
 function hdrHTML(){
   return '<div class="hdr"><div class="row">'+
     '<div class="mark">ТОЧНО<i>.</i><small>план / факт · v2.2</small></div>'+
-    '<div class="who"><b>'+esc(state.user)+'</b><span>3 отдела · '+rud(state.date)+'</span>'+
+    '<div class="who"><b>'+esc(state.user)+'</b><span class="dt">'+state.deps.length+(state.deps.length===1?' отдел':(state.deps.length<5?' отдела':' отделов'))+' · '+rud(state.date)+'</span>'+
     '<span class="role">Собственник</span></div></div></div>';
 }
 function loginHTML(){
@@ -273,8 +273,8 @@ function repHTML(){
     h+='<button class="item'+(d.got?'':' alert')+'" onclick="openDep('+d.id+')"><div class="ic">'+d.id+'</div>'+
        '<div class="tx"><div class="tp">'+esc(d.rop)+' · '+d.agents.length+' человек</div>'+
        '<div class="nm">'+esc(d.name)+'</div>'+
-       '<div class="sub">сдали '+d.sent+' из '+d.agents.length+' · '+(d.got?'отчёт получен':'отчёта нет')+'</div></div>'+
-       '<span class="rt '+(pct>=90?'ok':(pct<70?'no':'mv'))+'">'+pct+'%</span></button>';
+       '<div class="sub">агенты сдали '+d.sent+' из '+d.agents.length+' · '+pct+'%</div></div>'+
+       '<span class="rt '+(d.got?'ok':'no')+'">'+(d.got?'отчёт есть':'отчёта нет')+'</span></button>';
   }
   h+='<div class="sec">Архив · только просмотр</div>';
   h+=repGroup('Ежедневные','day');
@@ -426,8 +426,13 @@ function setHTML(){
      '<div class="hint" style="margin-top:10px">РОП может задать своему отделу другую норму — отклонение будет видно здесь.</div>';
   h+='<div class="sec">Отделы и РОПы</div>';
   for(var j=0;j<state.deps.length;j++){ var d=state.deps[j];
-    h+='<div class="item"><div class="ic">'+d.id+'</div><div class="tx"><div class="tp">'+d.agents.length+' человек</div>'+
-       '<div class="nm">'+esc(d.name)+'</div><div class="sub">'+esc(d.rop)+'</div></div></div>'; }
+    h+='<details><summary>'+d.id+' · '+esc(d.name)+'<span class="cnt">'+d.agents.length+' чел.</span></summary><div class="dbody">'+
+       '<div class="kv"><span>РОП</span><b>'+esc(d.rop)+'</b></div>'+
+       '<div class="kv"><span>Агентов</span><b>'+d.agents.length+'</b></div>'+
+       '<button class="btn" style="margin-top:10px" onclick="editRop('+d.id+')">Сменить РОПа</button>'+
+       '<button class="btn ghost" onclick="delDep('+d.id+')">Удалить отдел</button></div></details>'; }
+  h+='<button class="btn pri" onclick="addDep()">+ Добавить отдел и РОПа</button>'+
+     '<div class="hint" style="margin-top:10px">Агентов в отдел заводит его РОП — так у собственника не появляется работы, которой у него быть не должно.</div>';
   h+='<div class="sec">Данные</div>'+
      '<button class="btn" onclick="exportX()">Выгрузить в таблицу</button>'+
      '<div class="hint" style="margin-top:10px">Выгрузка в том же формате, что и нынешняя таблица — чтобы старые отчёты продолжали собираться.</div>';
@@ -450,6 +455,47 @@ function saveNorms(){
   for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k, e=document.getElementById('n_'+k);
     if(e&&e.value!=='') state.norm[k]=Number(e.value); }
   save(); closeSheet(); render();
+}
+function addDep(){
+  sheet('<h3>Новый отдел</h3><div class="sh">и его руководитель</div>'+
+    '<div class="lbl">Название отдела</div><input id="dName" placeholder="Отдел №4">'+
+    '<div class="lbl">Фамилия и имя РОПа</div><input id="dRop" placeholder="Соколова Ирина">'+
+    '<div class="hint">РОП получит доступ в Телеграм и дальше сам заведёт своих агентов.</div>'+
+    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
+    '<button class="btn pri" onclick="saveDep()">Создать</button></div>');
+}
+function saveDep(){
+  var n=document.getElementById('dName'), r=document.getElementById('dRop');
+  if(!n.value||!r.value){ alert('Заполните название и РОПа'); return; }
+  var id=1; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id>=id) id=state.deps[i].id+1;
+  state.deps.push({id:id,name:n.value,rop:r.value,agents:[],sent:0,got:false});
+  save(); closeSheet(); render();
+}
+function editRop(id){
+  var d=null; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) d=state.deps[i];
+  sheet('<h3>Сменить РОПа</h3><div class="sh">'+esc(d.name)+'</div>'+
+    '<div class="lbl">Сейчас</div><div class="kv"><span>Руководитель</span><b>'+esc(d.rop)+'</b></div>'+
+    '<div class="lbl">Новый РОП</div><input id="rName" placeholder="Фамилия и имя">'+
+    '<div class="hint">Прежний доступ закроется, записи отдела останутся.</div>'+
+    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
+    '<button class="btn pri" onclick="saveRop('+id+')">Сменить</button></div>');
+}
+function saveRop(id){
+  var e=document.getElementById('rName');
+  if(!e.value){ alert('Укажите имя'); return; }
+  for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) state.deps[i].rop=e.value;
+  save(); closeSheet(); render();
+}
+function delDep(id){
+  var d=null; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id===id) d=state.deps[i];
+  sheet('<h3>Удалить отдел?</h3><div class="sh">'+esc(d.name)+' · '+d.agents.length+' человек</div>'+
+    '<div class="hint">Доступы закроются, записи останутся в отчётах — иначе статистика прошлых месяцев поедет.</div>'+
+    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
+    '<button class="btn pri" onclick="doDelDep('+id+')">Удалить</button></div>');
+}
+function doDelDep(id){
+  var n=[]; for(var i=0;i<state.deps.length;i++) if(state.deps[i].id!==id) n.push(state.deps[i]);
+  state.deps=n; save(); closeSheet(); render();
 }
 function exportX(){
   sheet('<h3>Выгрузка</h3><div class="sh">формат существующей таблицы</div>'+
