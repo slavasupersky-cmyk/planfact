@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
 <title>ТОЧНО. — Кабинет собственника</title>
 <style>
@@ -76,7 +76,7 @@ button,input,textarea{font-family:inherit;font-size:var(--t3);color:var(--ink)}
 .sec.warn{color:var(--alarm)}
 
 /* ---------- показатели ---------- */
-.nrow{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s2)}
+.nrow{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s2)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
 .nrow button,.grid button,.grid div{background:var(--soft);border:0;border-radius:var(--r);
   padding:var(--s3) var(--s1);text-align:center;color:inherit;width:100%}
@@ -238,14 +238,6 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 .seg{display:grid;gap:var(--s2);margin-bottom:var(--s3)}
 .seg.two{grid-template-columns:1fr 1fr} .seg.three{grid-template-columns:repeat(3,1fr)}
 
-/* ---------- тёмная тема ---------- */
-:root{--ink:#F2F2F2;--mute:#8C8C8C;--line:#242424;--soft:#161616;--bg:#0B0B0B;--lime:#AEEA00;--on-lime:#0B0B0B;--plan:#FF9838;--alarm:#FF6B5C;color-scheme:dark}
-.nrow b.good,.grid b.good,.kv b.g,.pf .f,.rt.ok{color:var(--lime)}
-.task .ic{color:var(--lime)}
-.ovl{background:rgba(0,0,0,.6)}
-.sheet{border:1px solid var(--line);border-bottom:0}
-.st.wait{background:rgba(255,152,56,.18)} .st.no{background:rgba(255,107,92,.16)}
-
 
 /* ---------- шапка: три столбца, две строки ---------- */
 .hdr{display:block;padding-bottom:var(--s3);border-bottom:1px solid var(--line);margin-bottom:var(--s4)}
@@ -355,7 +347,12 @@ function seed(){
   var t=iso(new Date()), y=plus(-1);
   var A=function(n,k,prev){ return {name:n,week:{sdelka:k[0],pd:k[1],pokaz:k[2],ocenka:k[3],vstr:k[4],rekl:k[5],leads:k[6]},
     month:{sdelka:k[0]*3,pd:k[1]*3,pokaz:k[2]*4,ocenka:k[3]*4,vstr:k[4]*4,rekl:k[5]*4,leads:k[6]*4},pdSum:k[1]*100000,low:!!prev}; };
-  function dep(id,name,rop,agents,sent,got,prevPd){ return {id:id,name:name,rop:rop,agents:agents,sent:sent,got:got,prevPd:prevPd}; }
+  function dep(id,name,rop,agents,sent,got,prevPd){
+    var fc=[], names=['Строителей 11','Мира 6','Тепличная 4','Норвуд','Сити Квартал','Кулакова 2','Попова 72','Ладожская 35'];
+    for(var q=0;q<6;q++) fc.push({obj:names[(id*3+q)%8],sum:(85+((id*7+q*13)%50))*1000,
+      date:plus([-1,0,2,5,9,20][q]), done:q%3===0});
+    return {id:id,name:name,rop:rop,agents:agents,sent:sent,got:got,prevPd:prevPd,fc:fc};
+  }
   return {
     user:null,date:t,dateY:y,
     norm:{sdelka:4,pd:4,pokaz:20,ocenka:20,vstr:20,rekl:8,leads:40}, normW:{sdelka:1,pd:1,pokaz:5,ocenka:5,vstr:5,rekl:2,leads:10},
@@ -393,17 +390,17 @@ function sentAll(){ var s=0,n=0; for(var i=0;i<state.deps.length;i++){ s+=state.
 function pace(){ var expected=state.monthPlan*state.daysPassed/state.daysTotal; return Math.round((state.signedMonth/expected-1)*100); }
 
 /* ================= рендер ================= */
-var nav='today', openD=null, pickName=null, per='week';
+var nav='money', openD=null, pickName=null, per='week', fcMode='week';
 var OWNER='Прохорова Елена';
 function render(){ try{ draw(); }catch(e){ document.getElementById('root').innerHTML='<div class="app"><div class="card"><span class="t">Что-то пошло не так</span><button class="btn" onclick="hardReset()">Очистить и открыть заново</button><div class="hint">'+esc(e.message)+'</div></div></div>'; } }
 function hardReset(){ try{ localStorage.removeItem(KEY);}catch(e){} mem=null; state=seed(); save(); location.reload(); }
 function draw(){
   var r=document.getElementById('root');
   if(!state.user){ r.innerHTML=loginHTML(); return; }
-  var body = openD? depHTML() : nav==='today'? todayHTML() : nav==='money'? moneyHTML() : nav==='people'? peopleHTML() : setHTML();
+  var body = openD? depHTML() : nav==='money'? moneyHTML() : nav==='fc'? fcHTML() : nav==='funnel'? funnelHTML() : nav==='people'? peopleHTML() : setHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет собственника v4.1.2 · прототип<br>Данные выдуманные.<br><button onclick="resetAll()">сбросить и начать заново</button></div></div>'+
-    '<div class="bottom"><div class="in"><div class="nav" style="grid-template-columns:repeat(4,1fr)">'+nb('today','doc','Сегодня')+nb('money','money','Деньги')+nb('people','users','Люди')+nb('set','tune','Настройки')+'</div></div></div>';
+    '<div class="foot">ТОЧНО. · кабинет собственника v5.0.0 · прототип<br>Данные выдуманные.<br><button onclick="resetAll()">сбросить и начать заново</button></div></div>'+
+    '<div class="bottom"><div class="in"><div class="nav" style="grid-template-columns:repeat(5,1fr)">'+nb('money','money','Деньги')+nb('fc','target','Прогноз')+nb('funnel','funnel','Воронка')+nb('people','users','Люди')+nb('set','tune','Настройки')+'</div></div></div>';
 }
 function nb(k,i,n){ return '<button class="'+(nav===k&&!openD?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,24)+'</b>'+n+'</button>'; }
 function go(k){ nav=k; openD=null; render(); try{ window.scrollTo(0,0); }catch(e){} }
@@ -411,12 +408,12 @@ function hdrHTML(){
   var n=state.deps.length;
   return '<div class="hdr"><div class="row">'+
     '<div class="col"><div class="top">ТОЧНО<i>.</i></div><div class="bot">план / факт</div></div>'+
-    '<div class="col mid"><div class="top role">Собственник</div><div class="bot">v4.1.2</div></div>'+
+    '<div class="col mid"><div class="top role">Собственник</div><div class="bot">v5.0.0</div></div>'+
     '<div class="col end"><div class="top name">'+esc(state.user)+'</div><div class="bot">'+rud(state.date)+'</div></div>'+
     '</div></div>';
 }
 function loginHTML(){
-  return '<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет собственника v4.1.2</div><h2>Вход в кабинет</h2>'+
+  return '<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет собственника v5.0.0</div><h2>Вход в кабинет</h2>'+
     '<button class="pick'+(pickName===OWNER?' on':'')+'" onclick="pickName=\''+OWNER+'\';render()">'+OWNER+'</button>'+
     '<span class="lbl">Пароль</span><input type="password" id="pw" placeholder="••••••"><div class="sbtn"><button class="btn" onclick="pickName=null;render()">Сброс</button><button class="btn pri" onclick="doLogin()">Войти</button></div><div class="note">Пароль в прототипе любой.</div></div>';
 }
@@ -459,27 +456,101 @@ function openRep(i){ var r=state.reports[i];
 
 /* ================= ДЕНЬГИ ================= */
 function moneyHTML(){
-  var isW=per==='week', pd=coSum(per,'pd'), pdn=coNorm(per,'pd'), sd=coSum(per,'sdelka'), sdn=coNorm(per,'sdelka');
-  var sum=0, ag=agents(); for(var i=0;i<ag.length;i++) sum+=ag[i].pdSum*(isW?1:3);
-  var prev=isW? 2410000 : 9800000;
-  var h='<div class="seg two"><button class="chip'+(isW?' on':'')+'" onclick="per=\'week\';render()">Неделя</button><button class="chip'+(!isW?' on':'')+'" onclick="per=\'month\';render()">Месяц</button></div>';
-  h+='<div class="card"><div class="big">'+mln(sum)+'<small>подписанная комиссия · '+pd+' задатков из '+pdn+' по норме</small></div><div class="bar"><i style="width:'+Math.min(Math.round(pd/pdn*100),100)+'%"></i></div>'+
-     '<div class="cmp">'+(isW?'Прошлая неделя':'Прошлый месяц')+': <b>'+mln(prev)+'</b> · '+(sum>=prev?'больше на '+Math.round((sum/prev-1)*100)+'%':'меньше на '+Math.round((1-sum/prev)*100)+'%')+'</div></div>';
-  h+='<div class="grid"><div><b class="'+(sd>=sdn?'good':'')+'">'+sd+'/'+sdn+'</b><span>сделки</span></div><div><b class="'+(pd>=pdn?'good':'')+'">'+pd+'/'+pdn+'</b><span>задатки</span></div><div><b>'+money(pd?Math.round(sum/pd):0).replace(' ₽','')+'</b><span>средняя</span></div></div>';
-  h+='<div class="sec">Воронка · факт / норма</div><div class="card">';
-  for(var j=0;j<NK.length;j++){ var k=NK[j].k, d=coSum(per,k), n=coNorm(per,k);
-    h+='<div class="kv"><span>'+NK[j].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+n+'</span></span><span class="pct">'+Math.round(d/n*100)+'%</span></div>'; }
-  var lead=coSum('month','leads'), pok=coSum('month','pokaz'), pdm=coSum('month','pd'), sdm=coSum('month','sdelka');
-  h+='</div><div class="card"><span class="t">Конверсии · месяц</span><div class="kv two"><span>Заявка → показ</span><b>'+Math.round(pok/lead*100)+'%</b></div><div class="kv two"><span>Показ → задаток</span><b>'+(pdm/pok*100).toFixed(1)+'%</b></div><div class="kv two"><span>Задаток → сделка</span><b>'+(pdm?Math.round(sdm/pdm*100):0)+'%</b></div></div>';
+  var P={yest:'Вчера',today:'Сегодня',week:'Неделя',month:'Месяц'};
+  var h='<div class="seg" style="grid-template-columns:repeat(4,1fr)">';
+  for(var k in P) h+='<button class="chip'+(per===k?' on':'')+'" onclick="per=\''+k+'\';render()">'+P[k]+'</button>';
+  h+='</div>';
+  var mult={yest:0.05,today:0.05,week:1,month:4.33}[per];
+  var pdn=Math.round(coNorm('week','pd')*mult), sdn=Math.round(coNorm('week','sdelka')*mult);
+  var pd=Math.round(coSum('week','pd')*mult), sd=Math.round(coSum('week','sdelka')*mult);
+  var sum=0, ag=agents(); for(var i=0;i<ag.length;i++) sum+=ag[i].pdSum*mult;
+  var prev={yest:430000,today:512000,week:2410000,month:9800000}[per];
+  var pct=pdn?Math.round(pd/pdn*100):0;
+  h+='<div class="card"><div class="big">'+mln(sum)+'<small>подписанная комиссия · '+per_label()+'</small></div>'+
+     '<div class="bar"><i style="width:'+Math.min(pct,100)+'%"></i></div>'+
+     '<div class="kv"><span>Задатки</span><span class="pf"><span class="f">'+pd+'</span><span class="sl">/</span><span class="p">'+pdn+'</span></span><span class="pct">'+pct+'%</span></div>'+
+     '<div class="kv"><span>Сделки</span><span class="pf"><span class="f">'+sd+'</span><span class="sl">/</span><span class="p">'+sdn+'</span></span><span class="pct">'+(sdn?Math.round(sd/sdn*100):0)+'%</span></div>'+
+     '<div class="kv two"><span>Средняя комиссия</span><b>'+money(pd?Math.round(sum/pd):0)+'</b></div>'+
+     '<div class="cmp" style="margin-top:var(--s2)">Прошлый период: <b>'+mln(prev)+'</b> · '+(sum>=prev?'больше на '+Math.round((sum/prev-1)*100)+'%':'меньше на '+Math.round((1-sum/prev)*100)+'%')+'</div></div>';
   h+='<div class="sec">По отделам</div>';
-  for(var q=0;q<state.deps.length;q++){ var dp=state.deps[q], dpd=depSum(dp,per,'pd'), ds=0; for(var z=0;z<dp.agents.length;z++) ds+=dp.agents[z].pdSum*(isW?1:3);
-    h+='<button class="task noic hassum" style="grid-template-columns:58px 1fr auto" onclick="openDep('+dp.id+')"><div class="c"><b>'+dp.id+'</b><span>'+dp.agents.length+' чел</span></div><div class="c"><b>'+esc(dp.name)+'</b><span>задатков '+dpd+' · сделок '+depSum(dp,per,'sdelka')+' · на агента '+(dpd/dp.agents.length).toFixed(1)+'</span></div><div class="sum">'+kk(ds)+'</div></button>'; }
+  for(var q=0;q<state.deps.length;q++){ var dp=state.deps[q];
+    var dpd=Math.round(depSum(dp,'week','pd')*mult), dn=Math.round(depNorm(dp,'week','pd')*mult), ds=0;
+    for(var z=0;z<dp.agents.length;z++) ds+=dp.agents[z].pdSum*mult;
+    h+='<div class="task noic hassum" style="grid-template-columns:1fr auto auto"><div class="c"><b>'+esc(dp.name)+'</b>'+
+       '<span>'+esc(dp.rop)+' · задатки '+dpd+'/'+dn+' · сделки '+Math.round(depSum(dp,'week','sdelka')*mult)+'</span></div>'+
+       '<div class="sum">'+kk(ds)+'</div><div class="r"><span class="st '+(dpd>=dn?'ok':(dpd<dn*0.6?'no':'wait'))+'">'+(dn?Math.round(dpd/dn*100):0)+'%</span></div></div>'; }
   h+='<div class="hint">Деньги живут в задатке; у сделки суммы нет — она подтверждает, что задаток дошёл до конца.</div>';
+  return h;
+}
+function per_label(){ return {yest:'за вчера',today:'сегодня',week:'за неделю',month:'за месяц'}[per]; }
+
+/* ================= ПРОГНОЗ ================= */
+function fcHTML(){
+  var P={yest:'Вчера',today:'Сегодня',week:'Неделя',month:'Месяц',future:'Дальше'};
+  var h='<div class="seg" style="grid-template-columns:repeat(5,1fr)">';
+  for(var k in P) h+='<button class="chip'+(fcMode===k?' on':'')+'" onclick="fcMode=\''+k+'\';render()">'+P[k]+'</button>';
+  h+='</div>';
+  var plan=[],fact=[],late=[];
+  for(var i=0;i<state.deps.length;i++){ var dp=state.deps[i];
+    for(var j=0;j<(dp.fc||[]).length;j++){ var f=dp.fc[j];
+      var inP = fcMode==='yest'? f.date===state.dateY
+              : fcMode==='today'? f.date===state.date
+              : fcMode==='week'? f.date<=plus(6)
+              : fcMode==='month'? f.date<=plus(30) : f.date>plus(30);
+      if(!inP) continue;
+      var rec={dep:dp,f:f};
+      if(f.done) fact.push(rec); else if(f.date<state.date) late.push(rec); else plan.push(rec);
+    } }
+  var S=function(l){ var s2=0; for(var i2=0;i2<l.length;i2++) s2+=Number(l[i2].f.sum||0); return s2; };
+  var ps=S(plan),fs=S(fact),ls=S(late), all=ps+fs+ls;
+  h+='<div class="card"><div class="big">'+money(fs)+'<small>факт · из прогноза '+money(all)+'</small></div>'+
+     '<div class="bar"><i style="width:'+(all?Math.min(Math.round(fs/all*100),100):0)+'%"></i></div>'+
+     '<div class="kv two"><span>Исполнение прогноза</span><b class="'+(all&&fs/all>=0.7?'g':'')+'">'+(all?Math.round(fs/all*100):0)+'%</b></div>'+
+     (late.length?'<div class="kv two"><span>Отменено и просрочено</span><b class="r">'+money(ls)+'</b></div>':'')+'</div>';
+  var blk=function(title,list,cls){ if(!list.length) return '';
+    var x='<div class="sec">'+title+' · '+list.length+' · '+kk(S(list))+'</div>';
+    for(var i3=0;i3<list.length;i3++){ var r=list[i3];
+      x+='<div class="task noic hassum" style="grid-template-columns:1fr auto auto"><div class="c"><b>'+esc(r.f.obj)+'</b>'+
+         '<span>'+ru(r.f.date)+' · '+esc(r.dep.name)+' · '+esc(r.dep.rop)+'</span></div>'+
+         '<div class="sum">'+money(r.f.sum)+'</div><div class="r"><span class="st '+cls+'">'+
+         (cls==='ok'?'исполнен':(cls==='no'?'отменён':'план'))+'</span></div></div>'; }
+    return x; };
+  h+=blk('Отменённые и просроченные',late,'no')+blk('Впереди',plan,'wait')+blk('Исполненные',fact,'ok');
+  if(!all) h+='<div class="hint">В этом периоде задатков в прогнозе нет.</div>';
+  return h;
+}
+
+
+/* ================= ВОРОНКА ================= */
+function funnelHTML(){
+  var P={week:'Неделя',month:'Месяц'};
+  var h='<div class="seg two">';
+  for(var k in P) h+='<button class="chip'+(per===k?' on':'')+'" onclick="per=\''+k+'\';render()">'+P[k]+'</button>';
+  h+='</div>';
+  var pk=(per==='month')?'month':'week';
+  h+='<div class="card"><span class="t">Воронка компании · факт / норма</span>';
+  for(var i=0;i<NK.length;i++){ var key=NK[i].k, dv=coSum(pk,key), nv=coNorm(pk,key);
+    h+='<div class="kv"><span>'+NK[i].l+'</span><span class="pf"><span class="f">'+dv+'</span><span class="sl">/</span><span class="p">'+nv+'</span></span>'+
+       '<span class="pct">'+Math.round(dv/nv*100)+'%</span></div>'; }
+  h+='</div>';
+  var lead=coSum('month','leads'), pok=coSum('month','pokaz'), pdm=coSum('month','pd'), sdm=coSum('month','sdelka'), oc=coSum('month','ocenka');
+  h+='<div class="card"><span class="t">Конверсии · месяц</span>'+
+     '<div class="kv two"><span>Заявка → показ</span><b>'+Math.round(pok/lead*100)+'%</b></div>'+
+     '<div class="kv two"><span>Заявка → оценка</span><b>'+Math.round(oc/lead*100)+'%</b></div>'+
+     '<div class="kv two"><span>Показ → задаток</span><b>'+(pdm/pok*100).toFixed(1)+'%</b></div>'+
+     '<div class="kv two"><span>Задаток → сделка</span><b>'+(pdm?Math.round(sdm/pdm*100):0)+'%</b></div></div>'+
+     '<div class="hint">Конверсии считаются за месяц: на недельном объёме они скачут и вводят в заблуждение.</div>';
   return h;
 }
 
 /* ================= ЛЮДИ ================= */
 function peopleHTML(){
+  var s0=sentAll(), r0=state.reports[0];
+  var h0='<div class="card"><div class="verdict">Дисциплина: сдали '+s0[0]+' из '+s0[1]+'</div>'+
+    '<div class="cmp">Вчера подписано '+money(r0.signed)+' · задатков '+r0.pd+' · заявок '+r0.leads+'</div></div>';
+  return h0+peopleBody();
+}
+function peopleBody(){
   var isW=per==='week', all=agents(), low=all.filter(function(a){ return a.low; });
   var h='<div class="seg two"><button class="chip'+(isW?' on':'')+'" onclick="per=\'week\';render()">Неделя</button><button class="chip'+(!isW?' on':'')+'" onclick="per=\'month\';render()">Месяц</button></div>';
   h+='<div class="card"><div class="verdict'+(low.length>4?' bad':' good')+'">'+all.length+' агентов · ниже нормы три месяца подряд — '+low.length+'</div><div class="cmp">Сравнение отделов — всегда на одного агента: они разного размера</div></div>';
@@ -528,8 +599,11 @@ function saveRop(id){ var e=document.getElementById('rName'); if(!e.value){ warn
 function delDep(id){ sheet('<h3>Удалить отдел?</h3><span class="sh">записи останутся в отчётах</span><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn warn" onclick="doDelDep('+id+')">Удалить</button></div>'); }
 function doDelDep(id){ state.deps=state.deps.filter(function(d){ return d.id!==id; }); save(); closeSheet(); render(); }
 function logout(){ state.user=null; pickName=null; save(); render(); }
-function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on'); }
-function closeSheet(){ document.getElementById('ovl').classList.remove('on'); }
+function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on');
+  document.body.classList.add('locked'); }
+function closeSheet(){ document.getElementById('ovl').classList.remove('on');
+  document.body.classList.remove('locked');
+  try{ window.scrollTo(0,0); }catch(e){} }
 function resetAll(){ sheet('<h3>Сбросить прототип?</h3><span class="sh">данные вернутся к исходным</span><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="doReset()">Сбросить</button></div>'); }
 function doReset(){ var u=state.user; state=seed(); state.user=u; save(); nav='today'; openD=null; closeSheet(); render(); }
 render();

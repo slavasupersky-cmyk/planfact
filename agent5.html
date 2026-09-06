@@ -239,7 +239,7 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 
 /* ---------- сворачиваемые блоки дня ---------- */
 summary{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s3)}
-summary .cnt{margin:0;text-align:center;font-size:var(--t4);color:var(--mute);font-weight:400}
+summary .cnt{margin:0;text-align:center;font-size:var(--t4);color:var(--mute);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 summary .arw{display:inline-flex;align-items:center;height:32px;padding:0 var(--s3);border-radius:var(--pill);
   background:var(--soft);color:var(--ink);font-size:var(--t4);font-weight:600;white-space:nowrap}
 details[open]>summary .arw::after{content:'свернуть'}
@@ -247,6 +247,19 @@ details:not([open])>summary .arw::after{content:'развернуть'}
 .task.rop{background:var(--soft)}
 .task.rop .ic{background:var(--bg);color:var(--plan)}
 .sublbl{font-size:var(--t4);color:var(--mute);margin:var(--s3) 0 var(--s2)}
+
+/* ---------- общее: вход, шторка, скролл ---------- */
+.login{max-width:420px;margin:0 auto;padding:56px var(--s4) 40px;display:flex;flex-direction:column;min-height:100dvh}
+.login .mark{font-size:var(--t1);font-weight:600;letter-spacing:-.03em;margin-bottom:var(--s2)}
+.login .mark i{font-style:normal;color:var(--lime)}
+.login .sub{font-size:var(--t4);color:var(--mute);text-transform:uppercase;letter-spacing:.04em;margin-bottom:var(--s5)}
+.login h2{font-size:var(--t2);font-weight:600;margin:0 0 var(--s3)}
+.login .sbtn{position:static;margin-top:var(--s4);padding-bottom:0}
+.login .note{margin-top:var(--s3);padding-bottom:var(--s5)}
+body.locked{overflow:hidden;position:fixed;width:100%}
+summary .arw{display:inline-flex;align-items:center;height:32px;padding:0 var(--s3);border-radius:var(--pill);
+  background:var(--soft);color:var(--ink);font-size:var(--t4);font-weight:600;white-space:nowrap}
+.st{height:32px;padding:0 var(--s3);font-size:var(--t4);font-weight:600;border-radius:var(--pill)}
 </style>
 </head>
 <body>
@@ -257,6 +270,7 @@ details:not([open])>summary .arw::after{content:'развернуть'}
 <script>
 /* ================= иконки ================= */
 var IC={
+doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/>',
 list:'<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/>',
 chart:'<path d="M4 20h16"/><path d="M7.5 20v-5M12 20v-9M16.5 20v-6"/>',
 home:'<path d="M4 11 12 4l8 7"/><path d="M6.5 10v10h11V10"/>',
@@ -587,14 +601,14 @@ function draw(){
            : nav==='fc'   ? fcHTML()
            : meHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет агента v5.0.4 · прототип<br>Данные хранятся только на этом устройстве.<br>'+
+    '<div class="foot">ТОЧНО. · кабинет агента v5.1.0 · прототип<br>Данные хранятся только на этом устройстве.<br>'+
     '<button onclick="resetAll()">сбросить и начать заново</button></div></div>'+navHTML();
 }
 function navHTML(){
   var c=(nav==='yest'?'today':nav);
   return '<div class="bottom"><div class="in"><div class="nav">'+
-    nb(c,'today','list','Сегодня')+nb(c,'fc','target','Прогноз')+nb(c,'past','past','Прошлое')+
-    nb(c,'fut','future','Будущее')+nb(c,'me','chart','Моё')+'</div></div></div>';
+    nb(c,'today','list','Сегодня')+nb(c,'fc','target','Прогноз')+nb(c,'fut','future','Предстоит')+
+    nb(c,'past','doc','Отчёты')+nb(c,'me','chart','Моё')+'</div></div></div>';
 }
 function nb(c,k,i,n){ return '<button class="'+(c===k?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,24)+'</b>'+n+'</button>'; }
 function go(k){ nav=k; render(); try{ window.scrollTo(0,0); }catch(e){} }
@@ -602,7 +616,7 @@ function go(k){ nav=k; render(); try{ window.scrollTo(0,0); }catch(e){} }
 function hdrHTML(){
   return '<div class="hdr"><div class="row">'+
     '<div class="col"><div class="top">ТОЧНО<i>.</i></div><div class="bot">план / факт</div></div>'+
-    '<div class="col mid"><div class="top role">Агент</div><div class="bot">v5.0.4</div></div>'+
+    '<div class="col mid"><div class="top role">Агент</div><div class="bot">v5.1.0</div></div>'+
     '<div class="col end"><div class="top name">'+esc(state.user)+'</div><div class="bot">'+rud(state.date)+'</div></div>'+
     '</div></div>';
 }
@@ -610,7 +624,7 @@ function cycleStatus(){ var o=['sent','accepted','extra','rejected'],i=o.indexOf
   state.today.status=o[(i+1)%o.length]; save(); render(); }
 
 function loginHTML(){
-  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет агента v5.0.4</div><h2>Вход в кабинет</h2>';
+  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет агента v5.1.0</div><h2>Вход в кабинет</h2>';
   for(var i=0;i<STAFF.length;i++)
     h+='<button class="pick'+(pickName===STAFF[i]?' on':'')+'" onclick="pickName=\''+STAFF[i]+'\';render()">'+STAFF[i]+'</button>';
   h+='<div class="lbl">Пароль</div><input type="password" id="pw" placeholder="••••••">'+
@@ -650,7 +664,7 @@ function todayHTML(){
   var leftRop=0; for(var r0=0;r0<yRop.length;r0++) if(yRop[r0].done===null) leftRop++;
   var openYesterday = !frozen && (yestOpen || left || leftRop);
   h+='<details id="yestBlock"'+(openYesterday?' open':'')+'><summary>'+
-     '<span>Вчера · '+rud(state.dateY)+'</span>'+
+     '<span>Вчера</span>'+
      '<span class="cnt">'+(frozen?'отчёт сдан':((left+leftRop)?'не отмечено: '+(left+leftRop):'всё отмечено'))+'</span>'+
      '<span class="arw"></span></summary><div class="dbody">';
   if(y.length){
@@ -675,7 +689,7 @@ function todayHTML(){
   var t=byDate(state.date), tRop=ropOn(state.date);
   var leftToday=0; for(var q0=0;q0<t.length;q0++) if(!t[q0].status) leftToday++;
   h+='<details id="todayBlock"'+(todayOpen?' open':'')+'><summary>'+
-     '<span>Сегодня · '+rud(state.date)+'</span>'+
+     '<span>Сегодня</span>'+
      '<span class="cnt">'+(t.length+tRop.length)+(leftToday?' дел · не отмечено '+leftToday:' дел')+'</span>'+
      '<span class="arw"></span></summary><div class="dbody">';
   if(t.length){
@@ -687,8 +701,7 @@ function todayHTML(){
     for(var r2=0;r2<tRop.length;r2++) h+=ropRow(tRop[r2],false);
   }
   if(!t.length&&!tRop.length) h+='<div class="hint">На сегодня пусто. Добавьте хотя бы одно дело.</div>';
-  h+='<div class="seg two"><button class="btn" onclick="openAdd(state.date)">+ Добавить</button>'+
-     '<button class="btn" onclick="openVague()">+ Найти</button></div>';
+  h+='<button class="btn" onclick="openPick()">+ Добавить дело</button>';
   h+='</div></details>';
 
   if(!state.today.sent){
@@ -718,19 +731,20 @@ function itemHTML(it,mode){
   var t=T(it.type);
   var side = it.clt==='buyer'?'покупатель':(it.clt==='seller'?'продавец':'');
   var who  = it.cl ? it.cl+(side?' · '+side:'') : (side||'');
-  var sum = it.sum ? '<div class="sum">'+money(it.sum)+'</div>' : '';
+  var sum='';
+  if(it.sum) who = (who?who+' · ':'')+money(it.sum);
   var st  = mode==='fut' ? '' : statusView(it);
   if(mode==='frozen')
-    return '<div class="task'+(it.status?' done':'')+(sum?' hassum':'')+'">'+
+    return '<div class="task'+(it.status?' done':'')+'">'+
       '<div class="ic">'+ic(t.ic)+'</div>'+
       '<div class="c"><b>'+(it.time||'—')+'</b><span>'+t.n+(it.star?' ★':'')+'</span></div>'+
-      '<div class="c"><b>'+esc(it.obj||'без адреса')+'</b><span>'+esc(who)+'</span></div>'+
-      sum+'<div class="r">'+st+'</div></div>';
-  return '<button class="task'+(it.status?' done':'')+(sum?' hassum':'')+'" onclick="openTask('+it.id+')">'+
+      '<div class="c"><b>'+esc(it.obj|| (it.vague?'Объект пока не найден':'Задача без адреса'))+'</b><span>'+esc(who)+'</span></div>'+
+      '<div class="r">'+st+'</div></div>';
+  return '<button class="task'+(it.status?' done':'')+'" onclick="openTask('+it.id+')">'+
     '<div class="ic">'+ic(t.ic)+'</div>'+
     '<div class="c"><b>'+(it.time||'—')+'</b><span>'+t.n+(it.star?' ★':'')+'</span></div>'+
-    '<div class="c"><b>'+esc(it.obj||'без адреса')+'</b><span>'+esc(who)+'</span></div>'+
-    sum+'<div class="r">'+st+'</div></button>';
+    '<div class="c"><b>'+esc(it.obj|| (it.vague?'Объект пока не найден':'Задача без адреса'))+'</b><span>'+esc(who)+'</span></div>'+
+    '<div class="r">'+st+'</div></button>';
 }
 function statusView(it){
   if(it.status==='done')  return '<span class="st ok">сделано</span>';
@@ -818,7 +832,7 @@ function fcHTML(){
   for(var i=0;i<s.items.length;i++){ var f=s.items[i];
     h+='<button class="item'+(f.status==='done'?' done':'')+'" onclick="openTask('+f.id+')"><div class="ic">'+ic('money')+'</div>'+
        '<div class="tx"><div class="tp">'+ru(f.date)+'</div><div class="nm">'+esc(f.obj||'без адреса')+'</div>'+
-       '<div class="sub">кабинет агента v5.0.4</div></div>'+
+       '<div class="sub">кабинет агента v5.1.0</div></div>'+
        (f.status==='done'?'<span class="rt ok">факт</span>':'<span class="rt wait">план</span>')+'</button>';
   }
   if(!s.items.length) h+='<div class="hint">В этом периоде задатков нет.</div>';
@@ -845,7 +859,8 @@ function meHTML(){
   h+='<div class="card"><div class="t">'+(isW?'Неделя '+ru(weekStart())+' – '+ru(weekEnd()):monthNom()+' · с 1 числа')+'</div>';
   for(var j=0;j<NORMKEYS.length;j++){ var kk=NORMKEYS[j].k, d=isW?cntW(kk):cntM(kk), n=isW?normW(kk):normM(kk);
     h+='<div class="kv"><span>'+NORMKEYS[j].l.charAt(0).toUpperCase()+NORMKEYS[j].l.slice(1)+'</span>'+
-       '<b class="'+(d>=n?'g':'')+'">'+d+' / '+n+'</b><span class="pct">'+Math.round(d/n*100)+'%</span></div>';
+       '<span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+n+'</span></span>'+
+       '<span class="pct">'+Math.round(d/n*100)+'%</span></div>';
   }
   h+='</div>';
   h+='<div class="hint">Норма недели считается из месячной: месячная ÷ 4,33 с округлением вверх. Поэтому сумма недельных чуть больше месячной — так задумано.</div>';
@@ -1015,6 +1030,17 @@ function openAdd(date,star,editId,type){
   if(editId){ var t=task(editId); if(t) frm={id:t.id,type:t.type,obj:t.obj,cl:t.cl,clt:t.clt,date:t.date,time:t.time,sum:t.sum||'',star:!!t.star,vague:!!t.vague}; }
   fixClt(); drawAdd();
 }
+function openPick(){
+  sheet('<h3>Что добавить</h3><span class="sh">'+rud(state.date)+'</span>'+
+    '<button class="btn" onclick="closeSheet();openAdd(state.date)">Конкретное дело</button>'+
+    '<div class="hint">Показ, оценка, встреча, задаток, сделка, реклама — с адресом и клиентом.</div>'+
+    '<button class="btn" onclick="closeSheet();openVague()">Найти работу</button>'+
+    '<div class="hint">Нужен ещё показ или оценка, а объект и клиент ещё предстоит найти.</div>'+
+    '<button class="btn" onclick="closeSheet();openOther()">Другое</button>'+
+    '<div class="hint">Задача своими словами, без адреса.</div>'+
+    '<div class="sbtn" style="grid-template-columns:1fr"><button class="btn ghost" onclick="closeSheet()">Отмена</button></div>');
+}
+function openOther(){ frm={id:0,type:'other',obj:'',cl:'',clt:'',date:state.date,time:'',sum:'',star:false,vague:false}; fixClt(); drawAdd(); }
 function openVague(){ frm={id:0,type:'pokaz',obj:'',cl:'',clt:'',date:state.date,time:'',sum:'',star:false,vague:true}; fixClt(); drawAdd(); }
 function fixClt(){ var t=T(frm.type); if(t.cl==='none') frm.clt=''; else if(t.cl!=='any') frm.clt=t.cl; }
 function drawAdd(){
@@ -1025,7 +1051,7 @@ function drawAdd(){
     '<div class="lbl">Класс</div><div class="chips three">';
   for(var i=0;i<TYPES.length;i++)
     h+='<button class="chip'+(frm.type===TYPES[i].k?' on':'')+'" onclick="grabAdd();frm.type=\''+TYPES[i].k+'\';fixClt();drawAdd()">'+TYPES[i].n+'</button>';
-  h+='<button class="chip'+(frm.type==='lead'?' on':'')+'" onclick="frm.type=\'lead\';drawAdd()">Заявки</button>';
+
   h+='</div><div class="row2"><div><div class="lbl">Дата</div><input type="date" id="aDate" value="'+frm.date+'"></div>'+
      '<div><div class="lbl">Время</div><input type="time" id="aTime" value="'+(frm.time||'')+'"></div></div>';
   if(t.k==='other'){
@@ -1144,7 +1170,7 @@ function openSubmit(silent){
   if(blockers.length){
     h+='<div class="card" style="border-color:var(--alarm)"><b style="color:var(--alarm)">Пока сдать нельзя</b>'+
        '<div class="hint" style="margin:6px 0 0">'+esc(blockers.join(' · '))+'</div></div>'+
-       '<button class="btn" onclick="closeSheet();openYest()">Открыть вчера</button>';
+       '<button class="btn pri" onclick="closeSheet();openYest()">Открыть вчера</button>';
   }
   h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
      '<button class="btn pri"'+(blockers.length?' disabled':'')+' onclick="doSubmit()">Сдать</button></div>';
@@ -1172,8 +1198,11 @@ function flash(txt,bad){
   document.body.appendChild(e);
   setTimeout(function(){ if(e.parentNode) e.parentNode.removeChild(e); },bad?2600:1800);
 }
-function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on'); }
-function closeSheet(){ document.getElementById('ovl').classList.remove('on'); }
+function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on');
+  document.body.classList.add('locked'); }
+function closeSheet(){ document.getElementById('ovl').classList.remove('on');
+  document.body.classList.remove('locked');
+  try{ window.scrollTo(0,0); }catch(e){} }
 function resetAll(){
   sheet('<h3>Сбросить прототип?</h3><div class="sh">данные вернутся к исходным</div>'+
     '<div class="hint">Все отметки, добавленные дела и сданные отчёты будут стёрты.</div>'+

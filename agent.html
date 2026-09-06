@@ -241,6 +241,19 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 .task.noic{grid-template-columns:1fr auto}
 .task.tap{cursor:pointer}
 .task .c span.wrap{white-space:normal}
+
+/* ---------- общее: вход, шторка, скролл ---------- */
+.login{max-width:420px;margin:0 auto;padding:56px var(--s4) 40px;display:flex;flex-direction:column;min-height:100dvh}
+.login .mark{font-size:var(--t1);font-weight:600;letter-spacing:-.03em;margin-bottom:var(--s2)}
+.login .mark i{font-style:normal;color:var(--lime)}
+.login .sub{font-size:var(--t4);color:var(--mute);text-transform:uppercase;letter-spacing:.04em;margin-bottom:var(--s5)}
+.login h2{font-size:var(--t2);font-weight:600;margin:0 0 var(--s3)}
+.login .sbtn{position:static;margin-top:var(--s4);padding-bottom:0}
+.login .note{margin-top:var(--s3);padding-bottom:var(--s5)}
+body.locked{overflow:hidden;position:fixed;width:100%}
+summary .arw{display:inline-flex;align-items:center;height:32px;padding:0 var(--s3);border-radius:var(--pill);
+  background:var(--soft);color:var(--ink);font-size:var(--t4);font-weight:600;white-space:nowrap}
+.st{height:32px;padding:0 var(--s3);font-size:var(--t4);font-weight:600;border-radius:var(--pill)}
 </style>
 </head>
 <body>
@@ -1145,8 +1158,11 @@ function flash(txt,bad){
   document.body.appendChild(e);
   setTimeout(function(){ if(e.parentNode) e.parentNode.removeChild(e); },bad?2600:1800);
 }
-function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on'); }
-function closeSheet(){ document.getElementById('ovl').classList.remove('on'); }
+function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on');
+  document.body.classList.add('locked'); }
+function closeSheet(){ document.getElementById('ovl').classList.remove('on');
+  document.body.classList.remove('locked');
+  try{ window.scrollTo(0,0); }catch(e){} }
 function resetAll(){
   sheet('<h3>Сбросить прототип?</h3><div class="sh">данные вернутся к исходным</div>'+
     '<div class="hint">Все отметки, добавленные дела и сданные отчёты будут стёрты.</div>'+

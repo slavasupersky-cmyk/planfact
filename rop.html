@@ -76,7 +76,7 @@ button,input,textarea{font-family:inherit;font-size:var(--t3);color:var(--ink)}
 .sec.warn{color:var(--alarm)}
 
 /* ---------- показатели ---------- */
-.nrow{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s2)}
+.nrow{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s2)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
 .nrow button,.grid button,.grid div{background:var(--soft);border:0;border-radius:var(--r);
   padding:var(--s3) var(--s1);text-align:center;color:inherit;width:100%}
@@ -250,6 +250,19 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 .hdr .top i{font-style:normal;color:var(--lime)}
 .hdr .top.role,.hdr .top.name{font-size:var(--t3);font-weight:600;letter-spacing:-.01em}
 .hdr .bot{font-size:var(--t4);color:var(--mute);line-height:1.3;margin-top:4px;white-space:nowrap}
+
+/* ---------- общее: вход, шторка, скролл ---------- */
+.login{max-width:420px;margin:0 auto;padding:56px var(--s4) 40px;display:flex;flex-direction:column;min-height:100dvh}
+.login .mark{font-size:var(--t1);font-weight:600;letter-spacing:-.03em;margin-bottom:var(--s2)}
+.login .mark i{font-style:normal;color:var(--lime)}
+.login .sub{font-size:var(--t4);color:var(--mute);text-transform:uppercase;letter-spacing:.04em;margin-bottom:var(--s5)}
+.login h2{font-size:var(--t2);font-weight:600;margin:0 0 var(--s3)}
+.login .sbtn{position:static;margin-top:var(--s4);padding-bottom:0}
+.login .note{margin-top:var(--s3);padding-bottom:var(--s5)}
+body.locked{overflow:hidden;position:fixed;width:100%}
+summary .arw{display:inline-flex;align-items:center;height:32px;padding:0 var(--s3);border-radius:var(--pill);
+  background:var(--soft);color:var(--ink);font-size:var(--t4);font-weight:600;white-space:nowrap}
+.st{height:32px;padding:0 var(--s3);font-size:var(--t4);font-weight:600;border-radius:var(--pill)}
 </style>
 </head>
 <body>
@@ -375,7 +388,7 @@ function seed(){
     var hist=[]; for(var q=_d.length-1;q>=0;q--){ var dd=_d[q];
       hist.push({kind:'day',date:dd.date,plan:dd.plan,fact:dd.fact,ref:dd.ref,mv:dd.mv,leads:dd.cls.leads,status:dd.status}); }
     hist=hist.concat(histWeeks(_d,wn)).concat(histMonths(_d,mn));
-    return {id:id,name:name,sent:sent,status:null,tasks:tasks,today:today,hist:hist,plan:tasks.length,done:done,refused:ref,moved:mv,week:week,month:month,fc:fc,leads:leads,prev:prev||{},rop:[],streakMove:0};
+    return {id:id,name:name,tg:(['kastromina','rozanova','kondrateva','goncharova','titova','ershova','lapina','zueva','melnik','somova'][id-1]||''),sent:sent,status:null,tasks:tasks,today:today,hist:hist,plan:tasks.length,done:done,refused:ref,moved:mv,week:week,month:month,fc:fc,leads:leads,prev:prev||{},rop:[],streakMove:0};
   }
   return {
     user:null,date:t,dateY:y,seq:900,sentUp:false,comment:'',mytasks:'',
@@ -466,7 +479,7 @@ function clean(a){ return a.sent&&!a.status&&attention(a).length===0; }
 function fcAll(mode){
   var o=[]; for(var i=0;i<state.agents.length;i++){ var a=state.agents[i];
     for(var j=0;j<a.fc.length;j++){ var f=a.fc[j];
-      var inP = mode==='today'? f.date===state.date
+      var inP = mode==='yest'? f.date===state.dateY : mode==='today'? f.date===state.date
               : mode==='week'? f.date<=weekEnd()
               : (mode==='month'? f.date<=plus(30) : f.date>plus(30));
       if(inP) o.push({who:a.name,id:a.id,f:f}); } }
@@ -483,20 +496,20 @@ function draw(){
   if(!state.user){ r.innerHTML=loginHTML(); return; }
   var body = openA? agentHTML() : nav==='inbox'? inboxHTML() : nav==='team'? teamHTML() : nav==='fc'? fcHTML() : nav==='rep'? repHTML() : setHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет РОПа v4.1.4 · прототип<br>Данные выдуманные.<br><button onclick="resetAll()">сбросить и начать заново</button></div></div>'+
-    '<div class="bottom"><div class="in"><div class="nav">'+nb('inbox','inbox','Приёмка')+nb('team','users','Отдел')+nb('fc','target','Прогноз')+nb('rep','doc','Отчёты')+nb('set','tune','Настройки')+'</div></div></div>';
+    '<div class="foot">ТОЧНО. · кабинет РОПа v4.2.0 · прототип<br>Данные выдуманные.<br><button onclick="resetAll()">сбросить и начать заново</button></div></div>'+
+    '<div class="bottom"><div class="in"><div class="nav">'+nb('inbox','inbox','Приёмка')+nb('team','users','Агенты')+nb('fc','target','Прогноз')+nb('rep','doc','Отчёты')+nb('set','tune','Настройки')+'</div></div></div>';
 }
 function nb(k,i,n){ return '<button class="'+(nav===k&&!openA?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,24)+'</b>'+n+'</button>'; }
 function go(k){ nav=k; openA=null; render(); try{ window.scrollTo(0,0); }catch(e){} }
 function hdrHTML(){
   return '<div class="hdr"><div class="row">'+
     '<div class="col"><div class="top">ТОЧНО<i>.</i></div><div class="bot">план / факт</div></div>'+
-    '<div class="col mid"><div class="top role">РОП</div><div class="bot">v4.1.4</div></div>'+
+    '<div class="col mid"><div class="top role">РОП</div><div class="bot">v4.2.0</div></div>'+
     '<div class="col end"><div class="top name">'+esc(state.user)+'</div><div class="bot">'+rud(state.date)+'</div></div>'+
     '</div></div>';
 }
 function loginHTML(){
-  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет РОПа v4.1.4</div><h2>Вход в кабинет</h2>';
+  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет РОПа v4.2.0</div><h2>Вход в кабинет</h2>';
   for(var i=0;i<ROPS.length;i++) h+='<button class="pick'+(pickName===ROPS[i]?' on':'')+'" onclick="pickName=\''+ROPS[i]+'\';render()">'+ROPS[i]+'</button>';
   return h+'<span class="lbl">Пароль</span><input type="password" id="pw" placeholder="••••••"><div class="sbtn"><button class="btn" onclick="pickName=null;render()">Сброс</button><button class="btn pri" onclick="doLogin()">Войти</button></div><div class="note">Пароль в прототипе любой.</div></div>';
 }
@@ -507,7 +520,7 @@ function agentRow(a){
   var att=attention(a);
   var meta = a.sent? 'сделано '+a.done+' из '+a.plan+(a.refused?' · отказов '+a.refused:'')+(a.moved?' · переносов '+a.moved:'') : 'отчёта нет';
   var right;
-  if(!a.sent) right='<span class="st no">не сдал</span>';
+  if(!a.sent) right='<button class="st no" onclick="event.stopPropagation();poke('+a.id+')">напомнить</button>';
   else if(a.status) right='<span class="st ok">'+({accepted:'принят',extra:'с задачей',rejected:'возвращён'}[a.status])+'</span>';
   else right='<button class="st act" onclick="event.stopPropagation();quickAccept('+a.id+')">принять</button>';
   return '<div class="task noic tap'+(att.length?' bad':'')+(a.status?' done':'')+'" onclick="showAgent('+a.id+')">'+
@@ -568,17 +581,6 @@ function agentHTML(){
      ' · на прошлой неделе задатков '+(a.prev.pd||0)+'</div></div>';
 
   h+='<button class="btn" onclick="taskTo='+a.id+';openTask()">+ Поставить задачу на сегодня</button>';
-  if(a.sent&&!a.status){
-    h+='<div class="seg two"><button class="btn pri" onclick="accept(\'accepted\')">Принять</button>'+
-       '<button class="btn" onclick="accept(\'extra\')">Принять с задачей</button></div>'+
-       '<button class="btn ghost" onclick="accept(\'rejected\')">Вернуть на доработку</button>';
-  } else if(a.status){
-    h+='<div class="card"><div class="cmp">Отчёт '+({accepted:'принят',extra:'принят с задачей',rejected:'возвращён на доработку'}[a.status])+'</div></div>';
-  }
-
-  if(a.tasks.length){ h+='<div class="sec">Факт за вчера</div>'; for(var i=0;i<a.tasks.length;i++) h+=factRow(a.tasks[i]); }
-  else h+='<div class="hint">Отчёта за вчера нет.</div>';
-
   h+='<div class="sec">План на сегодня · '+a.today.length+'</div>';
   if(!a.today.length) h+='<div class="hint">План не сдан.</div>';
   for(var t=0;t<a.today.length;t++){ var pl=a.today[t], c=C(pl.cls);
@@ -586,10 +588,13 @@ function agentHTML(){
        '<div class="c"><b>'+pl.time+'</b><span>'+c.n+'</span></div>'+
        '<div class="c"><b>'+esc(pl.obj)+'</b><span>'+esc(pl.cl)+'</span></div><div class="r"></div></div>'; }
 
-  h+='<div class="sec">Неделя · факт / план</div><div class="card">';
-  for(var j=0;j<NK.length;j++){ var k=NK[j].k, d=a.week[k]||0, n=normW(k);
-    h+='<div class="kv"><span>'+NK[j].l+'</span><span class="pf"><span class="f">'+d+'</span><span class="sl">/</span><span class="p">'+n+'</span></span><span class="pct">'+Math.round(d/n*100)+'%</span></div>'; }
-  h+='</div>';
+  if(a.tasks.length){ h+='<div class="sec">Факт за вчера</div>'; for(var i=0;i<a.tasks.length;i++) h+=factRow(a.tasks[i]); }
+  else h+='<div class="hint">Отчёта за вчера нет.</div>';
+
+  h+='<details><summary><span>Неделя · норма</span><span class="cnt">факт / план</span><span class="arw"></span></summary><div class="dbody">';
+  for(var j=0;j<NK.length;j++){ var k=NK[j].k, dw=a.week[k]||0, nw=normW(k);
+    h+='<div class="kv"><span>'+NK[j].l+'</span><span class="pf"><span class="f">'+dw+'</span><span class="sl">/</span><span class="p">'+nw+'</span></span><span class="pct">'+Math.round(dw/nw*100)+'%</span></div>'; }
+  h+='</div></details>';
 
   if(a.fc.length){ h+='<div class="sec">Прогноз по задаткам</div>';
     for(var q=0;q<a.fc.length;q++){ var f=a.fc[q];
@@ -615,6 +620,15 @@ function agentHTML(){
   if(a.rop.length){ h+='<div class="sec">Мои задачи</div>';
     for(var w=0;w<a.rop.length;w++){ var rt=a.rop[w];
       h+='<div class="task noic"><div class="c"><b>'+ru(rt.date)+'</b><span>задача</span></div><div class="c"><b>'+esc(rt.text)+'</b><span>'+(rt.done===null?'ждёт ответа':(rt.done?'сделано':'не сделано: '+esc(rt.why)))+'</span></div><div class="r"></div></div>'; } }
+  if(a.sent&&!a.status){
+    h+='<div class="seg two" style="margin-top:var(--s4)">'+
+       '<button class="btn pri" onclick="accept(\'accepted\')">Принять</button>'+
+       '<button class="btn" onclick="accept(\'extra\')">Принять с задачей</button></div>'+
+       '<button class="btn ghost" onclick="accept(\'rejected\')">Вернуть на доработку</button>';
+  } else if(a.status){
+    h+='<div class="card" style="margin-top:var(--s4)"><div class="cmp">Отчёт '+
+       ({accepted:'принят',extra:'принят с задачей',rejected:'возвращён на доработку'}[a.status])+'</div></div>';
+  }
   return h;
 }
 function accept(st){ openA.status=st; save(); if(st==='extra'){ taskTo=openA.id; return openTask(); } flash(st==='rejected'?'Возвращён на доработку':'Принято'); render(); }
@@ -649,7 +663,7 @@ function teamHTML(){
     var pd=dd.pd||0, pdn=isW?normW('pd'):normM('pd');
     var pk=dd.pokaz||0, pkn=isW?normW('pokaz'):normM('pokaz');
     h+='<div class="task noic tap" onclick="showAgent('+a.id+',1)">'+
-       '<div class="c"><b>'+esc(a.name)+'</b><span>показы '+pk+' из '+pkn+' · оценки '+(dd.ocenka||0)+' · встречи '+(dd.vstr||0)+'</span></div>'+
+       '<div class="c"><b>'+esc(a.name)+'</b><span>план сегодня '+a.today.length+' · вчера '+a.done+' из '+a.plan+' · показы '+pk+'/'+pkn+'</span></div>'+
        '<div class="r"><span class="st '+(pd>=pdn?'ok':(pd===0?'no':'wait'))+'">задатки '+pd+'/'+pdn+'</span></div></div>';
   }
   return h;
@@ -661,9 +675,9 @@ function fcHTML(){
   for(var i=0;i<it.length;i++){ var f=it[i].f; if(f.done) fact.push(it[i]); else if(f.date<state.date) late.push(it[i]); else plan.push(it[i]); }
   var S=function(l){ var s=0; for(var i=0;i<l.length;i++) s+=Number(l[i].f.sum||0); return s; };
   var ps=S(plan),fs=S(fact),ls=S(late), all=ps+fs+ls;
-  var h='<div class="seg" style="grid-template-columns:repeat(4,1fr)">'+
-    ['today','week','month','future'].map(function(m){
-      var n={today:'Сегодня',week:'Неделя',month:'Месяц',future:'Дальше'}[m];
+  var h='<div class="seg" style="grid-template-columns:repeat(5,1fr)">'+
+    ['yest','today','week','month','future'].map(function(m){
+      var n={yest:'Вчера',today:'Сегодня',week:'Неделя',month:'Месяц',future:'Дальше'}[m];
       return '<button class="chip'+(fcMode===m?' on':'')+'" onclick="fcMode=\''+m+'\';render()">'+n+'</button>';
     }).join('')+'</div>';
   h+='<div class="card"><div class="big">'+money(fs)+'<small>факт · из прогноза '+money(all)+' · '+fact.length+' из '+it.length+'</small></div>'+
@@ -708,10 +722,14 @@ function sendUp(){ state.sentUp=true; save(); flash('Отчёт ушёл соб�
 function setHTML(){
   var h='<div class="card"><span class="t">Нормы на агента · неделя / месяц</span>';
   for(var i=0;i<NK.length;i++){ var k=NK[i].k; h+='<div class="kv"><span>'+NK[i].l+'</span><b>'+normW(k)+'</b><b style="color:var(--mute)">'+normM(k)+'</b></div>'; }
-  h+='</div><button class="btn" onclick="openNorms()">Изменить нормы</button>';
+  h+='</div><div class="hint">Нормы задаёт собственник. У РОПа только просмотр.</div>';
   h+='<div class="sec">Агенты · '+state.agents.length+'</div>';
   for(var j=0;j<state.agents.length;j++){ var a=state.agents[j];
-    h+='<details><summary>'+esc(a.name)+'</summary><div class="dbody"><button class="btn" onclick="resetPw('+a.id+')">Сбросить пароль</button><button class="btn warn" onclick="delAgent('+a.id+')">Удалить из отдела</button></div></details>'; }
+    h+='<details><summary><span>'+esc(a.name)+'</span><span class="cnt">'+(a.tg?'@'+a.tg:'телеграм не указан')+'</span><span class="arw"></span></summary><div class="dbody">'+
+       '<span class="lbl">Телеграм для напоминаний</span><input id="tg_'+a.id+'" value="'+esc(a.tg||'')+'" placeholder="username">'+
+       '<button class="btn" style="margin-top:var(--s2)" onclick="saveTg('+a.id+')">Сохранить телеграм</button>'+
+       '<button class="btn" onclick="resetPw('+a.id+')">Сбросить пароль</button>'+
+       '<button class="btn warn" onclick="delAgent('+a.id+')">Удалить из отдела</button></div></details>'; }
   h+='<button class="btn" onclick="addAgent()">+ Добавить агента</button><button class="btn ghost" onclick="logout()">Выйти из кабинета</button>';
   return h;
 }
@@ -719,6 +737,14 @@ function openNorms(){ var h='<h3>Нормы</h3><span class="sh">неделя и
   for(var i=0;i<NK.length;i++){ var k=NK[i].k; h+='<span class="lbl">'+NK[i].l+'</span><div class="row2"><input type="number" inputmode="numeric" id="w_'+k+'" value="'+normW(k)+'" placeholder="неделя"><input type="number" inputmode="numeric" id="m_'+k+'" value="'+normM(k)+'" placeholder="месяц"></div>'; }
   h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="saveNorms()">Сохранить</button></div>'; sheet(h); }
 function saveNorms(){ for(var i=0;i<NK.length;i++){ var k=NK[i].k, w=document.getElementById('w_'+k), m=document.getElementById('m_'+k); if(w&&w.value!=='') state.normW[k]=Number(w.value); if(m&&m.value!=='') state.norm[k]=Number(m.value); } save(); closeSheet(); render(); }
+function saveTg(id){ var e=document.getElementById('tg_'+id), a=agent(id);
+  if(!a) return; a.tg=(e.value||'').replace('@',''); save(); flash('Телеграм сохранён'); render(); }
+function poke(id){ var a=agent(id);
+  if(!a||!a.tg){ warn('У агента не указан телеграм — добавьте в настройках'); return; }
+  var msg=encodeURIComponent('Доброе утро! Жду ваш отчёт за вчера, срок был 10:00.');
+  try{ window.open('https://t.me/'+a.tg+'?text='+msg,'_blank'); }catch(e){}
+  flash('Открыт чат с @'+a.tg);
+}
 function resetPw(id){ sheet('<h3>Сбросить пароль?</h3><span class="sh">'+esc(agent(id).name)+'</span><div class="hint">Новый пароль придёт агенту в Телеграм, сессии закроются.</div><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="closeSheet();flash(\'Пароль сброшен\')">Сбросить</button></div>'); }
 function delAgent(id){ sheet('<h3>Удалить из отдела?</h3><span class="sh">'+esc(agent(id).name)+'</span><div class="hint">Доступ закроется, записи останутся в отчётах.</div><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn warn" onclick="doDel('+id+')">Удалить</button></div>'); }
 function doDel(id){ state.agents=state.agents.filter(function(a){ return a.id!==id; }); save(); closeSheet(); render(); }
@@ -726,8 +752,11 @@ function addAgent(){ sheet('<h3>Новый агент</h3><span class="sh">в о
 function saveAgent(){ var e=document.getElementById('aName'); if(!e.value){ warn('Укажите имя'); return; } var z={sdelka:0,pd:0,pokaz:0,ocenka:0,vstr:0,rekl:0,leads:0};
   state.agents.push({id:++state.seq,name:e.value,sent:false,status:null,tasks:[],plan:0,done:0,refused:0,moved:0,week:JSON.parse(JSON.stringify(z)),month:JSON.parse(JSON.stringify(z)),fc:[],leads:0,prev:{},rop:[],streakMove:0}); save(); closeSheet(); render(); }
 function logout(){ state.user=null; pickName=null; save(); render(); }
-function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on'); }
-function closeSheet(){ document.getElementById('ovl').classList.remove('on'); }
+function sheet(h){ document.getElementById('sheet').innerHTML=h; document.getElementById('ovl').classList.add('on');
+  document.body.classList.add('locked'); }
+function closeSheet(){ document.getElementById('ovl').classList.remove('on');
+  document.body.classList.remove('locked');
+  try{ window.scrollTo(0,0); }catch(e){} }
 function resetAll(){ sheet('<h3>Сбросить прототип?</h3><span class="sh">данные вернутся к исходным</span><div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="doReset()">Сбросить</button></div>'); }
 function doReset(){ var u=state.user; state=seed(); state.user=u; state.agents[2].streakMove=3; save(); nav='inbox'; openA=null; closeSheet(); render(); }
 render();
