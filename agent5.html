@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-<title>ТОЧНО. — Кабинет агента</title>
+<title>ТОЧНО. — Кабинет агента v5</title>
 <style>
 /* ============================================================
    ТОЧНО · план/факт — единая система интерфейса
@@ -114,13 +114,8 @@ button,input,textarea{font-family:inherit;font-size:var(--t3);color:var(--ink)}
 /* ---------- сворачиваемые блоки ---------- */
 details{border:1px solid var(--line);border-radius:var(--r);margin-bottom:var(--s2);overflow:hidden}
 details[open]{border-color:var(--ink)}
-summary{list-style:none;cursor:pointer;padding:var(--s3) var(--s4);display:grid;
-  grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s3);font-size:var(--t2);font-weight:600}
-summary .cnt{margin:0;text-align:center;font-size:var(--t4);color:var(--mute);font-weight:400}
-summary .arw{display:inline-flex;align-items:center;height:32px;padding:0 var(--s3);border-radius:var(--pill);
-  background:var(--soft);color:var(--ink);font-size:var(--t4);font-weight:600;white-space:nowrap}
-details[open]>summary .arw::after{content:'свернуть'}
-details:not([open])>summary .arw::after{content:'развернуть'}
+summary{list-style:none;cursor:pointer;padding:var(--s3) var(--s4);display:flex;align-items:center;
+  gap:var(--s2);font-size:var(--t2);font-weight:600}
 summary::-webkit-details-marker{display:none}
 summary .cnt{margin-left:auto;font-size:var(--t4);color:var(--mute);font-weight:400}
 summary .arw{display:none}
@@ -241,12 +236,23 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 .task.noic{grid-template-columns:1fr auto}
 .task.tap{cursor:pointer}
 .task .c span.wrap{white-space:normal}
+
+/* ---------- сворачиваемые блоки дня ---------- */
+summary{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s3)}
+summary .cnt{margin:0;text-align:center;font-size:var(--t4);color:var(--mute);font-weight:400}
+summary .arw{display:inline-flex;align-items:center;height:32px;padding:0 var(--s3);border-radius:var(--pill);
+  background:var(--soft);color:var(--ink);font-size:var(--t4);font-weight:600;white-space:nowrap}
+details[open]>summary .arw::after{content:'свернуть'}
+details:not([open])>summary .arw::after{content:'развернуть'}
+.task.rop{background:var(--soft)}
+.task.rop .ic{background:var(--bg);color:var(--plan)}
+.sublbl{font-size:var(--t4);color:var(--mute);margin:var(--s3) 0 var(--s2)}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <div class="ovl" id="ovl" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
-<div class="wiz" id="wiz"><div class="wizscroll"><div class="in" id="wizin"></div></div><div class="wizbar"><div class="in" id="wizbar"></div></div></div>
+
 
 <script>
 /* ================= иконки ================= */
@@ -272,7 +278,7 @@ phone:'<path d="M5 4h3.5l1.8 4.5-2.3 1.4a12 12 0 0 0 5.1 5.1l1.4-2.3L19 14.5V18a
 function ic(n,s){ s=s||26; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
 
 /* ================= хранилище ================= */
-var KEY='topf-agent-v41', mem=null;
+var KEY='topf-agent-v5', mem=null;
 function save(){ var s=JSON.stringify(state); try{ localStorage.setItem(KEY,s);}catch(e){ mem=s; } }
 function load(){ var s=null; try{ s=localStorage.getItem(KEY);}catch(e){ s=mem; } if(!s)s=mem;
   if(!s) return null; try{ return JSON.parse(s);}catch(e){ return null; } }
@@ -459,7 +465,9 @@ function seed(){
       {id:29,type:'pd',    obj:'Кулакова 2',    cl:'Гончаров', clt:'seller',date:plus(16),time:'',sum:130000,status:null},
       {id:30,type:'ocenka',obj:'Мира 45',       cl:'Сомов',    clt:'seller',date:plus(12),time:'11:00',status:null}
     ].concat(history()),
-    ropTasks:[{id:21,text:'Разобрать портфель',date:t,done:null,why:''},
+    ropTasks:[{id:19,text:'Собрать документы по Ладожской',date:y,done:null,why:''},
+              {id:20,text:'Перезвонить Розе по цене',date:y,done:true,why:'',res:'Снизила на 200 тысяч'},
+              {id:21,text:'Разобрать портфель',date:t,done:null,why:''},
               {id:22,text:'Сделать предложение по цене Маргарите',date:t,done:null,why:''}],
     leads:[{date:plus(-2),n:4},{date:plus(-3),n:5}],
     leadsY:null,
@@ -559,6 +567,7 @@ function fcStat(mode){
 }
 
 /* ================= рендер ================= */
+var yestOpen=false, todayOpen=true;
 var nav='today', pickName=null, meMode='week', fcMode='week';
 function render(){
   try{ draw(); }catch(e){
@@ -573,13 +582,12 @@ function draw(){
   var r=document.getElementById('root');
   if(!state.user){ r.innerHTML=loginHTML(); return; }
   var body = nav==='today'? todayHTML()
-           : nav==='yest' ? yestHTML()
-           : nav==='fut'  ? futHTML()
+           :  nav==='fut'  ? futHTML()
            : nav==='past' ? pastHTML()
            : nav==='fc'   ? fcHTML()
            : meHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет агента v4.1.2 · прототип<br>Данные хранятся только на этом устройстве.<br>'+
+    '<div class="foot">ТОЧНО. · кабинет агента v5.0.4 · прототип<br>Данные хранятся только на этом устройстве.<br>'+
     '<button onclick="resetAll()">сбросить и начать заново</button></div></div>'+navHTML();
 }
 function navHTML(){
@@ -592,32 +600,17 @@ function nb(c,k,i,n){ return '<button class="'+(c===k?'on':'')+'" onclick="go(\'
 function go(k){ nav=k; render(); try{ window.scrollTo(0,0); }catch(e){} }
 
 function hdrHTML(){
-  var st=state.today;
-  var h='<div class="hdr"><div class="row">'+'<div class="col"><div class="top">ТОЧНО<i>.</i></div><div class="bot">план / факт</div></div>'+'<div class="col mid"><div class="top role">Агент</div><div class="bot">v4.1.2</div></div>'+'<div class="col end"><div class="top name">'+esc(state.user)+'</div><div class="bot">'+rud(state.date)+'</div></div>'+'</div>';
-  if(nav==='today'||nav==='yest'){
-    if(!st.sent){
-      h+='<button class="btn pri submit" onclick="openWiz()">'+ic('send',20)+'Сдать план и факт</button>'+
-         '<div class="status alarm"><span class="dm no"></span>Не сдан · срок до 10:00</div>';
-    } else {
-      var m={sent:['wait','Сдан в '+st.at+' · ждёт приёмки'],accepted:['ok','Принят РОПом'],
-             extra:['wait','Принят с дополнительными задачами'],rejected:['no','Не принят — нужны правки']};
-      var x=m[st.status]||m.sent;
-      h+='<button class="btn submit" disabled>'+ic('ok',20)+'План и факт сданы</button>'+
-         '<div class="status"><span class="dm '+x[0]+'"></span>'+x[1]+
-         '<button style="background:none;border:0;color:var(--mute);text-decoration:underline;font-size:12px;padding:0 0 0 6px" onclick="cycleStatus()">демо</button></div>';
-    }
-  } else if(nav==='fut'){
-    h+='<button class="btn submit" onclick="openAdd(plus(1))">+ Назначить на дату</button>';
-  } else if(nav==='fc'){
-    h+='<button class="btn submit" onclick="openAdd(fcMode===\'week\'?state.date:plus(10),false,0,\'pd\')">+ Добавить задаток</button>';
-  }
-  return h+'</div>';
+  return '<div class="hdr"><div class="row">'+
+    '<div class="col"><div class="top">ТОЧНО<i>.</i></div><div class="bot">план / факт</div></div>'+
+    '<div class="col mid"><div class="top role">Агент</div><div class="bot">v5.0.4</div></div>'+
+    '<div class="col end"><div class="top name">'+esc(state.user)+'</div><div class="bot">'+rud(state.date)+'</div></div>'+
+    '</div></div>';
 }
 function cycleStatus(){ var o=['sent','accepted','extra','rejected'],i=o.indexOf(state.today.status);
   state.today.status=o[(i+1)%o.length]; save(); render(); }
 
 function loginHTML(){
-  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет агента v4.1.2</div><h2>Вход в кабинет</h2>';
+  var h='<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет агента v5.0.4</div><h2>Вход в кабинет</h2>';
   for(var i=0;i<STAFF.length;i++)
     h+='<button class="pick'+(pickName===STAFF[i]?' on':'')+'" onclick="pickName=\''+STAFF[i]+'\';render()">'+STAFF[i]+'</button>';
   h+='<div class="lbl">Пароль</div><input type="password" id="pw" placeholder="••••••">'+
@@ -635,46 +628,104 @@ function doLogin(){
 
 /* ================= СЕГОДНЯ ================= */
 function todayHTML(){
-  var h='<div class="card"><div class="t">Неделя · '+ru(weekStart())+' – '+ru(weekEnd())+'</div><div class="nrow">';
+  /* 1 · статистика недели */
+  var h='<div class="card"><span class="t">Неделя · '+ru(weekStart())+' – '+ru(weekEnd())+'</span><div class="nrow">';
   for(var i=0;i<NORMKEYS.length;i++){ var k=NORMKEYS[i].k, d=cntW(k), n=normW(k);
-    h+='<button onclick="openNorm(\''+k+'\')"><b class="'+(d>=n?'good':'')+'">'+d+'/'+n+'</b><span>'+NORMKEYS[i].l+'</span></button>';
-  }
+    h+='<button onclick="openNorm(\''+k+'\')"><b class="'+(d>=n?'good':'')+'">'+d+'/'+n+'</b><span>'+NORMKEYS[i].l+'</span></button>'; }
   h+='</div><div class="hint" style="margin:9px 0 0">'+paceLine()+'</div></div>';
 
-  var left=yestLeft();
-  if(left&&!state.today.sent)
-  h+='<button class="item'+(left?' alert':'')+'" onclick="go(\'yest\')">'+
-     '<div class="ic"'+(left?' style="color:var(--alarm)"':'')+'>'+ic(left?'alert':'ok')+'</div><div class="tx">'+
-     '<div class="tp">вчера · '+rud(state.dateY)+'</div><div class="nm">'+(left?'Не отмечено дел: '+left:'Все дела отмечены')+'</div>'+
-     '<div class="sub">кабинет агента v4.1.2</div></div>'+
-     '<span class="rt '+(left?'no':'ok')+'">открыть</span></button>';
+  var ropOn=function(dt){ var o=[]; for(var i=0;i<state.ropTasks.length;i++) if(state.ropTasks[i].date===dt) o.push(state.ropTasks[i]); return o; };
+  var ropRow=function(rt,frozen){
+    var right = rt.done===null ? (frozen?'<span class="st no">не отмечено</span>':'<span class="st wait">отметить</span>')
+              : (rt.done?'<span class="st ok">сделано</span>':'<span class="st no">не сделано</span>');
+    return '<div class="task rop'+(frozen?'':' tap')+(rt.done!==null?' done':'')+'"'+(frozen?'':' onclick="openRop('+rt.id+')"')+'>'+
+      '<div class="ic">'+ic('pin')+'</div>'+
+      '<div class="c"><b>задача</b><span>от РОПа</span></div>'+
+      '<div class="c"><b>'+esc(rt.text)+'</b><span class="wrap">'+esc(rt.why||rt.res||'задача руководителя')+'</span></div>'+
+      '<div class="r">'+right+'</div></div>';
+  };
 
-  if(state.ropTasks.length){
-    h+='<div class="sec">Задачи от РОПа</div>';
-    for(var j=0;j<state.ropTasks.length;j++){ var rt=state.ropTasks[j];
-      var right=rt.done===null?'<span class="rt wait">отметить</span>':(rt.done?'<span class="rt ok">сделано</span>':'<span class="rt no">не сделано</span>');
-      h+='<button class="item'+(rt.done!==null?' done':'')+'" onclick="openRop('+rt.id+')"><div class="ic">'+ic('pin')+'</div>'+
-         '<div class="tx"><div class="tp">от РОПа</div><div class="nm" style="white-space:normal">'+esc(rt.text)+'</div>'+
-         (rt.why?'<div class="sub">кабинет агента v4.1.2</div>':'')+'</div>'+right+'</button>';
-    }
+  /* 2 · вчера */
+  var y=byDate(state.dateY), left=yestLeft(), frozen=state.today.sent, yRop=ropOn(state.dateY);
+  var leftRop=0; for(var r0=0;r0<yRop.length;r0++) if(yRop[r0].done===null) leftRop++;
+  var openYesterday = !frozen && (yestOpen || left || leftRop);
+  h+='<details id="yestBlock"'+(openYesterday?' open':'')+'><summary>'+
+     '<span>Вчера · '+rud(state.dateY)+'</span>'+
+     '<span class="cnt">'+(frozen?'отчёт сдан':((left+leftRop)?'не отмечено: '+(left+leftRop):'всё отмечено'))+'</span>'+
+     '<span class="arw"></span></summary><div class="dbody">';
+  if(y.length){
+    h+='<div class="sublbl">Мои дела</div>';
+    for(var m=0;m<y.length;m++) h+=itemHTML(y[m],frozen?'frozen':'day');
   }
-  h+='<div class="sec">Сегодня · '+rud(state.date)+'</div>';
-  var t=byDate(state.date);
-  for(var m=0;m<t.length;m++) h+=itemHTML(t[m],'day');
-  if(!t.length) h+='<div class="hint">На сегодня пусто.</div>';
-  h+='<button class="btn" onclick="openAdd(state.date)">+ Добавить</button>'+
-     '<button class="btn" onclick="openVague()">+ Найти</button>'+
-     '<div class="hint" style="margin-top:10px">«Добавить» — когда объект и клиент известны. «Найти» — когда нужен ещё один показ или оценка, а кому — предстоит выяснить.</div>'+
-     '<div class="card" style="margin-top:14px;background:var(--soft)"><div class="t">Цитата дня</div>'+
-     '<div style="font-size:15px;color:var(--mute)">'+esc(quoteOfDay())+'</div></div>';
+  if(yRop.length){
+    h+='<div class="sublbl">От РОПа</div>';
+    for(var r1=0;r1<yRop.length;r1++) h+=ropRow(yRop[r1],frozen);
+  }
+  if(!frozen){
+    h+='<button class="btn" onclick="openAdd(state.dateY,true)">+ Что было вне плана</button>'+
+       '<span class="lbl">Новых заявок за вчера</span>'+
+       '<input type="number" inputmode="numeric" id="leadsY" value="'+(state.leadsY===null?wLeads:state.leadsY)+'" placeholder="0" oninput="wLeads=this.value">';
+  } else {
+    h+='<div class="kv two"><span>Новых заявок</span><b>'+(state.leadsY===null?0:state.leadsY)+'</b></div>'+
+       '<div class="hint" style="margin-bottom:0">Отчёт сдан, правка закрыта.</div>';
+  }
+  h+='</div></details>';
+
+  /* 3 · сегодня */
+  var t=byDate(state.date), tRop=ropOn(state.date);
+  var leftToday=0; for(var q0=0;q0<t.length;q0++) if(!t[q0].status) leftToday++;
+  h+='<details id="todayBlock"'+(todayOpen?' open':'')+'><summary>'+
+     '<span>Сегодня · '+rud(state.date)+'</span>'+
+     '<span class="cnt">'+(t.length+tRop.length)+(leftToday?' дел · не отмечено '+leftToday:' дел')+'</span>'+
+     '<span class="arw"></span></summary><div class="dbody">';
+  if(t.length){
+    h+='<div class="sublbl">Мои дела</div>';
+    for(var q=0;q<t.length;q++) h+=itemHTML(t[q],'day');
+  }
+  if(tRop.length){
+    h+='<div class="sublbl">От РОПа</div>';
+    for(var r2=0;r2<tRop.length;r2++) h+=ropRow(tRop[r2],false);
+  }
+  if(!t.length&&!tRop.length) h+='<div class="hint">На сегодня пусто. Добавьте хотя бы одно дело.</div>';
+  h+='<div class="seg two"><button class="btn" onclick="openAdd(state.date)">+ Добавить</button>'+
+     '<button class="btn" onclick="openVague()">+ Найти</button></div>';
+  h+='</div></details>';
+
+  if(!state.today.sent){
+    h+='<button class="btn pri" style="margin-top:var(--s4)" onclick="openSubmit()">'+ic('send',20)+'Сдать план и факт</button>'+
+       '<button class="btn ghost" style="margin-top:var(--s2)" onclick="devSubmit()">[тест] сдать без отметок</button>';
+  } else {
+    var mm={sent:['ok','Сдан в '+state.today.at+' · ждёт приёмки'],accepted:['ok','Принят РОПом'],
+            extra:['wait','Принят с дополнительными задачами'],rejected:['no','Не принят — нужны правки']};
+    var x=mm[state.today.status]||mm.sent;
+    h+='<div class="card" style="margin-top:var(--s4)"><div class="cmp">'+x[1]+
+       '<button style="background:none;border:0;color:var(--mute);text-decoration:underline;font-size:12px;padding:0 0 0 6px" onclick="cycleStatus()">демо</button></div></div>'+
+       '<button class="btn ghost" onclick="devReset()">[тест] вернуть к несданному</button>';
+  }
+  h+='<div class="card" style="margin-top:var(--s4);background:var(--soft)"><span class="t">Цитата дня</span>'+
+     '<div style="font-size:var(--t3);color:var(--mute)">'+esc(quoteOfDay())+'</div></div>';
   return h;
 }
+function devSubmit(){
+  var y=byDate(state.dateY);
+  for(var i=0;i<y.length;i++) if(!y[i].status){ y[i].status='done'; y[i].res='тест'; }
+  for(var j=0;j<state.ropTasks.length;j++) if(state.ropTasks[j].date===state.dateY&&state.ropTasks[j].done===null) state.ropTasks[j].done=true;
+  if(state.leadsY===null) state.leadsY=Number(wLeads||5);
+  save(); doSubmit();
+}
+function devReset(){ state.today={sent:false,status:null,at:null}; save(); flash('Возвращено к несданному'); render(); }
 function itemHTML(it,mode){
   var t=T(it.type);
   var side = it.clt==='buyer'?'покупатель':(it.clt==='seller'?'продавец':'');
   var who  = it.cl ? it.cl+(side?' · '+side:'') : (side||'');
   var sum = it.sum ? '<div class="sum">'+money(it.sum)+'</div>' : '';
   var st  = mode==='fut' ? '' : statusView(it);
+  if(mode==='frozen')
+    return '<div class="task'+(it.status?' done':'')+(sum?' hassum':'')+'">'+
+      '<div class="ic">'+ic(t.ic)+'</div>'+
+      '<div class="c"><b>'+(it.time||'—')+'</b><span>'+t.n+(it.star?' ★':'')+'</span></div>'+
+      '<div class="c"><b>'+esc(it.obj||'без адреса')+'</b><span>'+esc(who)+'</span></div>'+
+      sum+'<div class="r">'+st+'</div></div>';
   return '<button class="task'+(it.status?' done':'')+(sum?' hassum':'')+'" onclick="openTask('+it.id+')">'+
     '<div class="ic">'+ic(t.ic)+'</div>'+
     '<div class="c"><b>'+(it.time||'—')+'</b><span>'+t.n+(it.star?' ★':'')+'</span></div>'+
@@ -718,7 +769,7 @@ function pastHTML(){
   var grp=function(title,kind){
     var l=[]; for(var i=0;i<state.reports.length;i++) if(state.reports[i].kind===kind) l.push(i);
     if(!l.length) return '';
-    var x='<details'+(kind==='month'?' open':'')+'><summary><span>'+title+'</span><span class="cnt">'+l.length+'</span><span class="arw"></span></summary><div class="dbody">';
+    var x='<details'+(kind==='month'?' open':'')+'><summary>'+title+'<span class="cnt">'+l.length+'</span></summary><div class="dbody">';
     for(var j=0;j<l.length;j++){ var r=state.reports[l[j]];
       var sub = kind==='day' ? 'сделано '+r.fact+' из '+r.plan+' · отказов '+(r.ref||0)+' · заявок '+(r.leads||0)
               : 'задаток '+r.w.pd+' · показы '+r.w.pokaz+' · заявки '+r.w.leads;
@@ -767,7 +818,7 @@ function fcHTML(){
   for(var i=0;i<s.items.length;i++){ var f=s.items[i];
     h+='<button class="item'+(f.status==='done'?' done':'')+'" onclick="openTask('+f.id+')"><div class="ic">'+ic('money')+'</div>'+
        '<div class="tx"><div class="tp">'+ru(f.date)+'</div><div class="nm">'+esc(f.obj||'без адреса')+'</div>'+
-       '<div class="sub">кабинет агента v4.1.2</div></div>'+
+       '<div class="sub">кабинет агента v5.0.4</div></div>'+
        (f.status==='done'?'<span class="rt ok">факт</span>':'<span class="rt wait">план</span>')+'</button>';
   }
   if(!s.items.length) h+='<div class="hint">В этом периоде задатков нет.</div>';
@@ -995,7 +1046,7 @@ function drawAdd(){
   if(t.dayoff) h+='<div class="hint" style="margin-top:12px">Сделка обычно занимает час-два. Другие дела в этот день планировать можно.</div>';
   h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button><button class="btn pri" onclick="saveAdd(0)">Сохранить</button></div>';
   if(!frm.id&&!frm.vague&&frm.type==='pokaz') h+='<button class="btn ghost" style="margin-top:8px" onclick="saveAdd(1)">Сохранить и ещё показ этому же клиенту</button>';
-  if(frm.id) h+='<button class="btn ghost" style="margin-top:8px" onclick="delTask()">Удалить дело</button>';
+  if(frm.id) h+='<div class="hint" style="margin-top:8px">Дело нельзя удалить — его отмечают сделанным, переносят или отменяют.</div>';
   sheet(h);
   setTimeout(function(){ var o=document.getElementById('aObj'); if(o&&!frm.obj) o.focus(); },60);
 }
@@ -1062,78 +1113,54 @@ function delTask(){
   state.tasks=n; save(); closeSheet(); afterChange();
 }
 
-/* ================= мастер сдачи ================= */
-var step=0, wLeads='';
-function openWiz(){ step=0; wLeads=(state.leadsY===null?'':String(state.leadsY)); drawWiz(); document.getElementById('wiz').classList.add('on'); }
-function closeWiz(){ document.getElementById('wiz').classList.remove('on'); render(); }
-function afterChange(){ if(document.getElementById('wiz').classList.contains('on')) drawWiz(); else render(); }
-function drawWiz(){
-  var h='<div class="steps">'+[0,1,2].map(function(i){ return '<div class="'+(i<=step?'on':'')+'"></div>'; }).join('')+'</div>'+
-        '<div class="sh" style="margin:-6px 0 12px">Шаг '+(step+1)+' из 3</div>', bar='', one=false;
-  if(step===0){
-    var y=byDate(state.dateY), left=yestLeft();
-    h+='<div class="wtitle">Факт за вчера</div><div class="sh">'+rud(state.dateY)+'</div>'+
-       '<div class="card"><span class="t">Новых заявок за вчера</span>'+
-       '<input type="number" inputmode="numeric" id="wLeads" value="'+wLeads+'" placeholder="0">'+
-       '<div class="hint" style="margin-bottom:0">Входящий поток, а не ваша работа. Нужен, чтобы считать, сколько заявок дошло до показа.</div></div>'+
-       '<button class="btn" style="margin-bottom:12px" onclick="openAdd(state.dateY,true)">+ Что было вне плана</button>'+
-       (left?'<div class="card" style="border-color:var(--alarm)"><b style="color:var(--alarm)">Не отмечено дел: '+left+'</b><div class="hint" style="margin:6px 0 0">Отметьте каждое — тогда откроется следующий шаг.</div></div>':'');
-    for(var i=0;i<y.length;i++) h+=itemHTML(y[i],'day');
-    if(left) h+='<div class="hint" style="color:var(--alarm)">Не отмечено дел: '+left+'. Без этого сдать нельзя.</div>';
-    bar='<button class="btn" onclick="closeWiz()">Закрыть</button><button class="btn pri" onclick="wizNext()">Дальше</button>';
+/* ================= сдача одним окном ================= */
+var wLeads='';
+function afterChange(){ render(); if(document.getElementById('ovl').classList.contains('on')) openSubmit(true); }
+function openSubmit(silent){
+  var y=byDate(state.dateY), left=yestLeft(), done=0, ref=0, mv=0;
+  for(var i=0;i<y.length;i++){ if(y[i].status==='done') done++; else if(y[i].status==='refuse') ref++; else if(y[i].status==='moved') mv++; }
+  var t=byDate(state.date), monday=new Date().getDay()===1;
+  var leads=(state.leadsY===null?wLeads:state.leadsY);
+  var h='<h3>Сдать план и факт</h3><span class="sh">'+rud(state.date)+' · срок до 10:00</span>';
+
+  var blockers=[];
+  if(left) blockers.push('не отмечено вчерашних дел: '+left);
+  if(leads==='') blockers.push('не указаны заявки за вчера');
+  if(!t.length) blockers.push('план на сегодня пустой');
+
+  h+='<div class="card"><span class="t">Факт за '+rud(state.dateY)+'</span>'+
+     '<div class="kv two"><span>Сделано</span><b>'+done+' из '+y.length+'</b></div>'+
+     '<div class="kv two"><span>Отказов</span><b class="'+(ref?'r':'')+'">'+ref+'</b></div>'+
+     '<div class="kv two"><span>Переносов</span><b>'+mv+'</b></div>'+
+     '<div class="kv two"><span>Новых заявок</span><b class="'+(leads===''?'r':'')+'">'+(leads===''?'не указано':leads)+'</b></div></div>';
+  h+='<div class="card"><span class="t">План на сегодня</span>'+
+     '<div class="kv two"><span>Дел запланировано</span><b class="'+(t.length?'':'r')+'">'+t.length+'</b></div></div>';
+  if(monday){
+    h+='<div class="card"><span class="t">Прогноз недели · обязателен в понедельник</span>'+
+       '<div class="kv two"><span>Задатков в прогнозе</span><b>'+state.fc.items.length+'</b></div>'+
+       '<div class="kv two"><span>Сумма</span><b>'+money(fcSum())+'</b></div></div>'+
+       '<button class="btn" onclick="closeSheet();go(\'fc\')">Открыть прогноз</button>';
   }
-  if(step===1){
-    var t=byDate(state.date);
-    h+='<div class="wtitle">План на сегодня</div><div class="sh">'+rud(state.date)+'</div>';
-    for(var j=0;j<t.length;j++) h+=itemHTML(t[j],'fut');
-    h+='<button class="btn" onclick="openAdd(state.date)">+ Добавить</button>'+
-       '<button class="btn ghost" onclick="openVague()">Назначить новое · без адреса</button>';
-    if(!t.length) h+='<div class="hint" style="color:var(--alarm)">План пустой. Добавьте хотя бы одно дело.</div>';
-    bar='<button class="btn" onclick="wizBack()">Назад</button><button class="btn pri" onclick="wizNext()">Дальше</button>';
+  if(blockers.length){
+    h+='<div class="card" style="border-color:var(--alarm)"><b style="color:var(--alarm)">Пока сдать нельзя</b>'+
+       '<div class="hint" style="margin:6px 0 0">'+esc(blockers.join(' · '))+'</div></div>'+
+       '<button class="btn" onclick="closeSheet();openYest()">Открыть вчера</button>';
   }
-  if(step===2){
-    var s=fcStat('week'), sm=fcStat('month');
-    h+='<div class="wtitle">Прогноз</div><div class="sh">задатки на неделю и месяц</div>'+
-       '<div class="card"><div class="kv two"><span>Неделя</span><b>'+money(s.s)+' · '+s.n+'</b></div>'+
-       '<div class="kv two"><span>Месяц</span><b>'+money(sm.s)+' · '+sm.n+'</b></div></div>';
-    for(var w=0;w<s.items.length;w++){ var f=s.items[w];
-      h+='<button class="item" onclick="openTask('+f.id+')"><div class="ic">'+ic('money')+'</div><div class="tx">'+
-         '<div class="tp">'+ru(f.date)+'</div><div class="nm">'+esc(f.obj)+'</div><div class="sub">кабинет агента v4.1.2</div></div>'+
-         '<span class="rt ok">'+money(f.sum)+'</span></button>';
-    }
-    if(!s.items.length) h+='<div class="hint">На этой неделе задатков не запланировано.</div>';
-    h+='<button class="btn" onclick="openAdd(state.date,false,0,\'pd\')">+ Добавить задаток</button>'+
-       '<div class="hint">Подтвердите прогноз или добавьте объекты. В понедельник прогноз обязателен.</div>';
-    bar='<button class="btn" onclick="wizBack()">Назад</button><button class="btn pri" onclick="wizDone()">Сдать</button>';
-  }
-  var sc=document.querySelector('.wizscroll'); if(sc) sc.scrollTop=0;
-  document.getElementById('wizin').innerHTML=h;
-  document.getElementById('wizbar').innerHTML=bar;
-  document.getElementById('wizbar').className='in'+(one?' one':'');
+  h+='<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
+     '<button class="btn pri"'+(blockers.length?' disabled':'')+' onclick="doSubmit()">Сдать</button></div>';
+  sheet(h);
 }
-function wizBack(){ step--; drawWiz(); }
-function wizNext(){
-  if(step===0){
-    if(yestLeft()){ warn('Отметьте все вчерашние дела'); return; }
-    var e=document.getElementById('wLeads');
-    if(!e||e.value===''){ warn('Укажите количество новых заявок'); return; }
-    wLeads=e.value;
-  }
-  if(step===1&&!byDate(state.date).length){ warn('План на сегодня пустой'); return; }
-  step++; drawWiz();
-}
-function wizDone(){
-  state.leadsY=Number(wLeads||0);
+function openYest(){ yestOpen=true; render(); setTimeout(function(){ var e=document.getElementById('yestBlock'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'}); },60); }
+function doSubmit(){
+  var y=byDate(state.dateY), f=0, rf=0, mv=0;
+  for(var i=0;i<y.length;i++){ if(y[i].status==='done') f++; else if(y[i].status==='refuse') rf++; else if(y[i].status==='moved') mv++; }
+  if(state.leadsY===null) state.leadsY=Number(wLeads||0);
   var d=new Date();
   state.today={sent:true,status:'sent',at:('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)};
-  var y=byDate(state.dateY), f=0;
-  for(var i=0;i<y.length;i++) if(y[i].status==='done') f++;
-  var rf=0,mv=0;
-  for(var q=0;q<y.length;q++){ if(y[q].status==='refuse') rf++; else if(y[q].status==='moved') mv++; }
-  state.reports.unshift({date:state.dateY,label:rud(state.dateY),kind:'day',status:'sent',plan:y.length,fact:f,ref:rf,mv:mv,leads:state.leadsY});
-  save(); closeWiz(); nav='today'; render();
+  state.reports.unshift({kind:'day',date:state.dateY,label:rud(state.dateY),plan:y.length,fact:f,ref:rf,mv:mv,leads:state.leadsY,status:'sent'});
+  if(state.fc) state.fc.sent=true;
+  save(); closeSheet(); flash('План и факт сданы'); render();
 }
-
 /* ================= общее ================= */
 function warn(txt){ flash(txt,true); }
 function flash(txt,bad){

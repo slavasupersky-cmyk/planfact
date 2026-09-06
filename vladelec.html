@@ -44,16 +44,14 @@ button,input,textarea{font-family:inherit;font-size:var(--t3);color:var(--ink)}
 .big small{display:block;font-size:var(--t4);font-weight:400;color:var(--mute);letter-spacing:0;margin-top:var(--s2)}
 
 /* ---------- шапка ---------- */
-.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3);
-  padding-bottom:var(--s3);border-bottom:1px solid var(--line);margin-bottom:var(--s4)}
+
 .mark{font-size:20px;font-weight:600;letter-spacing:-.03em;line-height:1}
 .mark i{font-style:normal;color:var(--lime)}
 .mark small{display:block;font-size:var(--t4);color:var(--mute);font-weight:400;margin-top:6px;letter-spacing:.04em;text-transform:uppercase}
-.who{display:flex;flex-direction:column;align-items:flex-end;gap:var(--s1);text-align:right}
-.who b{font-size:var(--t3);font-weight:600}
+
+
 .who .dt{font-size:var(--t4);color:var(--mute)}
-.role{font-size:var(--t4);font-weight:600;background:var(--lime);color:var(--on-lime);
-  padding:2px var(--s2);border-radius:var(--r);letter-spacing:.04em;text-transform:uppercase}
+
 
 /* ---------- кнопки ---------- */
 .btn{width:100%;height:52px;border:1px solid var(--line);background:var(--bg);color:var(--ink);
@@ -90,8 +88,10 @@ button,input,textarea{font-family:inherit;font-size:var(--t3);color:var(--ink)}
 .bar i{display:block;height:100%;background:var(--lime)}
 
 /* ---------- строка «ключ — значение» ---------- */
-.kv{display:grid;grid-template-columns:1fr 76px 48px;align-items:baseline;gap:var(--s2);
+.kv{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;align-items:baseline;gap:var(--s3);
   padding:var(--s3) 0;border-bottom:1px solid var(--line);font-size:var(--t3)}
+.kv>*{white-space:nowrap}
+.kv span:first-child{overflow:hidden;text-overflow:ellipsis}
 .kv.two{grid-template-columns:1fr auto}
 .kv:last-child{border-bottom:0}
 .kv span:first-child{color:var(--mute)}
@@ -120,8 +120,13 @@ button,input,textarea{font-family:inherit;font-size:var(--t3);color:var(--ink)}
 /* ---------- сворачиваемые блоки ---------- */
 details{border:1px solid var(--line);border-radius:var(--r);margin-bottom:var(--s2);overflow:hidden}
 details[open]{border-color:var(--ink)}
-summary{list-style:none;cursor:pointer;padding:var(--s3) var(--s4);display:flex;align-items:center;
-  gap:var(--s2);font-size:var(--t2);font-weight:600}
+summary{list-style:none;cursor:pointer;padding:var(--s3) var(--s4);display:grid;
+  grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s3);font-size:var(--t2);font-weight:600}
+summary .cnt{margin:0;text-align:center;font-size:var(--t4);color:var(--mute);font-weight:400}
+summary .arw{display:inline-flex;align-items:center;height:32px;padding:0 var(--s3);border-radius:var(--pill);
+  background:var(--soft);color:var(--ink);font-size:var(--t4);font-weight:600;white-space:nowrap}
+details[open]>summary .arw::after{content:'свернуть'}
+details:not([open])>summary .arw::after{content:'развернуть'}
 summary::-webkit-details-marker{display:none}
 summary .cnt{margin-left:auto;font-size:var(--t4);color:var(--mute);font-weight:400}
 summary .arw{display:none}
@@ -159,7 +164,7 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 .ovl{position:fixed;inset:0;z-index:40;display:none;align-items:flex-end;
   background:rgba(15,15,15,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .ovl.on{display:flex}
-.sheet{width:100%;max-width:560px;margin:0 auto;height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+.sheet{width:100%;max-width:560px;margin:0 auto;height:92vh;height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
   background:var(--bg);border-radius:16px 16px 0 0;padding:var(--s5) var(--s4) 0;
   display:flex;flex-direction:column}
 .sheet h3{margin:0 0 var(--s1);font-size:var(--t1);font-weight:600;letter-spacing:-.03em;line-height:1.15}
@@ -223,9 +228,9 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 .st.mv{background:var(--soft);color:var(--mute)}
 .st.act{background:var(--ink);color:var(--bg)}
 .status.alarm{color:var(--alarm)}
-.hdr .row{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3)}
-.hdr{display:block}
-.who span{font-size:var(--t4);color:var(--mute)}
+
+
+
 .verdict{font-size:var(--t2);font-weight:600;letter-spacing:-.01em;line-height:1.3;margin:0 0 var(--s2)}
 .verdict.good{color:var(--ink)} .verdict.bad{color:var(--alarm)}
 .cmp{font-size:var(--t4);color:var(--mute)}
@@ -241,6 +246,17 @@ textarea{min-height:84px;resize:vertical;line-height:1.45}
 .sheet{border:1px solid var(--line);border-bottom:0}
 .st.wait{background:rgba(255,152,56,.18)} .st.no{background:rgba(255,107,92,.16)}
 
+
+/* ---------- шапка: три столбца, две строки ---------- */
+.hdr{display:block;padding-bottom:var(--s3);border-bottom:1px solid var(--line);margin-bottom:var(--s4)}
+.hdr .row{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:var(--s3)}
+.hdr .col{min-width:0}
+.hdr .col.mid{text-align:center}
+.hdr .col.end{text-align:right}
+.hdr .top{font-size:20px;font-weight:600;letter-spacing:-.03em;line-height:1.1;white-space:nowrap}
+.hdr .top i{font-style:normal;color:var(--lime)}
+.hdr .top.role,.hdr .top.name{font-size:var(--t3);font-weight:600;letter-spacing:-.01em}
+.hdr .bot{font-size:var(--t4);color:var(--mute);line-height:1.3;margin-top:4px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -255,7 +271,7 @@ tune:'<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx
 ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>'
 };
 function ic(n,s){ s=s||22; return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">'+(IC[n]||'')+'</svg>'; }
-var KEY='topf-owner-v4', mem=null;
+var KEY='topf-owner-v41', mem=null;
 function save(){ var s=JSON.stringify(state); try{ localStorage.setItem(KEY,s);}catch(e){ mem=s; } }
 function load(){ var s=null; try{ s=localStorage.getItem(KEY);}catch(e){ s=mem; } if(!s)s=mem; if(!s) return null; try{ return JSON.parse(s);}catch(e){ return null; } }
 var NK=[{k:'sdelka',l:'сделки'},{k:'pd',l:'задаток'},{k:'pokaz',l:'показы'},{k:'ocenka',l:'оценки'},{k:'vstr',l:'встречи'},{k:'rekl',l:'реклама'},{k:'leads',l:'заявки'}];
@@ -272,6 +288,68 @@ function ini(n){ var p=n.split(' '); return (p[0]||'')[0]+((p[1]||'')[0]||''); }
 function warn(t){ flash(t,true); }
 function flash(txt,bad){ var e=document.createElement('div'); e.style.cssText='position:fixed;left:0;right:0;top:0;z-index:60;padding:16px 14px;text-align:center;font-weight:600;font-size:15px;'+(bad?'background:#E03A2F;color:#fff':'background:#AEEA00;color:#0F0F0F'); e.textContent=txt; document.body.appendChild(e); setTimeout(function(){ if(e.parentNode) e.parentNode.removeChild(e); },bad?2600:1800); }
 
+/* ================= генератор истории ================= */
+function _rnd(seed){ return function(){ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; }; }
+function _iso(y,m,d){ return y+'-'+('0'+m).slice(-2)+'-'+('0'+d).slice(-2); }
+function _dow(dstr){ return new Date(dstr+'T00:00:00').getDay(); }
+function _monday(dstr){ var d=new Date(dstr+'T00:00:00'), sh=(d.getDay()+6)%7; d.setDate(d.getDate()-sh); return d.toISOString().slice(0,10); }
+var MNAMES=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+
+/* дни: с 1 августа по вчера · выходные не сдаются, пятница закрывает три дня */
+function histDays(seedNum,scale){
+  var r=_rnd(seedNum), out=[], today=new Date(), end=new Date(Date.now()-864e5);
+  var cur=new Date(today.getFullYear(),7,1);
+  while(cur<=end){
+    var ds=cur.toISOString().slice(0,10), dw=cur.getDay();
+    if(dw!==0&&dw!==6){
+      var wk=(dw===5?2.2:1); // пятница закрывает выходные
+      var c={
+        pokaz: Math.round((0.6+r()*1.2)*scale*wk),
+        ocenka:Math.round((0.5+r()*1.0)*scale*wk),
+        vstr:  Math.round((0.4+r()*1.0)*scale*wk),
+        rekl:  Math.round((0.2+r()*0.5)*scale*wk),
+        pd:    scale<=1.2 ? (r()<0.22*scale?1:0) : Math.round((0.12+r()*0.22)*scale*wk),
+        sdelka:scale<=1.2 ? (r()<0.16*scale?1:0) : Math.round((0.08+r()*0.16)*scale*wk),
+        leads: Math.round((1.5+r()*2.5)*scale*wk)
+      };
+      var plan=c.pokaz+c.ocenka+c.vstr+c.rekl+c.pd+c.sdelka+Math.round(r()*2);
+      var fact=c.pokaz+c.ocenka+c.vstr+c.rekl+c.pd+c.sdelka;
+      out.push({date:ds,cls:c,plan:Math.max(plan,fact),fact:fact,
+        ref:r()<0.28?1:0, mv:r()<0.35?1:0,
+        status:(r()<0.12?'extra':'accepted'), sum:c.pd*Math.round(85+r()*45)*1000});
+    }
+    cur.setDate(cur.getDate()+1);
+  }
+  return out;
+}
+function _agg(days){
+  var a={sdelka:0,pd:0,pokaz:0,ocenka:0,vstr:0,rekl:0,leads:0,plan:0,fact:0,ref:0,mv:0,sum:0};
+  for(var i=0;i<days.length;i++){ var d=days[i];
+    for(var k in d.cls) a[k]+=d.cls[k];
+    a.plan+=d.plan; a.fact+=d.fact; a.ref+=d.ref; a.mv+=d.mv; a.sum+=d.sum||0; }
+  return a;
+}
+function histWeeks(days,normW,mult){
+  var by={}, out=[];
+  for(var i=0;i<days.length;i++){ var m=_monday(days[i].date); (by[m]=by[m]||[]).push(days[i]); }
+  for(var mk in by){ var a=_agg(by[mk]), w={};
+    for(var k in normW) w[k]=(a[k]||0)+'/'+(normW[k]*(mult||1));
+    var last=by[mk][by[mk].length-1].date;
+    out.push({kind:'week',date:mk,label:'Неделя '+ru(mk)+' – '+ru(last),w:w,sum:a.sum,plan:a.plan,fact:a.fact,ref:a.ref,mv:a.mv,leads:a.leads});
+  }
+  out.sort(function(x,y){ return x.date<y.date?1:-1; }); return out;
+}
+function histMonths(days,normM,mult){
+  var by={}, out=[];
+  for(var i=0;i<days.length;i++){ var m=days[i].date.slice(0,7); (by[m]=by[m]||[]).push(days[i]); }
+  for(var mk in by){ var a=_agg(by[mk]), w={};
+    for(var k in normM) w[k]=(a[k]||0)+'/'+(normM[k]*(mult||1));
+    out.push({kind:'month',date:mk+'-01',label:MNAMES[parseInt(mk.slice(5,7),10)-1].replace(/^./,function(c){return c.toUpperCase();}),
+      w:w,sum:a.sum,plan:a.plan,fact:a.fact,ref:a.ref,mv:a.mv,leads:a.leads});
+  }
+  out.sort(function(x,y){ return x.date<y.date?1:-1; }); return out;
+}
+
 /* ================= данные ================= */
 function seed(){
   var t=iso(new Date()), y=plus(-1);
@@ -287,12 +365,18 @@ function seed(){
       dep(2,'Отдел №2','Титов Сергей',[A('Агеева Лидия',[1,1,7,4,4,2,18]),A('Белова Юлия',[0,1,6,4,3,2,15]),A('Волкова Дарья',[1,2,8,5,4,3,20]),A('Громова Инна',[0,0,4,2,2,1,10],true),A('Дьякова Анна',[0,1,5,3,3,2,13]),A('Ежова Мария',[0,0,3,2,1,1,9]),A('Жукова Ольга',[1,1,6,4,3,2,16]),A('Зорина Вера',[0,0,2,1,1,0,6],true),A('Ильина Софья',[0,1,5,3,2,1,12]),A('Кузина Алла',[0,0,4,2,2,1,11])],8,true,6),
       dep(3,'Отдел №3','Ершова Наталья',[A('Лебедева Ника',[0,1,4,2,2,1,10]),A('Мишина Раиса',[0,0,3,1,1,1,7]),A('Носова Нина',[0,0,2,1,1,0,5],true),A('Орлова Вера',[0,1,4,2,2,1,9]),A('Панина Зоя',[0,0,3,2,1,1,8]),A('Рыжова Таисия',[0,0,2,1,0,0,4]),A('Седова Кира',[0,0,3,1,1,1,6])],6,false,4)
     ],
-    reports:[
-      {kind:'day',date:plus(-1),label:'Вчера',signed:512000,pd:6,deals:2,leads:341,disc:'25 из 28'},
-      {kind:'day',date:plus(-2),label:'Позавчера',signed:398000,pd:4,deals:1,leads:318,disc:'27 из 28'},
-      {kind:'week',date:plus(-7),label:'Прошлая неделя',signed:2410000,pd:23,deals:7,leads:1620,disc:'92%'},
-      {kind:'month',date:plus(-32),label:'Прошлый месяц',signed:9800000,pd:94,deals:26,leads:6240,disc:'88%'}
-    ]
+    reports:(function(){
+      var wn={sdelka:1,pd:1,pokaz:5,ocenka:5,vstr:5,rekl:2,leads:10};
+      var mn={sdelka:4,pd:4,pokaz:20,ocenka:20,vstr:20,rekl:8,leads:40};
+      var days=histDays(20260701,26), out=[];
+      for(var i=days.length-1;i>=0;i--){ var d=days[i];
+        out.push({kind:'day',date:d.date,label:rud(d.date),signed:d.sum||Math.round(d.cls.pd*105000),
+          pd:d.cls.pd,deals:d.cls.sdelka,leads:d.cls.leads,
+          disc:(26-(i%4))+' из 28',plan:d.plan,fact:d.fact,ref:d.ref,mv:d.mv}); }
+      var wks=histWeeks(days,wn,28).map(function(r){ r.signed=r.sum||r.w.pd.split('/')[0]*105000; r.pd=Number(r.w.pd.split('/')[0]); r.deals=Number(r.w.sdelka.split('/')[0]); r.disc='92%'; return r; });
+      var mns=histMonths(days,mn,28).map(function(r){ r.signed=r.sum||r.w.pd.split('/')[0]*105000; r.pd=Number(r.w.pd.split('/')[0]); r.deals=Number(r.w.sdelka.split('/')[0]); r.disc='89%'; return r; });
+      return out.concat(wks).concat(mns);
+    })()
   };
 }
 var state=load()||seed();
@@ -318,18 +402,21 @@ function draw(){
   if(!state.user){ r.innerHTML=loginHTML(); return; }
   var body = openD? depHTML() : nav==='today'? todayHTML() : nav==='money'? moneyHTML() : nav==='people'? peopleHTML() : setHTML();
   r.innerHTML='<div class="app">'+hdrHTML()+body+
-    '<div class="foot">ТОЧНО. · кабинет собственника v4.0.1 · прототип<br>Данные выдуманные.<br><button onclick="resetAll()">сбросить и начать заново</button></div></div>'+
+    '<div class="foot">ТОЧНО. · кабинет собственника v4.1.2 · прототип<br>Данные выдуманные.<br><button onclick="resetAll()">сбросить и начать заново</button></div></div>'+
     '<div class="bottom"><div class="in"><div class="nav" style="grid-template-columns:repeat(4,1fr)">'+nb('today','doc','Сегодня')+nb('money','money','Деньги')+nb('people','users','Люди')+nb('set','tune','Настройки')+'</div></div></div>';
 }
 function nb(k,i,n){ return '<button class="'+(nav===k&&!openD?'on':'')+'" onclick="go(\''+k+'\')"><b>'+ic(i,24)+'</b>'+n+'</button>'; }
 function go(k){ nav=k; openD=null; render(); try{ window.scrollTo(0,0); }catch(e){} }
 function hdrHTML(){
   var n=state.deps.length;
-  return '<div class="hdr"><div class="row"><div class="mark">ТОЧНО<i>.</i><small>план / факт · v4.0.1</small></div>'+
-    '<div class="who"><b>'+esc(state.user)+'</b><span>'+n+(n===1?' отдел':(n<5?' отдела':' отделов'))+' · '+rud(state.date)+'</span><span class="role">Собственник</span></div></div></div>';
+  return '<div class="hdr"><div class="row">'+
+    '<div class="col"><div class="top">ТОЧНО<i>.</i></div><div class="bot">план / факт</div></div>'+
+    '<div class="col mid"><div class="top role">Собственник</div><div class="bot">v4.1.2</div></div>'+
+    '<div class="col end"><div class="top name">'+esc(state.user)+'</div><div class="bot">'+rud(state.date)+'</div></div>'+
+    '</div></div>';
 }
 function loginHTML(){
-  return '<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет собственника · v4.0.1</div><h2>Вход в кабинет</h2>'+
+  return '<div class="login"><div class="mark">ТОЧНО<i>.</i></div><div class="sub">кабинет собственника v4.1.2</div><h2>Вход в кабинет</h2>'+
     '<button class="pick'+(pickName===OWNER?' on':'')+'" onclick="pickName=\''+OWNER+'\';render()">'+OWNER+'</button>'+
     '<span class="lbl">Пароль</span><input type="password" id="pw" placeholder="••••••"><div class="sbtn"><button class="btn" onclick="pickName=null;render()">Сброс</button><button class="btn pri" onclick="doLogin()">Войти</button></div><div class="note">Пароль в прототипе любой.</div></div>';
 }
@@ -356,12 +443,19 @@ function todayHTML(){
     h+='<button class="task noic'+(dp.got?'':' bad')+'" onclick="openDep('+dp.id+')"><div class="c"><b>'+dp.id+'</b><span>'+dp.agents.length+' чел</span></div><div class="c"><b>'+esc(dp.name)+'</b><span>'+esc(dp.rop)+' · сдали '+dp.sent+' из '+dp.agents.length+' · '+pct+'%</span></div><div class="r"><span class="st '+(dp.got?'ok':'no')+'">'+(dp.got?'отчёт есть':'отчёта нет')+'</span></div></button>'; }
   h+='<div class="sec">Архив · только просмотр</div>';
   var grp=function(t,kind){ var l=[]; for(var i=0;i<state.reports.length;i++) if(state.reports[i].kind===kind) l.push(i); if(!l.length) return '';
-    var x='<details><summary>'+t+'<span class="cnt">'+l.length+'</span></summary><div class="dbody">';
+    var x='<details><summary><span>'+t+'</span><span class="cnt">'+l.length+'</span><span class="arw"></span></summary><div class="dbody">';
     for(var j=0;j<l.length;j++){ var rr=state.reports[l[j]]; x+='<button class="task noic" onclick="openRep('+l[j]+')"><div class="c"><b>'+ru(rr.date)+'</b><span>'+kind+'</span></div><div class="c"><b>'+esc(rr.label)+'</b><span>'+money(rr.signed)+' · задатков '+rr.pd+'</span></div><div class="r"><span class="st mv">открыть</span></div></button>'; }
     return x+'</div></details>'; };
   return h+grp('Ежедневные','day')+grp('Еженедельные','week')+grp('Ежемесячные','month');
 }
-function openRep(i){ var r=state.reports[i]; sheet('<h3>'+esc(r.label)+'</h3><span class="sh">'+ru(r.date)+'</span><div class="card"><div class="kv two"><span>Подписано</span><b class="g">'+money(r.signed)+'</b></div><div class="kv two"><span>Задатков</span><b>'+r.pd+'</b></div><div class="kv two"><span>Сделок</span><b>'+r.deals+'</b></div><div class="kv two"><span>Заявок</span><b>'+r.leads+'</b></div><div class="kv two"><span>Дисциплина</span><b>'+r.disc+'</b></div></div><div class="hint">Отчёт закрыт для правок.</div><div class="sbtn" style="grid-template-columns:1fr"><button class="btn pri" onclick="closeSheet()">Понятно</button></div>'); }
+function openRep(i){ var r=state.reports[i];
+  if(r.kind!=='day'){ var x='<h3>'+esc(r.label)+'</h3><span class="sh">'+(r.kind==='week'?'итог недели':'итог месяца')+'</span><div class="card">';
+    for(var j=0;j<NK.length;j++){ var v=r.w[NK[j].k]; if(!v) continue; var p2=v.split('/');
+      x+='<div class="kv"><span>'+NK[j].l+'</span><span class="pf"><span class="f">'+p2[0]+'</span><span class="sl">/</span><span class="p">'+p2[1]+'</span></span><span class="pct">'+Math.round(p2[0]/p2[1]*100)+'%</span></div>'; }
+    x+='<div class="kv two"><span>Подписано</span><b class="g">'+money(r.signed)+'</b></div></div>'+
+       '<div class="hint">Свод собран автоматически.</div><div class="sbtn" style="grid-template-columns:1fr"><button class="btn pri" onclick="closeSheet()">Понятно</button></div>';
+    return sheet(x); }
+  sheet('<h3>'+esc(r.label)+'</h3><span class="sh">'+ru(r.date)+'</span><div class="card"><div class="kv two"><span>Подписано</span><b class="g">'+money(r.signed)+'</b></div><div class="kv two"><span>Задатков</span><b>'+r.pd+'</b></div><div class="kv two"><span>Сделок</span><b>'+r.deals+'</b></div><div class="kv two"><span>Заявок</span><b>'+(r.leads||0)+'</b></div><div class="kv two"><span>Дисциплина</span><b>'+r.disc+'</b></div></div><div class="hint">Отчёт закрыт для правок.</div><div class="sbtn" style="grid-template-columns:1fr"><button class="btn pri" onclick="closeSheet()">Понятно</button></div>'); }
 
 /* ================= ДЕНЬГИ ================= */
 function moneyHTML(){
@@ -417,7 +511,7 @@ function setHTML(){
   for(var i=0;i<NK.length;i++){ var k=NK[i].k; h+='<div class="kv"><span>'+NK[i].l+'</span><b>'+normW(k)+'</b><b style="color:var(--mute)">'+normM(k)+'</b></div>'; }
   h+='</div><button class="btn" onclick="openNorms()">Изменить нормы</button><div class="hint">РОП может задать отделу свою норму — отклонение будет видно здесь.</div>';
   h+='<div class="sec">Отделы и РОПы</div>';
-  for(var j=0;j<state.deps.length;j++){ var d=state.deps[j]; h+='<details><summary>'+esc(d.name)+'<span class="cnt">'+d.agents.length+' чел</span></summary><div class="dbody"><div class="kv two"><span>РОП</span><b>'+esc(d.rop)+'</b></div><button class="btn" style="margin-top:12px" onclick="editRop('+d.id+')">Сменить РОПа</button><button class="btn warn" onclick="delDep('+d.id+')">Удалить отдел</button></div></details>'; }
+  for(var j=0;j<state.deps.length;j++){ var d=state.deps[j]; h+='<details><summary><span>'+esc(d.name)+'</span><span class="cnt">'+d.agents.length+' чел</span><span class="arw"></span></summary><div class="dbody"><div class="kv two"><span>РОП</span><b>'+esc(d.rop)+'</b></div><button class="btn" style="margin-top:12px" onclick="editRop('+d.id+')">Сменить РОПа</button><button class="btn warn" onclick="delDep('+d.id+')">Удалить отдел</button></div></details>'; }
   h+='<button class="btn pri" onclick="addDep()">+ Добавить отдел и РОПа</button><div class="hint">Агентов в отдел заводит его РОП.</div>';
   h+='<div class="sec">Данные</div><button class="btn" onclick="sheet(\'<h3>Выгрузка</h3><span class=&quot;sh&quot;>формат вашей таблицы</span><div class=&quot;hint&quot;>Соберётся файл с теми же листами и колонками, что вы ведёте сейчас.</div><div class=&quot;sbtn&quot; style=&quot;grid-template-columns:1fr&quot;><button class=&quot;btn pri&quot; onclick=&quot;closeSheet()&quot;>Понятно</button></div>\')">Выгрузить в таблицу</button>';
   h+='<button class="btn ghost" onclick="logout()">Выйти из кабинета</button>';
