@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>ТОЧНО. — Каталог блоков</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+/* только для этой страницы: подписи и раскладка каталога */
+.kit{max-width:560px;margin:0 auto;padding:var(--s4) var(--s4) 80px}
+.kit h1{font-size:var(--t1);font-weight:600;letter-spacing:-.03em;margin:0 0 var(--s2)}
+.kit .lead{color:var(--mute);font-size:var(--t3);margin:0 0 var(--s5)}
+.blk{border-top:1px solid var(--line);padding-top:var(--s4);margin-top:var(--s5)}
+.blk .code{font-size:var(--t4);color:var(--mute);margin-bottom:var(--s2)}
+.blk h2{font-size:var(--t2);font-weight:600;letter-spacing:-.01em;margin:0 0 var(--s2)}
+.rule{background:var(--soft);border-radius:var(--r);padding:var(--s3) var(--s4);font-size:var(--t4);color:#4a4a4a;margin:var(--s3) 0}
+.rule b{color:var(--ink)}
+.demo{margin:var(--s3) 0}
+.swatch{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s2)}
+.sw{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.sw i{display:block;height:56px}
+.sw span{display:block;padding:var(--s2) var(--s3);font-size:var(--t4);color:var(--mute)}
+.scale div{border-bottom:1px solid var(--line);padding:var(--s2) 0}
+.scale span{font-size:var(--t4);color:var(--mute);margin-left:var(--s2)}
+</style>
+</head>
+<body>
+<div class="kit">
+
+  <h1>Каталог блоков</h1>
+  <p class="lead">Всё, из чего собраны три кабинета. Один файл стилей на всех: правка здесь меняет каждый экран сразу. Если элемента нет в этом списке — его нельзя использовать на экране.</p>
+
+  <!-- ЦВЕТ -->
+  <div class="blk">
+    <div class="code">01</div>
+    <h2>Цвет</h2>
+    <div class="rule">Четыре цвета и три серых. <b>Салатовый</b> — факт, достигнутое, главное действие. <b>Оранжевый</b> — план, норма, то, что ещё не сделано. <b>Красный</b> — отказ и срыв. <b>Чёрный</b> — текст и активное состояние. Другие цвета в интерфейсе запрещены.</div>
+    <div class="swatch">
+      <div class="sw"><i style="background:var(--lime)"></i><span>салатовый · факт</span></div>
+      <div class="sw"><i style="background:var(--plan)"></i><span>оранжевый · план</span></div>
+      <div class="sw"><i style="background:var(--alarm)"></i><span>красный · отказ</span></div>
+      <div class="sw"><i style="background:var(--ink)"></i><span>чёрный · текст</span></div>
+      <div class="sw"><i style="background:var(--soft);border-bottom:1px solid var(--line)"></i><span>подложка</span></div>
+      <div class="sw"><i style="background:var(--line)"></i><span>границы</span></div>
+    </div>
+  </div>
+
+  <!-- ШРИФТ -->
+  <div class="blk">
+    <div class="code">02</div>
+    <h2>Шрифт</h2>
+    <div class="rule">Три размера и мелкий служебный. Серым — только служебные подписи; весь смысловой текст чёрный. Начертаний два: обычное и полужирное. Больше размеров вводить нельзя — если что-то не помещается, режется содержимое, а не шкала.</div>
+    <div class="scale">
+      <div><span class="t1" style="display:inline">28</span> <span>заголовок экрана, крупное число</span></div>
+      <div><b style="font-size:var(--t2)">17</b> <span>название строки, заголовок блока</span></div>
+      <div><span style="font-size:var(--t3)">15</span> <span>основной текст, кнопки</span></div>
+      <div><span style="font-size:var(--t4);color:var(--mute)">12</span> <span>подписи, служебное</span></div>
+    </div>
+  </div>
+
+  <!-- КНОПКИ -->
+  <div class="blk">
+    <div class="code">03</div>
+    <h2>Кнопки</h2>
+    <div class="rule">Высота <b>52</b>, во всю ширину. На экране <b>одно</b> главное действие салатовым — остальные обычные. Пунктирная — необязательное или отменяющее. Красная — разрушающее.</div>
+    <div class="demo">
+      <button class="btn pri">Главное действие</button>
+      <button class="btn">Обычное действие</button>
+      <button class="btn ghost">Необязательное</button>
+      <button class="btn warn">Удалить</button>
+      <button class="btn" disabled>Недоступно</button>
+    </div>
+  </div>
+
+  <!-- СТАТУС-ТАБЛЕТКИ -->
+  <div class="blk">
+    <div class="code">04</div>
+    <h2>Статус и действие в строке</h2>
+    <div class="rule">Высота <b>32</b>, минимальная ширина <b>96</b> — таблетки в столбце одинаковые. Цветом задаётся только фон, текст всегда чёрный. Оранжевый — требует действия, салатовый — сделано, красный — отказ, жёлтый — перенос, чёрный — действие прямо из строки.</div>
+    <div class="demo" style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="st wait">отметить</span>
+      <span class="st ok">сделано</span>
+      <span class="st no">отказ</span>
+      <span class="st mv">перенос</span>
+      <button class="st act">принять</button>
+    </div>
+  </div>
+
+  <!-- СТРОКА -->
+  <div class="blk">
+    <div class="code">05</div>
+    <h2>Строка списка</h2>
+    <div class="rule">Две строки в трёх столбцах: иконка, время и класс, объект и клиент, справа статус. Сверху — <b>17 полужирным</b>, снизу — <b>12 серым</b>. Сумма уходит в нижнюю подпись, а не в отдельную колонку: иначе она наезжает на имя.</div>
+    <div class="demo">
+      <button class="task">
+        <div class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6.5 10v10h11V10"/></svg></div>
+        <div class="c"><b>12:00</b><span>Показ</span></div>
+        <div class="c"><b>Онежская 19</b><span>Юлия · покупатель</span></div>
+        <div class="r"><span class="st wait">отметить</span></div>
+      </button>
+      <div class="task done">
+        <div class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="12" cy="12" r="2.5"/></svg></div>
+        <div class="c"><b>11:00</b><span>Задаток</span></div>
+        <div class="c"><b>Попова 72</b><span>Кондрева · покупатель · 98 000 ₽</span></div>
+        <div class="r"><span class="st ok">сделано</span></div>
+      </div>
+      <div class="task noic">
+        <div class="c"><b>Кастромина Ольга</b><span class="wrap">план сегодня 5 · вчера 6 из 7 · показы 8/5</span></div>
+        <div class="r"><span class="st no">не сдал</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- КАРТОЧКА -->
+  <div class="blk">
+    <div class="code">06</div>
+    <h2>Карточка и строки показателей</h2>
+    <div class="rule">Три колонки: название тянется, <b>факт / план</b> занимает 92, процент 56 — оба прижаты к правому краю. Числа моноширинные, поэтому разряды стоят друг под другом в любом списке.</div>
+    <div class="demo">
+      <div class="card">
+        <span class="t">Неделя · факт / план</span>
+        <div class="kv"><span>показы</span><span class="pf"><span class="f">8</span><span class="sl">/</span><span class="p">5</span></span><span class="pct">160%</span></div>
+        <div class="kv"><span>оценки</span><span class="pf"><span class="f">3</span><span class="sl">/</span><span class="p">5</span></span><span class="pct">60%</span></div>
+        <div class="kv two"><span>Средняя комиссия</span><b>98 000 ₽</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ПОКАЗАТЕЛИ -->
+  <div class="blk">
+    <div class="code">07</div>
+    <h2>Плашки показателей</h2>
+    <div class="rule">Четыре в ряд. Цифра факта оранжевая, пока норма не закрыта, и зелёная, когда закрыта. Норма после дроби всегда чёрная. Полоса прогресса: фон — план, заливка — факт.</div>
+    <div class="demo">
+      <div class="nrow">
+        <button><b class="good">1<span class="n">/1</span></b><span>сделки</span></button>
+        <button><b>2<span class="n">/4</span></b><span>задаток</span></button>
+        <button><b class="good">8<span class="n">/5</span></b><span>показы</span></button>
+        <button><b>3<span class="n">/5</span></b><span>оценки</span></button>
+      </div>
+      <div class="bar" style="margin-top:12px"><i style="width:60%"></i></div>
+    </div>
+  </div>
+
+  <!-- ПЕРЕКЛЮЧАТЕЛИ -->
+  <div class="blk">
+    <div class="code">08</div>
+    <h2>Переключатель периода</h2>
+    <div class="rule">Высота <b>48</b>, доли строго равные при любом числе кнопок. Активный — чёрный. Порядок всегда от короткого к длинному: вчера, сегодня, неделя, месяц, дальше.</div>
+    <div class="demo">
+      <div class="seg" style="grid-template-columns:repeat(4,1fr)">
+        <button class="chip">Вчера</button>
+        <button class="chip on">Сегодня</button>
+        <button class="chip">Неделя</button>
+        <button class="chip">Месяц</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- СВЁРТКИ -->
+  <div class="blk">
+    <div class="code">09</div>
+    <h2>Сворачиваемый блок</h2>
+    <div class="rule">Заголовок из трёх частей: название слева, состояние по центру, кнопка справа. Надпись на кнопке меняется сама — «развернуть» и «свернуть». Раскрытый блок обводится чёрным.</div>
+    <div class="demo">
+      <details>
+        <summary><span>Вчера</span><span class="cnt">не отмечено: 3</span><span class="arw"></span></summary>
+        <div class="dbody"><div class="hint" style="margin:0">Содержимое блока.</div></div>
+      </details>
+      <details open>
+        <summary><span>Сегодня</span><span class="cnt">8 дел</span><span class="arw"></span></summary>
+        <div class="dbody"><div class="hint" style="margin:0">Раскрытый блок с чёрной обводкой.</div></div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ПОЛЯ -->
+  <div class="blk">
+    <div class="code">10</div>
+    <h2>Поля ввода</h2>
+    <div class="rule">Подпись сверху мелким серым, поле высотой <b>52</b>. Размер текста в поле <b>16</b> — меньше нельзя, иначе телефон увеличивает страницу при вводе.</div>
+    <div class="demo">
+      <span class="lbl">Объект · адрес</span>
+      <input placeholder="Строителей 11">
+      <div class="row2" style="margin-top:8px">
+        <div><span class="lbl" style="margin-top:0">Дата</span><input type="date"></div>
+        <div><span class="lbl" style="margin-top:0">Время</span><input type="time"></div>
+      </div>
+      <span class="lbl">Итог</span>
+      <textarea placeholder="Чем закончилось"></textarea>
+    </div>
+  </div>
+
+  <!-- ШТОРКА -->
+  <div class="blk">
+    <div class="code">11</div>
+    <h2>Всплывающее окно</h2>
+    <div class="rule">Занимает <b>92%</b> высоты экрана всегда — не прыгает от количества полей. Фон размыт и заблокирован от прокрутки. Кнопки прилипают к низу окна. Информационное окно закрывается <b>одной</b> кнопкой «Понятно», окно с выбором — двумя.</div>
+    <div class="demo">
+      <button class="btn" onclick="demoSheet()">Показать окно</button>
+    </div>
+  </div>
+
+  <!-- ЗАГОЛОВКИ -->
+  <div class="blk">
+    <div class="code">12</div>
+    <h2>Шапка экрана</h2>
+    <div class="rule">Три столбца по центральной оси: логотип во всю высоту слева, по центру «план / факт» и под ним роль с версией, справа имя и дата. Одинаковая во всех кабинетах.</div>
+    <div class="demo">
+      <div class="hdr"><div class="row">
+        <div class="col brand">ТОЧНО<i>.</i></div>
+        <div class="col mid"><div class="top">план / факт</div><div class="bot">Агент · v5.1.1</div></div>
+        <div class="col end"><div class="top">Брыкина Александра</div><div class="bot">вс, 6 сен</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ПРАВИЛА -->
+  <div class="blk">
+    <div class="code">13</div>
+    <h2>Правила, которые проверяются на каждом экране</h2>
+    <div class="rule">
+      <b>Одно главное действие</b> на экран, салатовым.<br><br>
+      <b>Числа не прыгают:</b> фиксированные колонки, выравнивание по правому краю, без переносов.<br><br>
+      <b>Сначала ответ, потом данные:</b> сверху фраза или одно число, ниже разбивка.<br><br>
+      <b>Спокойный день выглядит спокойно:</b> когда всё в норме, экран короткий.<br><br>
+      <b>После закрытия окна</b> страница возвращается наверх.<br><br>
+      <b>Ничего нельзя удалить молча:</b> дело отмечают, переносят или отменяют.
+    </div>
+  </div>
+
+
+  <!-- ДОПОЛНИТЕЛЬНЫЕ ЭЛЕМЕНТЫ -->
+  <div class="blk">
+    <div class="code">14</div>
+    <h2>Остальные элементы</h2>
+    <div class="rule">Всё, что ещё встречается на экранах. Новых сущностей вводить нельзя — только эти.</div>
+
+    <div class="sublbl">Вывод и сравнение · верх экрана</div>
+    <div class="card">
+      <div class="verdict">Отдел идёт на 64% от нормы по задаткам</div>
+      <div class="cmp">Прошлая неделя в этот же день: <b>8</b> задатков против <b>6</b> сейчас</div>
+    </div>
+
+    <div class="sublbl">Подзаголовок внутри блока</div>
+    <div class="sublbl">Мои дела</div>
+    <div class="task noic"><div class="c"><b>Пример строки без иконки</b><span class="wrap">подпись в две строки, если нужно</span></div><div class="r"><span class="st mv">открыть</span></div></div>
+
+    <div class="sublbl">Заголовок раздела</div>
+    <div class="sec">Вчера · сб, 5 сен</div>
+    <div class="sec warn">Требует внимания · 4</div>
+
+    <div class="sublbl">Пустое состояние</div>
+    <div class="empty">На сегодня пусто. Добавьте хотя бы одно дело.</div>
+
+    <div class="sublbl">Подсказка</div>
+    <div class="hint">Мелкий серый текст под блоком. Только пояснение, никогда не смысл.</div>
+
+    <div class="sublbl">Точка статуса отчёта</div>
+    <div class="status"><span class="dm ok"></span>Принят РОПом</div>
+    <div class="status alarm"><span class="dm no"></span>Не сдан · срок до 10:00</div>
+
+    <div class="sublbl">Крупное число</div>
+    <div class="card"><div class="big">2,1 млн<small>подписанная комиссия · за неделю</small></div></div>
+
+    <div class="sublbl">Кнопка возврата</div>
+    <button class="back">← К агентам</button>
+
+    <div class="sublbl">Сообщение поверх экрана</div>
+    <div style="position:relative;height:52px;overflow:hidden;border-radius:var(--r)">
+      <div class="flash" style="position:absolute">+105 000 ₽ к неделе</div>
+    </div>
+    <div style="position:relative;height:52px;overflow:hidden;border-radius:var(--r);margin-top:6px">
+      <div class="flash bad" style="position:absolute">Отметьте все вчерашние дела</div>
+    </div>
+
+    <div class="sublbl">Нижняя навигация</div>
+    <div style="position:relative;border:1px solid var(--line);border-radius:var(--r);overflow:hidden">
+      <div class="bottom" style="position:static"><div class="in"><div class="nav">
+        <button class="on"><b><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></b>Сегодня</button>
+        <button><b><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg></b>Прогноз</button>
+        <button><b><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="1.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></b>Предстоит</button>
+        <button><b><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg></b>Отчёты</button>
+        <button><b><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15.5" cy="12" r="2"/></svg></b>Настройки</button>
+      </div></div></div>
+    </div>
+  </div>
+
+  <!-- РЕШЕНИЯ -->
+  <div class="blk">
+    <div class="code">15</div>
+    <h2>Решения по структуре · к пересборке</h2>
+    <div class="rule">
+      <b>«Моё» и «Отчёты» объединяются.</b> Наверху статистика за неделю и месяц, ниже история сданных план-фактов. Пятая кнопка внизу освобождается под настройки.<br><br>
+      <b>Вход, выход и настройки кабинета</b> — по нажатию на своё имя в шапке, а не отдельным разделом.<br><br>
+      <b>«Найти работу»</b> называется «Дополнительное дело, без конкретики».<br><br>
+      <b>Приписка «по классу»</b> у типа клиента убирается — она объясняет реализацию, а не помогает.<br><br>
+      <b>Счётчики в заголовках свёрток</b> не меняют ширину при раскрытии.
+    </div>
+  </div>
+</div>
+
+<div class="ovl" id="ovl" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
+<script>
+function demoSheet(){
+  document.getElementById('sheet').innerHTML=
+    '<h3>Пример окна</h3><span class="sh">подзаголовок</span>'+
+    '<div class="card"><div class="kv two"><span>Показатель</span><b>значение</b></div>'+
+    '<div class="kv two"><span>Ещё показатель</span><b class="g">хорошо</b></div></div>'+
+    '<span class="lbl">Поле</span><input placeholder="Ввод">'+
+    '<div class="sbtn"><button class="btn" onclick="closeSheet()">Отмена</button>'+
+    '<button class="btn pri" onclick="closeSheet()">Сохранить</button></div>';
+  document.getElementById('ovl').classList.add('on'); document.body.classList.add('locked');
+}
+function closeSheet(){ document.getElementById('ovl').classList.remove('on'); document.body.classList.remove('locked'); }
+</script>
+</body>
+</html>

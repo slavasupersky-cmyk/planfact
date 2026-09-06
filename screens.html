@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>ТОЧНО. — Контактный лист экранов</title>
+<style>
+:root{
+  --ink:#0F0F0F; --mute:#8C8C8C; --line:#E9E9E9; --soft:#F6F6F6; --bg:#FFFFFF;
+  --lime:#AEEA00; --on-lime:#0F0F0F; --alarm:#E03A2F; --r:8px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--soft);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.5}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:16px 20px}
+.mark{font-size:20px;font-weight:600;letter-spacing:-.03em}
+.mark i{font-style:normal;color:var(--lime)}
+.sub{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tools button,.tools a{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:var(--r);
+  padding:8px 12px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer}
+.tools button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{padding:20px}
+h2{font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);margin:28px 0 12px;font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.cell{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.cap{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.id{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:700;background:var(--ink);color:var(--bg);
+  padding:3px 8px;border-radius:var(--r)}
+.nm{font-size:13.5px;font-weight:600}
+.open{margin-left:auto;font-size:12px;color:var(--mute);text-decoration:none}
+.frame{position:relative;background:var(--soft);height:620px;overflow:hidden}
+.frame iframe{width:390px;height:844px;border:0;transform:scale(.73);transform-origin:top left;
+  position:absolute;left:50%;margin-left:-142px}
+body.full .frame{height:844px}
+body.full .frame iframe{transform:none;margin-left:-195px}
+.note{background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--lime);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:18px;font-size:14px;color:#4a4a4a}
+.note b{color:var(--ink)}
+footer{padding:30px 20px 60px;color:var(--mute);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div class="mark">ТОЧНО<i>.</i></div>
+  <div class="sub">контактный лист экранов · для разметки правок</div>
+  <div class="tools">
+    <button id="btnSize" onclick="document.body.classList.toggle('full');this.classList.toggle('on')">Показать в натуральную величину</button>
+    <button onclick="reloadAll()">Перезагрузить все</button>
+    <button onclick="window.print()">Печать в PDF</button>
+    <a href="index.html">К оглавлению</a>
+  </div>
+</header>
+
+<main>
+  <div class="note">
+    <b>Как этим пользоваться.</b> Каждый экран пронумерован. Открывайте лист на компьютере, печатайте в PDF или снимайте экран, размечайте в Фигме и присылайте правки списком в виде «<b>A-03</b> — сумма налезает на имя, перенести вниз». Правки по номерам применяются пакетом, после чего я прогоняю все экраны и показываю, что изменилось. Одиночная ссылка на экран — по кнопке «открыть».
+  </div>
+
+  <h2>Агент</h2>
+  <div class="grid" id="gA"></div>
+
+
+  <h2>РОП</h2>
+  <div class="grid" id="gR"></div>
+
+  <h2>Собственник</h2>
+  <div class="grid" id="gO"></div>
+</main>
+
+<footer>Экраны загружаются живыми — это те же файлы, что на сайте. Данные выдуманные.</footer>
+
+<script>
+var SCREENS={
+  gA:[
+    ['A-01','Вход',                 'agent5.html'],
+    ['A-02','Сегодня · вчера открыто','agent5.html#screen=today'],
+    ['A-03','Отметка дела',          'agent5.html#screen=today&fn=openTask&arg=2'],
+    ['A-04','Добавление · выбор',    'agent5.html#screen=today&sheet=openPick'],
+    ['A-05','Новое дело · форма',    'agent5.html#screen=today&fn=openAdd&arg=0'],
+    ['A-06','Окно сдачи',            'agent5.html#screen=today&sheet=openSubmit'],
+    ['A-07','Прогноз',               'agent5.html#screen=fc'],
+    ['A-08','Предстоит',             'agent5.html#screen=fut'],
+    ['A-09','Отчёты · архив',        'agent5.html#screen=past'],
+    ['A-10','Моё',                   'agent5.html#screen=me'],
+    ['A-11','Норма · раскрытие',     'agent5.html#screen=today&fn=openNorm&arg=0']
+  ],
+  gR:[
+    ['R-01','Вход',                  'rop.html'],
+    ['R-02','Приёмка',               'rop.html#screen=inbox'],
+    ['R-03','Карточка агента',       'rop.html#screen=inbox&agent=1'],
+    ['R-04','Карточка · принят',     'rop.html#screen=inbox&agent=2'],
+    ['R-05','Агенты · неделя',       'rop.html#screen=team'],
+    ['R-06','Прогноз',               'rop.html#screen=fc'],
+    ['R-07','Отчёты · архив',        'rop.html#screen=rep'],
+    ['R-08','Настройки',             'rop.html#screen=set'],
+    ['R-09','Постановка задачи',     'rop.html#screen=inbox&sheet=openTask']
+  ],
+  gO:[
+    ['O-01','Вход',        'vladelec.html'],
+    ['O-02','Деньги',      'vladelec.html#screen=money'],
+    ['O-03','Прогноз',     'vladelec.html#screen=fc'],
+    ['O-04','Воронка',     'vladelec.html#screen=funnel'],
+    ['O-05','Люди',        'vladelec.html#screen=people'],
+    ['O-06','Отдел внутри','vladelec.html#screen=people&fn=openDep&arg=1'],
+    ['O-07','Настройки',   'vladelec.html#screen=set'],
+    ['O-08','Нормы · окно','vladelec.html#screen=set&sheet=openNorms']
+  ]
+};
+function build(){
+  for(var g in SCREENS){
+    var box=document.getElementById(g), html='';
+    SCREENS[g].forEach(function(s){
+      html+='<div class="cell"><div class="cap"><span class="id">'+s[0]+'</span>'+
+        '<span class="nm">'+s[1]+'</span>'+
+        '<a class="open" href="'+s[2]+'" target="_blank">открыть ↗</a></div>'+
+        '<div class="frame"><iframe loading="lazy" src="'+s[2]+'"></iframe></div></div>';
+    });
+    box.innerHTML=html;
+  }
+}
+function reloadAll(){ document.querySelectorAll('iframe').forEach(function(f){ var s=f.src; f.src='about:blank'; setTimeout(function(){ f.src=s; },50); }); }
+build();
+</script>
+</body>
+</html>
