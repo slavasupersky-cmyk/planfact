@@ -1,0 +1,3157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#FFFFFF">
+<title>ТОЧНО. Календарь агента</title>
+<script>
+// GENERATED from dc-runtime/src/*.ts — do not edit. Rebuild with `cd dc-runtime && bun run build`.
+"use strict";
+(() => {
+  var __defProp = Object.defineProperty;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+
+  // src/react.ts
+  function getReact() {
+    const R = window.React;
+    if (!R) throw new Error("dc-runtime: window.React is not available yet");
+    return R;
+  }
+  function getReactDOM() {
+    const RD = window.ReactDOM;
+    if (!RD) throw new Error("dc-runtime: window.ReactDOM is not available yet");
+    return RD;
+  }
+  var h = ((...args) => getReact().createElement(
+    ...args
+  ));
+
+  // src/parse.ts
+  function parseDcDocument(doc) {
+    const dc = doc.querySelector("x-dc");
+    if (!dc) return null;
+    const scriptEl = doc.querySelector("script[data-dc-script]");
+    const { props, preview } = parseDataProps(
+      scriptEl?.getAttribute("data-props") ?? null
+    );
+    return {
+      template: dc.innerHTML,
+      js: scriptEl ? scriptEl.textContent || "" : "",
+      props,
+      preview
+    };
+  }
+  function parseDcText(src) {
+    const openMatch = /<x-dc(?:\s[^>]*)?>/.exec(src);
+    if (!openMatch) return null;
+    const close = src.lastIndexOf("</x-dc>");
+    if (close === -1 || close < openMatch.index) return null;
+    const template = src.slice(openMatch.index + openMatch[0].length, close);
+    const doc = new DOMParser().parseFromString(src, "text/html");
+    const scriptEl = doc.querySelector("script[data-dc-script]");
+    const { props, preview } = parseDataProps(
+      scriptEl?.getAttribute("data-props") ?? null
+    );
+    return {
+      template,
+      js: scriptEl ? scriptEl.textContent || "" : "",
+      props,
+      preview
+    };
+  }
+  function parseDataProps(raw) {
+    if (!raw) return { props: null, preview: null };
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return { props: null, preview: null };
+    }
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return { props: null, preview: null };
+    }
+    const obj = parsed;
+    const preview = obj.$preview && typeof obj.$preview === "object" ? obj.$preview : null;
+    const rest = {};
+    for (const k of Object.keys(obj)) {
+      if (k[0] !== "$") rest[k] = obj[k];
+    }
+    return { props: Object.keys(rest).length ? rest : null, preview };
+  }
+  function dcNameFromPath(pathname) {
+    let p = pathname || "";
+    try {
+      p = decodeURIComponent(p);
+    } catch {
+    }
+    const base = p.split("/").pop() || "Root";
+    return base.replace(/\.dc\.html$/, "").replace(/\.html?$/, "") || "Root";
+  }
+
+  // src/boot.ts
+  var BASE_CSS = `
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts \u2014 keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  `;
+  var FULL_PAGE_CSS = "html,body{height:100%;margin:0}#dc-root,#dc-root>.sc-host{height:100%}";
+  function rootNameForDocument(doc, loc) {
+    let bootPath = loc.pathname || "";
+    if (!/\.dc\.html?$/i.test(safeDecode(bootPath))) {
+      try {
+        bootPath = new URL(doc.baseURI || "/").pathname;
+      } catch {
+      }
+    }
+    return dcNameFromPath(bootPath);
+  }
+  function safeDecode(s) {
+    try {
+      return decodeURIComponent(s);
+    } catch {
+      return s;
+    }
+  }
+  function boot(runtime, doc = document) {
+    const parsed = parseDcDocument(doc);
+    if (!parsed) return null;
+    const React = getReact();
+    const rootName = rootNameForDocument(doc, location);
+    runtime.markFetched(rootName);
+    runtime.setRootName(rootName);
+    runtime.adoptParsed(rootName, parsed);
+    if (!window.__resources) {
+      fetch(location.href).then((res) => res.ok ? res.text() : "").then((t) => {
+        const raw = t ? parseDcText(t) : null;
+        if (raw?.template) runtime.updateHtml(rootName, raw.template);
+      }).catch(() => {
+      });
+    }
+    const dc = doc.querySelector("x-dc");
+    const hostEl = doc.createElement("div");
+    hostEl.id = "dc-root";
+    dc.replaceWith(hostEl);
+    if (!parsed.preview) {
+      const s = doc.createElement("style");
+      s.textContent = FULL_PAGE_CSS;
+      doc.head.appendChild(s);
+    }
+    const Root = runtime.getDC(rootName);
+    const entry = runtime.registry.get(rootName);
+    function StandaloneRoot() {
+      const [, setTick] = React.useState(0);
+      React.useEffect(() => {
+        const sub = () => setTick((n) => n + 1);
+        entry.subs.add(sub);
+        return () => {
+          entry.subs.delete(sub);
+        };
+      }, []);
+      const defaults = React.useMemo(() => {
+        const d = {};
+        for (const k in entry.propsMeta || {}) {
+          const v = entry.propsMeta?.[k]?.default;
+          if (v !== void 0) d[k] = v;
+        }
+        return d;
+      }, [entry.propsMeta]);
+      return h(Root, { ...defaults, ...entry.propOverrides || {} });
+    }
+    const ReactDOM = getReactDOM();
+    if (ReactDOM.createRoot)
+      ReactDOM.createRoot(hostEl).render(h(StandaloneRoot));
+    else ReactDOM.render(h(StandaloneRoot), hostEl);
+    return rootName;
+  }
+
+  // src/expr.ts
+  var IDENT_RE = /^[A-Za-z_$][A-Za-z0-9_$]*/;
+  var NUMBER_RE = /^-?\d+(\.\d+)?$/;
+  function resolve(vals, src) {
+    const expr = String(src).trim();
+    if (!expr) return void 0;
+    if (expr[0] === "(" && expr[expr.length - 1] === ")" && parensWrapWhole(expr)) {
+      return resolve(vals, expr.slice(1, -1));
+    }
+    const eq = findTopLevelEquality(expr);
+    if (eq) {
+      const lv = resolve(vals, expr.slice(0, eq.index));
+      const rv = resolve(vals, expr.slice(eq.index + eq.op.length));
+      switch (eq.op) {
+        case "===":
+          return lv === rv;
+        case "!==":
+          return lv !== rv;
+        case "==":
+          return lv == rv;
+        default:
+          return lv != rv;
+      }
+    }
+    if (expr[0] === "!") return !resolve(vals, expr.slice(1));
+    if (expr === "true") return true;
+    if (expr === "false") return false;
+    if (expr === "null") return null;
+    if (expr === "undefined") return void 0;
+    if (NUMBER_RE.test(expr)) return Number(expr);
+    if (expr.length >= 2 && (expr[0] === '"' || expr[0] === "'") && expr[expr.length - 1] === expr[0]) {
+      return expr.slice(1, -1);
+    }
+    return resolvePath(vals, expr);
+  }
+  function parensWrapWhole(expr) {
+    let depth = 0;
+    for (let i = 0; i < expr.length - 1; i++) {
+      if (expr[i] === "(") depth++;
+      else if (expr[i] === ")") {
+        depth--;
+        if (depth === 0) return false;
+      }
+    }
+    return true;
+  }
+  function findTopLevelEquality(expr) {
+    let depth = 0;
+    for (let i = 0; i < expr.length; i++) {
+      const c = expr[i];
+      if (c === "[" || c === "(") depth++;
+      else if (c === "]" || c === ")") depth--;
+      else if (depth === 0 && (c === "=" || c === "!") && expr[i + 1] === "=") {
+        if (i > 0 && (expr[i - 1] === "=" || expr[i - 1] === "!")) continue;
+        if (!expr.slice(0, i).trim()) continue;
+        const op = expr[i + 2] === "=" ? c + "==" : c + "=";
+        return { index: i, op };
+      }
+    }
+    return null;
+  }
+  function resolvePath(vals, expr) {
+    const head = expr.match(IDENT_RE);
+    if (!head) return void 0;
+    let cur = vals == null ? void 0 : vals[head[0]];
+    let i = head[0].length;
+    while (i < expr.length) {
+      if (expr[i] === ".") {
+        const m = expr.slice(i + 1).match(IDENT_RE) || expr.slice(i + 1).match(/^\d+/);
+        if (!m) return void 0;
+        cur = cur == null ? void 0 : cur[m[0]];
+        i += 1 + m[0].length;
+      } else if (expr[i] === "[") {
+        let depth = 1;
+        let j = i + 1;
+        while (j < expr.length && depth > 0) {
+          if (expr[j] === "[") depth++;
+          else if (expr[j] === "]") {
+            depth--;
+            if (depth === 0) break;
+          }
+          j++;
+        }
+        if (depth !== 0) return void 0;
+        const key = resolve(vals, expr.slice(i + 1, j));
+        cur = cur == null ? void 0 : cur[key];
+        i = j + 1;
+      } else {
+        return void 0;
+      }
+    }
+    return cur;
+  }
+
+  // src/encode.ts
+  var CAMEL_ATTR = "sc-camel-";
+  var INLINE_TEXT_TAGS = new Set(
+    "a abbr b bdi bdo br cite code del dfn em i ins kbd mark q s samp small span strike strong sub sup u var wbr".split(
+      " "
+    )
+  );
+  var RAW_WRAP = {
+    select: "sc-raw-select",
+    table: "sc-raw-table",
+    tbody: "sc-raw-tbody",
+    thead: "sc-raw-thead",
+    tfoot: "sc-raw-tfoot",
+    tr: "sc-raw-tr",
+    td: "sc-raw-td",
+    th: "sc-raw-th",
+    caption: "sc-raw-caption"
+  };
+  var RAW_UNWRAP = Object.fromEntries(
+    Object.entries(RAW_WRAP).map(([k, v]) => [v, k])
+  );
+  var EVENT_MAP = {
+    onclick: "onClick",
+    onchange: "onChange",
+    oninput: "onInput",
+    onsubmit: "onSubmit",
+    onkeydown: "onKeyDown",
+    onkeyup: "onKeyUp",
+    onkeypress: "onKeyPress",
+    onmousedown: "onMouseDown",
+    onmouseup: "onMouseUp",
+    onmouseenter: "onMouseEnter",
+    onmouseleave: "onMouseLeave",
+    onfocus: "onFocus",
+    onblur: "onBlur",
+    ondoubleclick: "onDoubleClick",
+    oncontextmenu: "onContextMenu",
+    onmousemove: "onMouseMove",
+    onmouseover: "onMouseOver",
+    onmouseout: "onMouseOut",
+    onpointerdown: "onPointerDown",
+    onpointerup: "onPointerUp",
+    onpointermove: "onPointerMove",
+    onpointerenter: "onPointerEnter",
+    onpointerleave: "onPointerLeave",
+    onpointercancel: "onPointerCancel",
+    onpointerover: "onPointerOver",
+    onpointerout: "onPointerOut",
+    ongotpointercapture: "onGotPointerCapture",
+    onlostpointercapture: "onLostPointerCapture",
+    ontouchstart: "onTouchStart",
+    ontouchend: "onTouchEnd",
+    ontouchmove: "onTouchMove",
+    ontouchcancel: "onTouchCancel",
+    ondragstart: "onDragStart",
+    ondragend: "onDragEnd",
+    ondragenter: "onDragEnter",
+    ondragleave: "onDragLeave",
+    ondragover: "onDragOver",
+    onanimationstart: "onAnimationStart",
+    onanimationend: "onAnimationEnd",
+    onanimationiteration: "onAnimationIteration",
+    ontransitionend: "onTransitionEnd"
+  };
+  var ATTRS = `(?:[^>"']|"[^"]*"|'[^']*')*`;
+  var IMPORT_SELF_CLOSE_RE = new RegExp(
+    "<(x-import|dc-import)(" + ATTRS + ")/>",
+    "gi"
+  );
+  var CAMEL_ATTR_RE = /(\s)([a-z]+[A-Z][A-Za-z0-9]*)(\s*=)/g;
+  function encodeCamelAttrs(html) {
+    return html.replace(
+      CAMEL_ATTR_RE,
+      (_, sp, name, eq) => sp + CAMEL_ATTR + name.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase()) + eq
+    );
+  }
+  function encodeCase(html) {
+    html = html.replace(
+      IMPORT_SELF_CLOSE_RE,
+      (_, t, a) => "<" + t + a + "></" + t + ">"
+    );
+    html = html.replace(/<helmet(\s|>)/gi, "<sc-helmet$1");
+    html = html.replace(/<\/helmet\s*>/gi, "</sc-helmet>");
+    html = encodeCamelAttrs(html);
+    for (const [real, alias] of Object.entries(RAW_WRAP)) {
+      html = html.replace(
+        new RegExp("(</?)" + real + "(?=[\\s>])", "gi"),
+        "$1" + alias
+      );
+    }
+    return html;
+  }
+  function kebabToCamel(s) {
+    return s.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+  }
+  function cssToObj(css) {
+    const o = {};
+    for (const decl of css.split(";")) {
+      const i = decl.indexOf(":");
+      if (i < 0) continue;
+      const prop = decl.slice(0, i).trim();
+      o[prop.startsWith("--") ? prop : kebabToCamel(prop)] = decl.slice(i + 1).trim();
+    }
+    return o;
+  }
+  function compileAttr(raw) {
+    const whole = raw.match(/^\s*\{\{([\s\S]+?)\}\}\s*$/);
+    if (whole) {
+      const path = whole[1];
+      return (vals) => resolve(vals, path);
+    }
+    if (raw.includes("{{")) {
+      const parts = raw.split(/\{\{([\s\S]+?)\}\}/g);
+      return (vals) => parts.map((s, i) => i & 1 ? resolve(vals, s) ?? "" : s).join("");
+    }
+    return () => raw;
+  }
+
+  // src/compile.ts
+  function collectProps(node, kind, host) {
+    const propGetters = [];
+    const pseudoClasses = [];
+    let hintSize = null;
+    for (const { name, value } of [...node.attributes]) {
+      if (name === "sc-name" || name === "data-dc-tpl") continue;
+      let key = name;
+      if (key.startsWith(CAMEL_ATTR))
+        key = kebabToCamel(key.slice(CAMEL_ATTR.length));
+      if (key === "hint-size") {
+        hintSize = value;
+        continue;
+      }
+      if (key.startsWith("style-")) {
+        pseudoClasses.push(host.pseudoClass(key.slice(6), value));
+        continue;
+      }
+      if (kind !== "dom") {
+        if (key.includes("-") && !(kind === "x-import" && (key.startsWith("aria-") || key.startsWith("data-"))))
+          key = kebabToCamel(key);
+      } else {
+        if (key === "class") key = "className";
+        else if (key === "for") key = "htmlFor";
+        else if (key.startsWith("on"))
+          key = EVENT_MAP[key] || "on" + key[2].toUpperCase() + key.slice(3);
+      }
+      propGetters.push([key, compileAttr(value)]);
+    }
+    return { propGetters, pseudoClasses, hintSize };
+  }
+  var HOST_STYLE_PROPS = /* @__PURE__ */ new Set([
+    "position",
+    "left",
+    "right",
+    "top",
+    "bottom",
+    "inset",
+    "width",
+    "height",
+    "z-index",
+    "transform"
+  ]);
+  function hostPositionStyle(style) {
+    const all = typeof style === "string" ? cssToObj(style) : style != null && typeof style === "object" ? style : null;
+    if (!all) return void 0;
+    const out = {};
+    for (const [k, v] of Object.entries(all)) {
+      const kebab = k.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase());
+      if (HOST_STYLE_PROPS.has(kebab)) out[k] = v;
+    }
+    return Object.keys(out).length ? out : void 0;
+  }
+  function compileTemplate(html, host) {
+    const tpl = document.createElement("template");
+    //! nosemgrep: direct-inner-html-assignment
+    tpl.innerHTML = encodeCase(html);
+    let tplN = 0;
+    (function stamp(node) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        node.setAttribute("data-dc-tpl", String(tplN++));
+      }
+      for (const c of node.childNodes) stamp(c);
+    })(tpl.content);
+    const builders = walkChildren(tpl.content, host);
+    const render = ((vals, ctx) => builders.map((b, i) => b(vals || {}, ctx, i)));
+    render.__annotated = tpl.innerHTML;
+    return render;
+  }
+  function walkChildren(node, host) {
+    return [...node.childNodes].map((c) => walk(c, host)).filter((b) => b != null);
+  }
+  var SLIDE_ID_VALUE_RE = /^[0-9a-f]{8}$/;
+  var DECK_CONTROL_FLOW_RE = /^(sc-if|sc-for|sc-else|dc-import|x-import)$/;
+  var DECK_AUX_RE = /^(template|script|style|sc-helmet|helmet)$/;
+  function isDeckMountTag(el) {
+    if (el.localName === "deck-stage") return true;
+    return el.localName === "x-import" && (el.getAttribute("component-from-global-scope") || "") === "deck-stage";
+  }
+  function walkDeckChildren(el, host) {
+    const pairs = [...el.childNodes].map((c) => ({ c, b: walk(c, host) })).filter((p) => p.b !== null);
+    const kids = pairs.map((p) => p.b);
+    const seen = /* @__PURE__ */ new Set();
+    const wsSeen = /* @__PURE__ */ new Map();
+    const keys = [];
+    const nextSlideId = new Array(pairs.length);
+    {
+      let upcoming = null;
+      for (let j = pairs.length - 1; j >= 0; j--) {
+        const n = pairs[j].c;
+        if (n.nodeType === Node.ELEMENT_NODE) {
+          const t = n.localName;
+          upcoming = !DECK_AUX_RE.test(t) && !DECK_CONTROL_FLOW_RE.test(t) ? n.getAttribute("data-om-slide-id") : null;
+        }
+        nextSlideId[j] = upcoming;
+      }
+    }
+    for (let j = 0; j < pairs.length; j++) {
+      const { c } = pairs[j];
+      if (c.nodeType === Node.TEXT_NODE) {
+        if ((c.nodeValue ?? "").trim() === "") {
+          const base = nextSlideId[j] ? "omid-ws:" + nextSlideId[j] : "omid-ws:aux";
+          const n = wsSeen.get(base) ?? 0;
+          wsSeen.set(base, n + 1);
+          keys.push(n === 0 ? base : base + ":" + n);
+          continue;
+        }
+        return { kids, keys: null };
+      }
+      if (c.nodeType !== Node.ELEMENT_NODE) {
+        keys.push(j);
+        continue;
+      }
+      const child = c;
+      const tag = child.localName;
+      if (DECK_AUX_RE.test(tag)) {
+        keys.push(j);
+        continue;
+      }
+      if (DECK_CONTROL_FLOW_RE.test(tag)) return { kids, keys: null };
+      const v = child.getAttribute("data-om-slide-id");
+      if (!v || !SLIDE_ID_VALUE_RE.test(v) || seen.has(v)) {
+        return { kids, keys: null };
+      }
+      seen.add(v);
+      keys.push("omid:" + v);
+    }
+    return { kids, keys };
+  }
+  function renderDeckKids(kids, kidKeys, vals, ctx) {
+    return kids.map((b, j) => {
+      const k = kidKeys ? kidKeys[j] : j;
+      const out = b(vals, ctx, k);
+      return kidKeys != null && typeof out === "string" ? h(getReact().Fragment, { key: k }, out) : out;
+    });
+  }
+  function walk(node, host) {
+    if (node.nodeType === Node.TEXT_NODE) return walkText(node);
+    if (node.nodeType !== Node.ELEMENT_NODE) return null;
+    const el = node;
+    const tag = el.tagName.toLowerCase();
+    if (tag === "sc-for") return walkFor(el, host);
+    if (tag === "sc-if") return walkIf(el, host);
+    if (tag === "x-import") return walkXImport(el, host);
+    if (tag === "sc-helmet") return host.helmet(el);
+    if (tag === "dc-import") return walkComponent(el, host);
+    return walkElement(el, host);
+  }
+  var warnedHoles = /* @__PURE__ */ new Set();
+  function warnUnresolved(ctx, what) {
+    const key = (ctx?.__name || "?") + "\0" + what;
+    if (warnedHoles.has(key)) return;
+    warnedHoles.add(key);
+    console.warn("[dc-runtime] " + (ctx?.__name || "template") + ": " + what);
+  }
+  function walkText(node) {
+    const txt = node.nodeValue ?? "";
+    if (!txt.includes("{{")) {
+      if (!txt.trim() && !txt.includes(" ")) return null;
+      return () => txt;
+    }
+    const parts = txt.split(/\{\{([\s\S]+?)\}\}/g);
+    return (vals, ctx, key) => h(
+      getReact().Fragment,
+      { key },
+      ...parts.map((p, i) => {
+        if (!(i & 1)) return p;
+        const v = resolve(vals, p);
+        if (v === void 0) {
+          if (!ctx?.__streamingNow) {
+            if (document.body?.hasAttribute("data-dc-editor-on")) {
+              return h(
+                "span",
+                { key: i, className: "sc-interp sc-unresolved" },
+                "{{ " + p.trim() + " }}"
+              );
+            }
+            warnUnresolved(
+              ctx,
+              "{{ " + p.trim() + " }} never resolved \u2014 rendered as empty"
+            );
+            return null;
+          }
+          return h(
+            "span",
+            { key: i, className: "sc-interp sc-missing" },
+            p.trim()
+          );
+        }
+        if (getReact().isValidElement(v) || Array.isArray(v)) {
+          return h(getReact().Fragment, { key: i }, v);
+        }
+        if (v === null || typeof v === "boolean") return null;
+        return h("span", { key: i, className: "sc-interp" }, String(v));
+      })
+    );
+  }
+  function walkFor(el, host) {
+    const listGet = compileAttr(el.getAttribute("list") || "");
+    const asName = el.getAttribute("as") || "item";
+    const hintN = parseInt(el.getAttribute("hint-placeholder-count") || "0", 10);
+    const kids = walkChildren(el, host);
+    const listSrc = el.getAttribute("list") || "";
+    return (vals, ctx, key) => {
+      let list = listGet(vals);
+      if (!Array.isArray(list)) {
+        if (!ctx?.__streamingNow) {
+          if (list !== void 0 && list !== null) {
+            warnUnresolved(
+              ctx,
+              'sc-for list="' + listSrc + '" is not an array (' + typeof list + ")"
+            );
+          }
+          list = [];
+        } else {
+          list = hintN > 0 ? Array(hintN).fill(void 0) : [];
+        }
+      }
+      return h(
+        getReact().Fragment,
+        { key },
+        list.map((item, i) => {
+          const sub = { ...vals, [asName]: item, $index: i };
+          return h(
+            getReact().Fragment,
+            { key: i },
+            kids.map((b, j) => b(sub, ctx, j))
+          );
+        })
+      );
+    };
+  }
+  function walkIf(el, host) {
+    const valGet = compileAttr(el.getAttribute("value") || "");
+    const hintRaw = el.getAttribute("hint-placeholder-val");
+    const hintGet = hintRaw != null ? compileAttr(hintRaw) : null;
+    const kids = walkChildren(el, host);
+    return (vals, ctx, key) => {
+      let v = valGet(vals);
+      if (v === void 0 && hintGet && ctx?.__streamingNow) v = hintGet(vals);
+      return v ? h(
+        getReact().Fragment,
+        { key },
+        kids.map((b, j) => b(vals, ctx, j))
+      ) : null;
+    };
+  }
+  function walkComponent(el, host) {
+    const name = el.getAttribute("name") || el.getAttribute("component") || "";
+    el.removeAttribute("name");
+    el.removeAttribute("component");
+    const tplId = el.getAttribute("data-dc-tpl");
+    const styleRaw = el.getAttribute("style");
+    el.removeAttribute("style");
+    const styleGet = styleRaw != null ? compileAttr(styleRaw) : null;
+    const { propGetters, hintSize } = collectProps(el, "dc-import", host);
+    const kids = walkChildren(el, host);
+    return (vals, ctx, key) => {
+      const props = {
+        key,
+        __hintSize: hintSize,
+        __tplId: tplId,
+        __hostStyle: styleGet ? hostPositionStyle(styleGet(vals)) : void 0
+      };
+      for (const [k, g] of propGetters) {
+        const v = g(vals);
+        if (k === "dcProps") {
+          if (v && typeof v === "object") Object.assign(props, v);
+          continue;
+        }
+        props[k] = v;
+      }
+      if (kids.length) props.children = kids.map((b, j) => b(vals, ctx, j));
+      return h(host.component(name), props);
+    };
+  }
+  function walkXImport(el, host) {
+    const globalNameGet = compileAttr(
+      el.getAttribute("component-from-global-scope") || ""
+    );
+    const exportNameGet = compileAttr(
+      el.getAttribute("component") || el.getAttribute("name") || ""
+    );
+    const fromRaw = el.getAttribute("from") || (el.getAttribute("component-from-global-scope") ? "" : el.getAttribute("src") || el.getAttribute("import") || "");
+    const urls = fromRaw.trim() ? fromRaw.trim().split(/\s+/) : [];
+    const url = urls.length ? urls[urls.length - 1] : "";
+    const kindOf = (u) => /\.(jsx|tsx)(\?|#|$)/i.test(u) ? "jsx" : "js";
+    const tplId = el.getAttribute("data-dc-tpl");
+    const styleRaw = el.getAttribute("style");
+    el.removeAttribute("style");
+    const styleGet = styleRaw != null ? compileAttr(styleRaw) : null;
+    const wrap = tplId != null || styleGet != null;
+    const { propGetters, hintSize } = collectProps(el, "x-import", host);
+    const hasContent = el.children.length > 0 || !!(el.textContent || "").trim();
+    const deckKeyed = hasContent && isDeckMountTag(el) ? walkDeckChildren(el, host) : null;
+    const kids = deckKeyed ? deckKeyed.kids : hasContent ? walkChildren(el, host) : [];
+    const kidKeys = deckKeyed?.keys ?? null;
+    const urlBindable = fromRaw.includes("{{");
+    if (urls.length && !urlBindable) {
+      let prev;
+      for (const u of urls) prev = host.loadExternal(kindOf(u), u, prev);
+    }
+    const evalName = (g, vals) => {
+      const v = g(vals);
+      const s = v == null ? "" : String(v);
+      return s.includes("{{") ? "" : s;
+    };
+    return (vals, ctx, key) => {
+      const globalName = evalName(globalNameGet, vals);
+      const name = globalName || evalName(exportNameGet, vals);
+      const C = !name || urlBindable ? null : globalName ? host.resolveExternalGlobal(url, globalName) : host.resolveExternal(url, name);
+      const hostStyle = styleGet ? hostPositionStyle(styleGet(vals)) : void 0;
+      const wrapper = wrap ? {
+        key,
+        className: "sc-host-x",
+        "data-dc-tpl": tplId,
+        style: hostStyle || { display: "contents" }
+      } : null;
+      if (!C) {
+        const error = urlBindable ? "x-import `from` cannot contain {{ \u2026 }} \u2014 module URLs are resolved at parse time; use a literal URL" : host.resolveExternalError(url, name);
+        const ph = host.placeholder({
+          key: wrapper ? void 0 : key,
+          name,
+          hintSize,
+          error
+        });
+        return wrapper ? h("div", wrapper, ph) : ph;
+      }
+      const props = wrapper ? {} : { key };
+      let unresolvedHole = false;
+      for (const [k, g] of propGetters) {
+        if (k === "component" || k === "componentFromGlobalScope" || k === "from") {
+          continue;
+        }
+        const v = g(vals);
+        if (v === void 0) unresolvedHole = true;
+        if (k === "dcProps") {
+          if (v && typeof v === "object") Object.assign(props, v);
+          continue;
+        }
+        props[k] = v;
+      }
+      if (unresolvedHole && ctx?.__htmlStreamingNow) {
+        const ph = host.placeholder({
+          key: wrapper ? void 0 : key,
+          name,
+          hintSize,
+          error: null
+        });
+        return wrapper ? h("div", wrapper, ph) : ph;
+      }
+      if (kids.length) {
+        props.children = renderDeckKids(kids, kidKeys, vals, ctx);
+      }
+      return wrapper ? h("div", wrapper, h(C, props)) : h(C, props);
+    };
+  }
+  function contentKey(el) {
+    const clone = el.cloneNode(true);
+    for (const d of clone.querySelectorAll("*")) {
+      while (d.attributes.length) d.removeAttribute(d.attributes[0].name);
+    }
+    const s = clone.innerHTML;
+    let h2 = 5381;
+    for (let i = 0; i < s.length; i++) h2 = (h2 << 5) + h2 + s.charCodeAt(i) | 0;
+    return s.length + "." + (h2 >>> 0).toString(36);
+  }
+  var NEVER_CONTENT_KEYED = new Set(
+    "script style textarea option title select canvas iframe video audio".split(
+      " "
+    )
+  );
+  var NOT_INLINE_SELECTOR = ":not(" + [...INLINE_TEXT_TAGS].join(",") + ")";
+  function walkElement(el, host) {
+    const realTag = RAW_UNWRAP[el.localName] || el.localName;
+    const tplId = el.getAttribute("data-dc-tpl");
+    const inlineOnly = el.childNodes.length > 0 && !NEVER_CONTENT_KEYED.has(realTag) && el.querySelector(NOT_INLINE_SELECTOR) === null;
+    const keySuffix = inlineOnly ? "|" + contentKey(el) : "";
+    const { propGetters, pseudoClasses } = collectProps(el, "dom", host);
+    const deckKeyed = isDeckMountTag(el) ? walkDeckChildren(el, host) : null;
+    const kids = deckKeyed ? deckKeyed.kids : walkChildren(el, host);
+    const kidKeys = deckKeyed?.keys ?? null;
+    return (vals, ctx, key) => {
+      const props = {
+        key: key + keySuffix,
+        "data-dc-tpl": tplId
+      };
+      for (const [k, g] of propGetters) {
+        let v = g(vals);
+        if (k === "style" && typeof v === "string") v = cssToObj(v);
+        if ((k === "value" || k === "checked") && v === void 0) {
+          v = k === "checked" ? false : "";
+        }
+        props[k] = v;
+      }
+      if (pseudoClasses.length) {
+        props.className = [props.className, ...pseudoClasses].filter(Boolean).join(" ");
+      }
+      return h(realTag, props, ...renderDeckKids(kids, kidKeys, vals, ctx));
+    };
+  }
+
+  // src/logic.ts
+  var StreamableLogic = class {
+    constructor(props) {
+      __publicField(this, "props");
+      __publicField(this, "state", {});
+      /** Back-pointer to the wrapper component, installed after construction. */
+      __publicField(this, "__host");
+      this.props = props || {};
+    }
+    setState(update, cb) {
+      this.__host && this.__host.__setLogicState(update, cb);
+    }
+    forceUpdate() {
+      this.__host && this.__host.forceUpdate();
+    }
+    componentDidMount() {
+    }
+    componentDidUpdate(_prevProps) {
+    }
+    componentWillUnmount() {
+    }
+    /** The flat object the template renders against (merged over props). */
+    renderVals() {
+      return {};
+    }
+  };
+  function evalDcLogic(src) {
+    //! nosemgrep: eval-and-function-constructor
+    const fn = new Function(
+      "DCLogic",
+      "StreamableLogic",
+      "React",
+      src + '\n;return (typeof Component!=="undefined"&&Component)||undefined;'
+    );
+    return fn(StreamableLogic, StreamableLogic, getReact());
+  }
+
+  // src/component.ts
+  function shallowEqual(a, b) {
+    if (!b) return false;
+    const ak = Object.keys(a).filter((k) => k !== "children");
+    const bk = Object.keys(b).filter((k) => k !== "children");
+    if (ak.length !== bk.length) return false;
+    for (const k of ak) if (a[k] !== b[k]) return false;
+    return true;
+  }
+  function Placeholder({
+    name,
+    hintSize,
+    streaming,
+    error
+  }) {
+    const [w, hgt] = (hintSize || "100%,60px").split(",");
+    return h(
+      "div",
+      {
+        className: "sc-placeholder" + (streaming ? " sc-streaming" : ""),
+        style: { width: w.trim(), height: hgt && hgt.trim() },
+        title: name
+      },
+      error ? h(
+        "div",
+        { className: "sc-placeholder-error" },
+        (name ? name + ": " : "") + error
+      ) : null
+    );
+  }
+  function hintToMin(hint) {
+    if (!hint) return void 0;
+    const [w, hgt] = hint.split(",");
+    return { minWidth: w.trim(), minHeight: hgt && hgt.trim() };
+  }
+  function createComponentFactory(registry, ensureFetched) {
+    const React = getReact();
+    const AncestorContext = React.createContext([]);
+    class StreamableComponent extends React.Component {
+      constructor(props) {
+        super(props);
+        __publicField(this, "__name");
+        __publicField(this, "__sub");
+        __publicField(this, "__needsDidMount", false);
+        /** Snapshot of the registry's streaming flags taken at render time —
+         *  builders read it off the RenderCtx (this) to pick placeholder vs
+         *  render-nothing for unresolved values. */
+        __publicField(this, "__streamingNow", false);
+        __publicField(this, "__htmlStreamingNow", false);
+        /** When a construct throws, remember the (class, registry.ver, props)
+         *  triple so render-time reconcile doesn't re-attempt it on every parent
+         *  re-render. A registry bump (new class, template, external module
+         *  resolving via bumpAll) changes `ver` and breaks the memo so an
+         *  env-dependent constructor can self-heal. */
+        __publicField(this, "__failedLogic", null);
+        __publicField(this, "__failedUserProps", null);
+        __publicField(this, "__failedVer", -1);
+        /** Per-instance constructor error — kept here (not on the registry entry)
+         *  so one instance's successful construct can't hide a sibling's failure,
+         *  and a construct can never wipe an eval error `updateJs` recorded on
+         *  `r.logicError`. */
+        __publicField(this, "__ctorError", null);
+        __publicField(this, "logic");
+        this.__name = props.__name;
+        this.state = { __v: 0, __err: null };
+        this.__sub = () => {
+          if (this.state.__err) this.setState({ __err: null });
+          this.forceUpdate();
+        };
+        this.__makeLogic(registry.get(this.__name).Logic, null);
+        ensureFetched(this.__name);
+      }
+      /** Error-boundary hook: a render crash anywhere in this DC's subtree
+       *  (its own template, an x-import'd component, a child DC without its
+       *  own deeper boundary) lands here instead of unmounting the page. */
+      static getDerivedStateFromError(e) {
+        return { __err: e instanceof Error && e.message ? e.message : String(e) };
+      }
+      componentDidCatch(e, info) {
+        console.error(
+          "[dc-runtime] render error in <" + this.__name + ">:",
+          e,
+          info?.componentStack || ""
+        );
+      }
+      /** Instantiate the logic class (or the no-op base) and adopt `prevState`
+       *  over its initial state — used both at mount and on hot-swap. */
+      __makeLogic(Logic, prevState) {
+        const L = Logic || StreamableLogic;
+        try {
+          this.logic = new L(this.__userProps());
+          this.__failedLogic = null;
+          this.__failedUserProps = null;
+          this.__ctorError = null;
+        } catch (e) {
+          console.error(e);
+          this.__failedLogic = Logic;
+          this.__failedUserProps = this.__userProps();
+          this.__failedVer = registry.get(this.__name).ver;
+          this.__ctorError = this.__name + ": " + (e instanceof Error && e.message ? e.message : String(e));
+          this.logic = new StreamableLogic(
+            this.__userProps()
+          );
+        }
+        this.logic.__host = this;
+        if (prevState)
+          this.logic.state = { ...this.logic.state || {}, ...prevState };
+      }
+      /** The props the author's logic + template see — internal __-prefixed
+       *  wiring stripped. */
+      __userProps() {
+        const { __name, __hintSize, __tplId, __hostStyle, ...rest } = this.props;
+        return rest;
+      }
+      __setLogicState(update, cb) {
+        const prev = this.logic.state;
+        const patch = typeof update === "function" ? update(prev) : update;
+        this.logic.state = { ...prev, ...patch };
+        this.setState((s) => ({ __v: s.__v + 1 }), cb);
+      }
+      /** Swap the logic instance when the registry's Logic class changed
+       *  (streaming completion, hot reload). State carries over; didMount
+       *  re-fires after the swap commits so refs exist. */
+      __reconcileLogic() {
+        const r = registry.get(this.__name);
+        const Next = r.Logic;
+        const Cur = this.logic.constructor;
+        if (Next === Cur || !Next && Cur === StreamableLogic || Next === this.__failedLogic && r.ver === this.__failedVer && shallowEqual(this.__userProps(), this.__failedUserProps)) {
+          return;
+        }
+        if (!this.__needsDidMount) {
+          try {
+            this.logic.componentWillUnmount();
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        this.__makeLogic(Next, this.logic.state);
+        this.__needsDidMount = true;
+      }
+      componentDidMount() {
+        registry.get(this.__name).subs.add(this.__sub);
+        try {
+          this.logic.componentDidMount();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      componentDidUpdate(prevProps) {
+        this.logic.props = this.__userProps();
+        if (this.__needsDidMount) {
+          if (this.state.__err || !registry.get(this.__name).tpl) return;
+          this.__needsDidMount = false;
+          try {
+            this.logic.componentDidMount();
+          } catch (e) {
+            console.error(e);
+          }
+        } else {
+          try {
+            this.logic.componentDidUpdate(prevProps);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+      componentWillUnmount() {
+        registry.get(this.__name).subs.delete(this.__sub);
+        if (!this.__needsDidMount) {
+          try {
+            this.logic.componentWillUnmount();
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+      render() {
+        const r = registry.get(this.__name);
+        const cls = "sc-host" + (r.htmlStreaming ? " sc-streaming-html" : "") + (r.jsStreaming ? " sc-streaming-js" : "");
+        const hintStyle = r.htmlStreaming ? hintToMin(this.props.__hintSize) : void 0;
+        const hostStyle = this.props.__hostStyle || hintStyle ? { ...hintStyle || {}, ...this.props.__hostStyle || {} } : void 0;
+        const hostBase = {
+          className: cls,
+          style: hostStyle,
+          "data-sc-name": this.__name,
+          "data-dc-tpl": this.props.__tplId
+        };
+        const chain = Array.isArray(this.context) ? this.context : [];
+        if (chain.includes(this.__name)) {
+          const cycle = [
+            ...chain.slice(chain.indexOf(this.__name)),
+            this.__name
+          ].join(" \u2192 ");
+          return h(
+            "div",
+            { ...hostBase, className: cls + " sc-has-error" },
+            h(Placeholder, {
+              name: this.__name,
+              hintSize: this.props.__hintSize,
+              error: "circular import: " + cycle
+            })
+          );
+        }
+        if (this.state.__err) {
+          return h(
+            "div",
+            { ...hostBase, className: cls + " sc-has-error" },
+            h(
+              "div",
+              { className: "sc-logic-error", "data-omelette-chrome": "" },
+              this.__name + ": " + this.state.__err
+            ),
+            h(Placeholder, {
+              name: this.__name,
+              hintSize: this.props.__hintSize,
+              error: this.state.__err
+            })
+          );
+        }
+        this.__reconcileLogic();
+        if (!r.tpl) {
+          return h(
+            "div",
+            hostBase,
+            h(Placeholder, { name: this.__name, hintSize: this.props.__hintSize })
+          );
+        }
+        const userProps = this.__userProps();
+        this.logic.props = userProps;
+        let vals = userProps;
+        let renderErr = r.logicError || this.__ctorError;
+        try {
+          vals = { ...userProps, ...this.logic.renderVals() || {} };
+        } catch (e) {
+          console.error(e);
+          renderErr = this.__name + ".renderVals(): " + (e instanceof Error && e.message ? e.message : String(e));
+        }
+        this.__streamingNow = !!(r.htmlStreaming || r.jsStreaming);
+        this.__htmlStreamingNow = !!r.htmlStreaming;
+        return h(
+          "div",
+          { ...hostBase, className: cls + (renderErr ? " sc-has-error" : "") },
+          renderErr && h(
+            "div",
+            { className: "sc-logic-error", "data-omelette-chrome": "" },
+            renderErr
+          ),
+          h(
+            AncestorContext.Provider,
+            { value: [...chain, this.__name] },
+            r.tpl(vals, this)
+          )
+        );
+      }
+    }
+    __publicField(StreamableComponent, "contextType", AncestorContext);
+    const named = /* @__PURE__ */ new Map();
+    function getDC(name) {
+      const hit = named.get(name);
+      if (hit) return hit;
+      function Dispatcher(p) {
+        const [, setTick] = React.useState(0);
+        React.useEffect(() => {
+          const sub = () => setTick((n) => n + 1);
+          registry.get(name).subs.add(sub);
+          return () => {
+            registry.get(name).subs.delete(sub);
+          };
+        }, []);
+        ensureFetched(name);
+        return h(StreamableComponent, { ...p, __name: name });
+      }
+      Dispatcher.displayName = name;
+      named.set(name, Dispatcher);
+      return Dispatcher;
+    }
+    return {
+      getDC,
+      StreamableComponent
+    };
+  }
+
+  // src/bundled.ts
+  function bundledBlob(url) {
+    const blobs = window.__resourceBlobs;
+    const b = blobs ? blobs[url.split("#")[0]] : void 0;
+    return b instanceof Blob ? b : null;
+  }
+
+  // src/cdn.ts
+  var REACT_URL = "https://unpkg.com/react@18.3.1/umd/react.production.min.js";
+  var REACT_SRI = "sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z";
+  var REACT_DOM_URL = "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js";
+  var REACT_DOM_SRI = "sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1";
+  var BABEL_URL = "https://unpkg.com/@babel/standalone@7.29.0/babel.min.js";
+  var BABEL_SRI = "sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y";
+  function cdnScriptFor(url, sri) {
+    const res = window.__resources;
+    const v = res ? res[url] : void 0;
+    return typeof v === "string" && v ? { src: v } : { src: url, integrity: sri };
+  }
+
+  // src/external.ts
+  var isCustomElementName = (n) => !n.includes(".") && n.includes("-");
+  function isRenderableType(g) {
+    if (typeof g === "function") return !isElementClass(g);
+    return typeof g === "object" && g !== null && typeof g.$$typeof === "symbol";
+  }
+  function resolveDottedPath(root, name) {
+    let cur = root;
+    for (const seg of name.split(".")) {
+      if (cur == null) return void 0;
+      cur = cur[seg];
+    }
+    return cur;
+  }
+  var GLOBAL_POLL_INTERVAL_MS = 50;
+  var GLOBAL_POLL_TIMEOUT_MS = 3e4;
+  function createExternalModules(onResolved) {
+    const cache = /* @__PURE__ */ new Map();
+    let babelLoading = null;
+    const reportedMissing = /* @__PURE__ */ new Map();
+    const polling = /* @__PURE__ */ new Set();
+    function ensureBabel() {
+      if (window.Babel) return Promise.resolve();
+      if (babelLoading) return babelLoading;
+      const babel = cdnScriptFor(BABEL_URL, BABEL_SRI);
+      babelLoading = new Promise((res, rej) => {
+        const s = document.createElement("script");
+        s.src = babel.src;
+        if (babel.integrity) {
+          s.integrity = babel.integrity;
+          s.crossOrigin = "anonymous";
+        }
+        s.onload = () => res();
+        s.onerror = rej;
+        document.head.appendChild(s);
+      });
+      return babelLoading;
+    }
+    const pending = /* @__PURE__ */ new Map();
+    function load(kind, url, after) {
+      const existing = pending.get(url);
+      if (existing) return existing;
+      cache.set(url, null);
+      console.info("[dc-runtime] x-import: loading", url, "(" + kind + ")");
+      const ready = Promise.all([
+        kind === "jsx" ? ensureBabel() : Promise.resolve(),
+        after ?? Promise.resolve()
+      ]);
+      const p = ready.then(() => {
+        const pre = bundledBlob(url);
+        if (pre) return pre.text();
+        return fetch(url).then((r) => {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.text();
+        });
+      }).then((src) => {
+        const code = kind === "jsx" ? window.Babel.transform(src, {
+          filename: url,
+          presets: ["react", "typescript"]
+        }).code : src;
+        const module = { exports: {} };
+        const before = new Set(Object.keys(window));
+        //! nosemgrep: eval-and-function-constructor
+        new Function("React", "module", "exports", "require", code)(
+          getReact(),
+          module,
+          module.exports,
+          () => ({})
+        );
+        const globals = {};
+        for (const k of Object.keys(window)) {
+          if (!before.has(k) && typeof window[k] === "function") {
+            globals[k] = window[k];
+          }
+        }
+        cache.set(url, { mod: module.exports, globals });
+        console.info(
+          "[dc-runtime] x-import: loaded",
+          url,
+          "\u2014 exports:",
+          Object.keys(module.exports),
+          "window globals:",
+          Object.keys(globals)
+        );
+        onResolved();
+      }).catch((e) => {
+        cache.set(url, {
+          mod: {},
+          globals: {},
+          error: "failed to load: " + (e instanceof Error && e.message ? e.message : String(e))
+        });
+        console.error(
+          "[dc-runtime] x-import: FAILED to load",
+          url,
+          "(" + kind + ")",
+          e
+        );
+        onResolved();
+      });
+      pending.set(url, p);
+      return p;
+    }
+    function resolve2(url, name) {
+      const entry = cache.get(url);
+      if (!entry) return null;
+      const { mod, globals } = entry;
+      const C = mod && mod[name] || globals && globals[name] || typeof window !== "undefined" && window[name] || mod && mod.default;
+      if (typeof C === "function") return C;
+      const key = url + "\0" + name;
+      if (!reportedMissing.has(key)) {
+        reportedMissing.set(
+          key,
+          entry.error || 'no export named "' + name + '" (has: ' + Object.keys(mod).join(", ") + ")"
+        );
+        console.error(
+          "[dc-runtime] x-import: module",
+          url,
+          "loaded but has no component named",
+          JSON.stringify(name),
+          "\u2014 available exports:",
+          Object.keys(mod),
+          "window globals:",
+          Object.keys(globals),
+          ". The module must `module.exports = {" + name + "}` or set `window." + name + "`."
+        );
+      }
+      return null;
+    }
+    function waitForGlobal(name) {
+      if (polling.has(name)) return;
+      polling.add(name);
+      const started = Date.now();
+      const isCE = isCustomElementName(name);
+      const tick = () => {
+        const found = isCE ? customElements.get(name) : isRenderableType(resolveDottedPath(window, name));
+        if (found) {
+          polling.delete(name);
+          onResolved();
+          return;
+        }
+        if (Date.now() - started >= GLOBAL_POLL_TIMEOUT_MS) {
+          console.warn(
+            "[dc-runtime] x-import: global",
+            JSON.stringify(name),
+            "never appeared on window after " + GLOBAL_POLL_TIMEOUT_MS + "ms"
+          );
+          return;
+        }
+        setTimeout(tick, GLOBAL_POLL_INTERVAL_MS);
+      };
+      setTimeout(tick, GLOBAL_POLL_INTERVAL_MS);
+    }
+    function resolveGlobal(url, name) {
+      const isCE = isCustomElementName(name);
+      if (!url) {
+        if (isCE) {
+          if (customElements.get(name)) return name;
+          waitForGlobal(name);
+          return null;
+        }
+        const g2 = resolveDottedPath(window, name);
+        if (isRenderableType(g2)) return g2;
+        waitForGlobal(name);
+        return null;
+      }
+      const entry = cache.get(url);
+      if (!entry) return null;
+      if (isCE && customElements.get(name)) return name;
+      const g = entry.globals[name] ?? resolveDottedPath(window, name);
+      if (isRenderableType(g)) return g;
+      if (name.includes(".")) return null;
+      const key = url + "\0global\0" + name;
+      if (!reportedMissing.has(key)) {
+        reportedMissing.set(key, null);
+        if (isCE && !customElements.get(name)) {
+          console.warn(
+            "[dc-runtime] x-import:",
+            url,
+            "loaded but no custom element",
+            JSON.stringify(name),
+            "is registered and window." + name + " is not a function \u2014 rendering <" + name + "> as an unknown element."
+          );
+        }
+      }
+      return name;
+    }
+    function getError(url, name) {
+      const entry = cache.get(url);
+      if (entry?.error) return entry.error;
+      return reportedMissing.get(url + "\0" + name) || null;
+    }
+    return { load, resolve: resolve2, resolveGlobal, getError };
+  }
+  function isElementClass(g) {
+    try {
+      return typeof g === "function" && typeof HTMLElement !== "undefined" && g.prototype instanceof HTMLElement;
+    } catch {
+      return false;
+    }
+  }
+
+  // src/atomics.ts
+  var ATOMIC_CSS = (
+    // layout
+    ".fx{display:flex}.col{display:flex;flex-direction:column}.grid{display:grid}.ac{align-items:center}.jc{justify-content:center}.jb{justify-content:space-between}.f1{flex:1}.noshrink{flex-shrink:0}.wrap{flex-wrap:wrap}.fw5{font-weight:500}.fw6{font-weight:600}.fw7{font-weight:700}.fw8{font-weight:800}.fs11{font-size:11px}.fs12{font-size:12px}.fs13{font-size:13px}.fs14{font-size:14px}.fs15{font-size:15px}.fs16{font-size:16px}.fs20{font-size:20px}.fs22{font-size:22px}.upper{text-transform:uppercase}.tc{text-align:center}.nowrap{white-space:nowrap}.gap8{gap:8px}.gap10{gap:10px}.gap12{gap:12px}.gap16{gap:16px}.gap24{gap:24px}.m0{margin:0}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.posrel{position:relative}.posabs{position:absolute}.round{border-radius:50%}.ohide{overflow:hidden}.bbox{box-sizing:border-box}.pointer{cursor:pointer}.w100{width:100%}.b0{border:none}"
+  );
+
+  // src/helmet.ts
+  var DESIGN_DOC_MODE_RE = /<meta\b[^>]*\bname\s*=\s*["']design_doc_mode["'][^>]*\b(?:content|value)\s*=\s*["'](\w+)["']/i;
+  var CANVAS_BG_LIGHT = "#f0eee6";
+  var CANVAS_BG_DARK = "#2e2c26";
+  function createHelmetManager(doc, isStreaming) {
+    const mounted = /* @__PURE__ */ new Set();
+    const live = /* @__PURE__ */ new Map();
+    let designDocMode = null;
+    let canvasStyleEl = null;
+    let appTheme = "light";
+    try {
+      const ds = doc.documentElement.dataset.theme;
+      appTheme = ds === "dark" || ds === "light" ? ds : new URLSearchParams(doc.defaultView?.location.search ?? "").get(
+        "theme"
+      ) === "dark" ? "dark" : "light";
+    } catch {
+    }
+    function applyCanvasBg() {
+      if (!canvasStyleEl) return;
+      const bg = appTheme === "dark" ? CANVAS_BG_DARK : CANVAS_BG_LIGHT;
+      canvasStyleEl.textContent = `html,body{background:${bg}}#dc-root>.sc-host{position:relative}`;
+    }
+    function postDesignMode(mode) {
+      if (window.parent === window) return;
+      try {
+        window.parent.postMessage({ type: "__dc_design_mode", mode }, "*");
+      } catch {
+      }
+    }
+    function setDesignDocMode(mode) {
+      if (mode === designDocMode) return;
+      designDocMode = mode;
+      postDesignMode(mode);
+      if (mode === "canvas") {
+        doc.documentElement.setAttribute("data-dc-canvas", "");
+        canvasStyleEl = doc.createElement("style");
+        canvasStyleEl.setAttribute("data-dc-canvas", "");
+        applyCanvasBg();
+        doc.head.appendChild(canvasStyleEl);
+      } else {
+        doc.documentElement.removeAttribute("data-dc-canvas");
+        canvasStyleEl?.remove();
+        canvasStyleEl = null;
+      }
+    }
+    window.addEventListener("message", (e) => {
+      const type = e.data && e.data.type;
+      if (type === "__dc_theme") {
+        const t = e.data.theme;
+        if (t === "light" || t === "dark") {
+          appTheme = t;
+          applyCanvasBg();
+        }
+        return;
+      }
+      if (!designDocMode || type !== "__dc_probe") return;
+      postDesignMode(designDocMode);
+    });
+    function compile(node) {
+      const raw = [...node.children];
+      const helmetClosed = node.nextSibling != null || node.parentNode?.nextSibling != null;
+      if (node.hasAttribute("data-dc-atomics") && !mounted.has("__dc-atomics")) {
+        mounted.add("__dc-atomics");
+        const el = doc.createElement("style");
+        el.id = "__dc-atomics";
+        el.textContent = ATOMIC_CSS;
+        doc.head.appendChild(el);
+      }
+      return (_vals, ctx) => {
+        const name = ctx && ctx.__name || "";
+        const streaming = !!(name && isStreaming(name));
+        for (let i = 0; i < raw.length; i++) {
+          const child = raw[i];
+          const tag = child.tagName;
+          const mayBePartial = streaming && !helmetClosed && i === raw.length - 1;
+          if (tag === "SCRIPT") {
+            if (mayBePartial) continue;
+            const key = "SCRIPT|" + (child.getAttribute("src") || child.textContent || "");
+            if (mounted.has(key)) continue;
+            mounted.add(key);
+            const el = doc.createElement("script");
+            for (const { name: an, value } of [...child.attributes])
+              el.setAttribute(an, value);
+            if (child.textContent) el.textContent = child.textContent;
+            doc.head.appendChild(el);
+          } else if (tag === "LINK" || tag === "META") {
+            if (mayBePartial) continue;
+            const key = tag + "|" + (child.getAttribute("href") || child.getAttribute("src") || child.outerHTML);
+            if (mounted.has(key)) continue;
+            mounted.add(key);
+            if (tag === "LINK") {
+              const rel = (child.getAttribute("rel") || "").toLowerCase().split(/\s+/);
+              const href = (child.getAttribute("href") || "").trim();
+              const res = window.__resources;
+              const pre = res && rel.includes("stylesheet") && !rel.includes("alternate") ? res[href] : void 0;
+              const blob = typeof pre === "string" && pre ? bundledBlob(pre) : null;
+              if (blob) {
+                const el = doc.createElement("style");
+                if (child.hasAttribute("disabled")) {
+                  el.setAttribute("media", "not all");
+                } else if (child.getAttribute("media")) {
+                  el.setAttribute("media", child.getAttribute("media"));
+                }
+                if (child.getAttribute("title"))
+                  el.setAttribute("title", child.getAttribute("title"));
+                void blob.text().then((css) => {
+                  el.textContent = css;
+                });
+                doc.head.appendChild(el);
+                continue;
+              }
+            }
+            doc.head.appendChild(child.cloneNode(true));
+          } else {
+            const key = name + "|" + i;
+            let el = live.get(key);
+            if (!el || el.tagName !== tag) {
+              if (el) el.remove();
+              el = doc.createElement(tag.toLowerCase());
+              live.set(key, el);
+              doc.head.appendChild(el);
+            }
+            for (const { name: an, value } of [...child.attributes]) {
+              if (el.getAttribute(an) !== value) el.setAttribute(an, value);
+            }
+            if (el.textContent !== child.textContent)
+              el.textContent = child.textContent;
+          }
+        }
+        return null;
+      };
+    }
+    return { compile, setDesignDocMode };
+  }
+
+  // src/pseudo.ts
+  function scanUnquotedUrl(css, i) {
+    if (css[i] !== "u" && css[i] !== "U" || css.slice(i, i + 4).toLowerCase() !== "url(" || /[a-z0-9_-]/i.test(css[i - 1] ?? "")) {
+      return -1;
+    }
+    let j = i + 4;
+    while (j < css.length && /\s/.test(css[j])) j++;
+    if (css[j] === '"' || css[j] === "'") return -1;
+    while (j < css.length && css[j] !== ")") {
+      if (css[j] === "\\") j++;
+      j++;
+    }
+    return j < css.length ? j + 1 : css.length;
+  }
+  function stripComments(css) {
+    let out = "";
+    let quote = "";
+    for (let i = 0; i < css.length; i++) {
+      const c = css[i];
+      if (quote) {
+        if (c === "\\") {
+          out += c + (css[i + 1] ?? "");
+          i++;
+          continue;
+        }
+        if (c === quote) quote = "";
+        out += c;
+      } else if (c === "'" || c === '"') {
+        quote = c;
+        out += c;
+      } else if (c === "/" && css[i + 1] === "*") {
+        const end = css.indexOf("*/", i + 2);
+        i = end === -1 ? css.length : end + 1;
+        out += " ";
+      } else {
+        const end = scanUnquotedUrl(css, i);
+        if (end === -1) out += c;
+        else {
+          out += css.slice(i, end);
+          i = end - 1;
+        }
+      }
+    }
+    return out;
+  }
+  function importantify(css) {
+    css = stripComments(css);
+    const decls = [];
+    let start = 0;
+    let depth = 0;
+    let quote = "";
+    for (let i = 0; i < css.length; i++) {
+      const c = css[i];
+      if (quote) {
+        if (c === "\\") i++;
+        else if (c === quote) quote = "";
+      } else if (c === "'" || c === '"') quote = c;
+      else if (c === "(") depth++;
+      else if (c === ")") depth = Math.max(0, depth - 1);
+      else if (c === ";" && depth === 0) {
+        decls.push(css.slice(start, i));
+        start = i + 1;
+      } else {
+        const end = scanUnquotedUrl(css, i);
+        if (end !== -1) i = end - 1;
+      }
+    }
+    decls.push(css.slice(start));
+    return decls.map((d) => d.trim()).filter(Boolean).map((d) => /!\s*important$/i.test(d) ? d : d + " !important").join(";");
+  }
+  function createPseudoSheet(doc) {
+    let el = null;
+    const cache = /* @__PURE__ */ new Map();
+    let n = 0;
+    return (pseudo, css) => {
+      const k = pseudo + "|" + css;
+      const hit = cache.get(k);
+      if (hit) return hit;
+      if (!el) {
+        el = doc.createElement("style");
+        doc.head.appendChild(el);
+      }
+      const cls = "scp" + (n++).toString(36);
+      const isPseudoElement = pseudo === "before" || pseudo === "after";
+      const sel = isPseudoElement ? "." + cls + "::" + pseudo : "." + cls + ":" + pseudo;
+      el.sheet.insertRule(
+        sel + "{" + (isPseudoElement ? css : importantify(css)) + "}",
+        el.sheet.cssRules.length
+      );
+      cache.set(k, cls);
+      return cls;
+    };
+  }
+
+  // src/registry.ts
+  function createRegistry() {
+    const entries = /* @__PURE__ */ Object.create(null);
+    function get(name) {
+      return entries[name] || (entries[name] = {
+        html: "",
+        tpl: null,
+        Logic: null,
+        jsStreaming: false,
+        htmlStreaming: false,
+        ver: 0,
+        subs: /* @__PURE__ */ new Set(),
+        fetched: false
+      });
+    }
+    function bump(name) {
+      const r = get(name);
+      r.ver++;
+      for (const fn of r.subs) fn();
+    }
+    return {
+      entries,
+      get,
+      bump,
+      bumpAll() {
+        for (const n in entries) bump(n);
+      }
+    };
+  }
+
+  // src/runtime.ts
+  var COMPONENT_DIR = ".";
+  function createRuntime(doc = document) {
+    const registry = createRegistry();
+    const pseudoClass = createPseudoSheet(doc);
+    const helmet = createHelmetManager(
+      doc,
+      (name) => registry.get(name).htmlStreaming
+    );
+    const external = createExternalModules(() => registry.bumpAll());
+    const factory = createComponentFactory(registry, ensureFetched);
+    const host = {
+      component: (name) => factory.getDC(name),
+      placeholder: (props) => h(Placeholder, props),
+      helmet: (node) => helmet.compile(node),
+      loadExternal: (kind, url, after) => external.load(kind, url, after),
+      resolveExternal: (url, name) => external.resolve(url, name),
+      resolveExternalGlobal: (url, name) => external.resolveGlobal(url, name),
+      resolveExternalError: (url, name) => external.getError(url, name),
+      pseudoClass
+    };
+    function ensureFetched(name) {
+      const r = registry.get(name);
+      if (r.fetched) return;
+      r.fetched = true;
+      const url = COMPONENT_DIR + "/" + encodeURIComponent(name) + ".dc.html";
+      const res = window.__resources;
+      const pre = res ? res[url] : void 0;
+      const target = typeof pre === "string" && pre ? pre : url;
+      const blob = bundledBlob(target);
+      (blob ? blob.text() : fetch(target).then((res2) => {
+        if (!res2.ok) {
+          console.error(
+            '[dc-runtime] sibling fetch for "' + name + '" failed:',
+            url,
+            "returned",
+            res2.status,
+            "\u2014 the reference renders as an empty placeholder."
+          );
+          return "";
+        }
+        return res2.text();
+      })).then((t) => {
+        if (!t) return;
+        const parsed = parseDcText(t);
+        if (!parsed) {
+          console.error(
+            '[dc-runtime] sibling fetch for "' + name + '":',
+            url,
+            "has no <x-dc> block \u2014 not a Design Component."
+          );
+          return;
+        }
+        if (parsed.props) r.propsMeta = parsed.props;
+        if (parsed.preview) r.preview = parsed.preview;
+        if (parsed.template && !r.html) updateHtml(name, parsed.template);
+        if (parsed.js && !r.Logic) updateJs(name, parsed.js);
+      }).catch(
+        (e) => console.error(
+          '[dc-runtime] sibling fetch for "' + name + '" threw:',
+          url,
+          e
+        )
+      );
+    }
+    let rootName = null;
+    function updateHtml(name, html) {
+      const r = registry.get(name);
+      r.html = html;
+      if (name === rootName) {
+        const mode = DESIGN_DOC_MODE_RE.exec(html)?.[1] ?? null;
+        if (mode || !r.htmlStreaming) helmet.setDesignDocMode(mode);
+      }
+      try {
+        r.tpl = compileTemplate(html, host);
+      } catch (e) {
+        console.error("[dc-runtime] template compile FAILED for", name, e);
+      }
+      registry.bump(name);
+    }
+    function updateJs(name, src) {
+      const r = registry.get(name);
+      const seq = r.jsSeq = (r.jsSeq || 0) + 1;
+      try {
+        const Cls = evalDcLogic(src);
+        if (r.jsSeq !== seq) return;
+        if (typeof Cls !== "function") {
+          r.logicError = name + ".dc.html: <script data-dc-script> must define `class Component extends DCLogic`";
+        } else {
+          r.logicError = null;
+          r.Logic = Cls;
+        }
+      } catch (e) {
+        if (r.jsSeq !== seq) return;
+        console.error(
+          "[dc-runtime] logic class eval FAILED for",
+          name,
+          "\u2014 the template renders with props only.",
+          e
+        );
+        r.logicError = name + ": " + (e instanceof Error && e.message ? e.message : String(e));
+      }
+      registry.bump(name);
+    }
+    function setStreaming(name, kind, on) {
+      const r = registry.get(name);
+      if (kind === "html") r.htmlStreaming = !!on;
+      else r.jsStreaming = !!on;
+      let any = false;
+      for (const n in registry.entries) {
+        const e = registry.entries[n];
+        if (e && (e.htmlStreaming || e.jsStreaming)) {
+          any = true;
+          break;
+        }
+      }
+      doc.documentElement.classList.toggle("sc-dc-streaming", any);
+      registry.bump(name);
+    }
+    function dcUpdate(name, kind, content, streaming) {
+      if (streaming) registry.get(name).fetched = true;
+      if (kind === "html") {
+        setStreaming(name, "html", !!streaming);
+        updateHtml(name, content);
+      } else if (kind === "js") {
+        setStreaming(name, "js", !!streaming);
+        if (!streaming) updateJs(name, content);
+      } else if (kind === "props") {
+        const { props, preview } = parseDataProps(content);
+        const r = registry.get(name);
+        r.propsMeta = props ?? void 0;
+        r.preview = preview;
+        registry.bump(name);
+      }
+    }
+    function setProps(name, overrides) {
+      registry.get(name).propOverrides = overrides && typeof overrides === "object" ? { ...overrides } : null;
+      registry.bump(name);
+    }
+    function adoptParsed(name, parsed) {
+      if (!parsed) return;
+      const r = registry.get(name);
+      if (parsed.props) r.propsMeta = parsed.props;
+      if (parsed.preview) r.preview = parsed.preview;
+      if (parsed.template) updateHtml(name, parsed.template);
+      if (parsed.js) updateJs(name, parsed.js);
+    }
+    return {
+      registry,
+      getDC: factory.getDC,
+      updateHtml,
+      updateJs,
+      dcUpdate,
+      setProps,
+      adoptParsed,
+      setRootName: (name) => {
+        rootName = name;
+      },
+      markFetched: (name) => {
+        registry.get(name).fetched = true;
+      },
+      annotatedTemplate: (name) => {
+        const r = registry.get(name);
+        return r.tpl && r.tpl.__annotated || null;
+      },
+      templateSource: (name) => registry.get(name).html || null,
+      StreamableLogic
+    };
+  }
+
+  // src/stream-state.ts
+  function createStreamTracker(staleMs = 6e4, now = Date.now) {
+    const since = /* @__PURE__ */ new Map();
+    const liveOne = (n) => {
+      const t = since.get(n);
+      if (t === void 0) return false;
+      if (now() - t > staleMs) {
+        since.delete(n);
+        return false;
+      }
+      return true;
+    };
+    return {
+      push(name, streaming, viewportKey) {
+        if (viewportKey === "dc-model") return;
+        if (streaming) since.set(name, now());
+        else since.delete(name);
+      },
+      live(name) {
+        if (name !== void 0) return liveOne(name);
+        for (const n of [...since.keys()]) if (liveOne(n)) return true;
+        return false;
+      }
+    };
+  }
+
+  // src/index.ts
+  function hideRawTemplate() {
+    const s = document.createElement("style");
+    s.textContent = "x-dc{display:none!important}";
+    document.head.appendChild(s);
+  }
+  function loadScript(src, integrity) {
+    return new Promise((resolve2, reject) => {
+      //! nosemgrep: create-script-element
+      const s = document.createElement("script");
+      s.src = src;
+      if (integrity) {
+        s.integrity = integrity;
+        s.crossOrigin = "anonymous";
+      }
+      s.async = false;
+      s.onload = () => resolve2();
+      s.onerror = () => reject(new Error(`failed to load ${src}`));
+      document.head.appendChild(s);
+    });
+  }
+  function loadReactUmd() {
+    const w = window;
+    if (w.React && w.ReactDOM) return Promise.resolve();
+    const react = cdnScriptFor(REACT_URL, REACT_SRI);
+    const reactDom = cdnScriptFor(REACT_DOM_URL, REACT_DOM_SRI);
+    return Promise.all([
+      loadScript(react.src, react.integrity),
+      loadScript(reactDom.src, reactDom.integrity)
+    ]).then(() => void 0);
+  }
+  function init() {
+    const runtime = createRuntime(document);
+    let rootName = "Root";
+    const baseCss = document.createElement("style");
+    baseCss.textContent = BASE_CSS;
+    document.head.prepend(baseCss);
+    const notifyHost = () => {
+      if (window.parent === window) return;
+      const r = runtime.registry.entries[rootName];
+      try {
+        window.parent.postMessage(
+          {
+            type: "__dc_booted",
+            rootName,
+            propsMeta: r && r.propsMeta || null,
+            preview: r && r.preview || null
+          },
+          "*"
+        );
+      } catch {
+      }
+    };
+    const streams = createStreamTracker();
+    const api = {
+      __dcUpdate: (name, kind, content, streaming, viewportKey) => {
+        streams.push(name, streaming, viewportKey);
+        runtime.dcUpdate(name, kind, content, streaming);
+        if (name === rootName && !streaming && kind === "props") notifyHost();
+      },
+      __dcStreaming: (name) => streams.live(name),
+      __dcSetProps: (name, overrides) => runtime.setProps(name, overrides),
+      /** Name of the component currently mounted as the page root — DC tools
+       *  push their template-stream here when targeting "the open page". */
+      __dcRootName: () => rootName,
+      /** Editor bridge — the encoded, `data-dc-tpl`-annotated template source.
+       *  The host editor parses this into its own template DOM so it can map a
+       *  rendered node (carrying the same `data-dc-tpl`) back to the source
+       *  node that emitted it. Returns the encoded form (`sc-camel-*` attrs,
+       *  `<sc-raw-*>`/`<sc-helmet>` tags); the editor decodes on serialize. */
+      __dcAnnotatedTemplate: (name) => runtime.annotatedTemplate(name),
+      /** Editor bridge — the *original* (decoded) template source. */
+      __dcTemplateSource: (name) => runtime.templateSource(name),
+      __dcBoot: () => {
+        rootName = boot(runtime, document) ?? rootName;
+        notifyHost();
+      },
+      __dcRegistry: runtime.registry.entries,
+      getDC: (name) => runtime.getDC(name),
+      // `DCLogic` is the documented base class name; `StreamableLogic` is the
+      // implementation alias kept for any project that already references it.
+      DCLogic: runtime.StreamableLogic,
+      StreamableLogic: runtime.StreamableLogic
+    };
+    Object.assign(window, api);
+    window.__dcContentKeyed = true;
+    if (document.readyState !== "loading") api.__dcBoot();
+    else document.addEventListener("DOMContentLoaded", () => api.__dcBoot());
+  }
+  hideRawTemplate();
+  loadReactUmd().then(init).catch((err) => {
+    console.error("[dc] failed to load React or boot:", err);
+    throw err;
+  });
+})();
+
+</script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics=""><style>body{margin:0;background:#fff;font-family:-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}*{box-sizing:border-box}input,button,textarea{font-family:inherit}a{color:#0D7A46}a:hover{color:#6FA800}</style></helmet>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#AEEA00"/><rect x="30" y="26" width="40" height="48" rx="6" fill="#0F0F0F"/><rect x="36" y="38" width="28" height="4" rx="2" fill="#AEEA00"/><rect x="36" y="48" width="20" height="4" rx="2" fill="#fff"/><rect x="36" y="58" width="24" height="4" rx="2" fill="#fff"/></svg></template>
+<div style="min-height:100dvh;display:block;background:#fff">
+<div style="width:100%;max-width:560px;margin:0 auto;min-height:100dvh;background:#fff;position:relative;overflow:visible;display:flex;flex-direction:column">
+
+  
+
+  <div style="flex:none;padding:0 16px 8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
+      <div style="font-size:28px;font-weight:700;color:#0F0F0F;letter-spacing:-.5px">{{ headTitle }}</div>
+      <div style="flex:none;display:flex;gap:3px;background:#F6F6F6;border-radius:8px;padding:3px">
+        <button onClick="{{ goYesterday }}" style="{{ btnYesterdayStyle }}">
+          <span style="width:6px;height:6px;border-radius:8px;background:{{ factDotColor }};display:inline-block"></span>
+          <span>Факт вчера</span>
+        </button>
+        <button onClick="{{ goToday }}" style="{{ btnTodayStyle }}">
+          <span style="width:6px;height:6px;border-radius:8px;background:{{ planDotColor }};display:inline-block"></span>
+          <span>План сегодня</span>
+        </button>
+      </div>
+    </div>
+    <sc-if value="{{ anyPending }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:12px;color:#F07C00;margin-bottom:6px">{{ pendingLabel }}</div>
+    </sc-if>
+    <div style="display:flex;gap:4px;background:#F6F6F6;border-radius:8px;padding:3px">
+      <button onClick="{{ setDay }}" style="{{ tabDayStyle }}">День</button>
+      <button onClick="{{ setWeek }}" style="{{ tabWeekStyle }}">Неделя</button>
+      <button onClick="{{ setMonth }}" style="{{ tabMonthStyle }}">Месяц</button>
+    </div>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding:0 16px 120px">
+
+    <sc-if value="{{ isDay }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="position:sticky;top:0;z-index:2;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 0 8px">
+          <button onClick="{{ prevDay }}" style="width:40px;height:40px;flex:none;border-radius:8px;border:1px solid #E9E9E9;background:#fff;color:#0F0F0F;font-size:28px;line-height:1;cursor:pointer">‹</button>
+          <div style="text-align:center;line-height:1.2">
+            <div style="font-size:17px;font-weight:700;color:#0F0F0F">{{ dayLabel }}</div>
+            <div style="font-size:12px;color:#8C8C8C">{{ daySub }}</div>
+          </div>
+          <button onClick="{{ nextDay }}" style="width:40px;height:40px;flex:none;border-radius:8px;border:1px solid #E9E9E9;background:#fff;color:#0F0F0F;font-size:28px;line-height:1;cursor:pointer">›</button>
+        </div>
+
+
+        <sc-if value="{{ never }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <sc-for list="{{ unclosedRows }}" as="u" hint-placeholder-count="2">
+              <div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #E9E9E9">
+                <div style="width:44px;flex:none;font-size:17px;font-weight:700;color:#0F0F0F">{{ u.timeLabel }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:17px;font-weight:700;color:#0F0F0F">{{ u.name }}</div>
+                  <div style="font-size:17px;color:#8C8C8C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ u.sub }}</div>
+                </div>
+                <button onClick="{{ u.onOutcome }}" style="flex:none;height:28px;padding:0 12px;border-radius:8px;border:none;background:#E9E9E9;color:#1A1A1A;font-size:12px;font-weight:700;line-height:28px;cursor:pointer;white-space:nowrap">Отметить</button>
+              </div>
+            </sc-for>
+            <sc-for list="{{ addedYesterday }}" as="ay" hint-placeholder-count="0">
+              <div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #E9E9E9">
+                <div style="width:44px;flex:none;font-size:17px;font-weight:700;color:#8C8C8C">{{ ay.timeLabel }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:17px;font-weight:700;color:#0F0F0F">{{ ay.name }}</div>
+                  <div style="font-size:12px;color:#8C8C8C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ ay.result }}</div>
+                </div>
+                <div style="flex:none;height:32px;padding:0 12px;border-radius:8px;background:#AEEA00;color:#0F0F0F;font-size:12px;font-weight:700;display:flex;align-items:center">Сделано</div>
+              </div>
+            </sc-for>
+            <button onClick="{{ addYesterday }}" style="width:100%;height:44px;border-radius:8px;border:1px dashed #8C8C8C;background:#fff;color:#0F0F0F;font-size:17px;font-weight:700;cursor:pointer;margin-top:12px">+ Что ещё было вчера</button>
+
+            <div style="border-top:1px solid #E9E9E9;margin-top:12px;padding-top:12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <div style="min-width:0">
+                <div style="font-size:17px;font-weight:700;color:#0F0F0F">Заявки за вчера</div>
+                <div style="font-size:12px;color:{{ yLeadsHintColor }}">{{ yLeadsHint }}</div>
+              </div>
+              <div style="flex:none;display:flex;align-items:center;gap:8px">
+                <sc-if value="{{ yLeadsOpen }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ yLeadsMinus }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E9E9E9;background:#fff;font-size:17px;color:#0F0F0F;cursor:pointer">−</button>
+                </sc-if>
+                <div style="font-size:28px;font-weight:700;color:#0F0F0F;min-width:32px;text-align:center">{{ yLeads }}</div>
+                <sc-if value="{{ yLeadsOpen }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ yLeadsPlus }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E9E9E9;background:#fff;font-size:17px;color:#0F0F0F;cursor:pointer">+</button>
+                </sc-if>
+                <sc-if value="{{ yLeadsOpen }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ confirmYLeads }}" style="height:32px;padding:0 12px;border-radius:8px;border:1px solid #F07C00;background:#fff;color:#F07C00;font-size:12px;font-weight:700;cursor:pointer">Подтвердить</button>
+                </sc-if>
+              </div>
+            </div>
+            <button onClick="{{ submitFact }}" style="{{ factBtnStyle }}">{{ factBtnLabel }}</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ msRitual }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #0F0F0F;border-radius:8px;padding:12px;margin-bottom:16px">
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:4px">Понедельник · план недели</div>
+            <div style="font-size:17px;font-weight:700;color:#0F0F0F;margin-bottom:4px">Набери недельный пул</div>
+            <div style="font-size:17px;color:#8C8C8C">Четыре типа. Конкретные дела — с адресом, абстрактные — одной кнопкой, день найдётся по ходу.</div>
+            <sc-for list="{{ ritualRows }}" as="rr" hint-placeholder-count="4">
+              <div style="padding:12px 0;border-top:1px solid #E9E9E9">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+                  <div style="font-size:17px;font-weight:700;color:#0F0F0F">{{ rr.q }}</div>
+                  <div style="flex:none;font-size:17px;font-weight:700;color:{{ rr.color }}">{{ rr.progress }}</div>
+                </div>
+                <div style="font-size:12px;color:#8C8C8C;margin:4px 0 8px">{{ rr.have }}</div>
+                <div style="display:flex;gap:8px">
+                  <button onClick="{{ rr.onConcrete }}" style="flex:1;height:44px;border-radius:8px;border:1px solid #0F0F0F;background:#fff;color:#0F0F0F;font-size:17px;font-weight:700;cursor:pointer">+ конкретный</button>
+                  <button onClick="{{ rr.onAbstract }}" style="flex:1;height:44px;border-radius:8px;border:1px solid #F07C00;background:#fff;color:#F07C00;font-size:17px;font-weight:700;cursor:pointer">+ {{ rr.abstractLabel }}</button>
+                </div>
+              </div>
+            </sc-for>
+            <button onClick="{{ finishRitual }}" style="width:100%;height:44px;border-radius:8px;border:none;background:#AEEA00;color:#0F0F0F;font-size:17px;font-weight:700;cursor:pointer;margin-top:4px">Неделя спланирована</button>
+            <sc-if value="{{ ritualThin }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:12px;color:#F07C00;margin-top:8px;text-align:center">Набрано меньше нормы. Можно, но руководитель увидит это утром.</div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showShortfallTop }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E9E9E9;border-radius:8px;padding:8px;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin-bottom:6px">
+              <div style="font-size:12px;color:#8C8C8C">{{ shortfallTitle }}</div>
+              <sc-if value="{{ noDeficit }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:none;font-size:12px;color:#6FA800;font-weight:700">норма закрыта</div>
+              </sc-if>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+              <sc-for list="{{ normChips }}" as="nc" hint-placeholder-count="6">
+                <button onClick="{{ nc.onTap }}" style="{{ nc.style }}">
+                  <span style="font-size:12px;color:{{ nc.nameColor }}">{{ nc.name }}</span>
+                  <span style="font-size:12px;font-weight:700;line-height:1">{{ nc.value }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+
+        <sc-if value="{{ msSubmitted }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#F6F6F6;border-radius:8px;padding:12px;margin-bottom:16px">
+            <div style="font-size:17px;color:#0F0F0F">Факт за вчера сдан в <b>{{ factAt }}</b></div>
+            <div style="font-size:17px;color:#0F0F0F;margin-top:4px">План на сегодня сдан в <b>{{ planAt }}</b> · {{ todayPlanLabel }}</div>
+          </div>
+        </sc-if>
+
+        <div style="{{ dimStyle }}">
+        <sc-if value="{{ showShortfall }}" hint-placeholder-val="{{ true }}">
+          <div style="border:1px solid #E9E9E9;border-radius:8px;padding:8px;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin-bottom:6px">
+              <div style="font-size:12px;color:#8C8C8C">{{ shortfallTitle }}</div>
+              <sc-if value="{{ noDeficit }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:none;font-size:12px;color:#6FA800;font-weight:700">норма закрыта</div>
+              </sc-if>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+              <sc-for list="{{ normChips }}" as="nc" hint-placeholder-count="6">
+                <button onClick="{{ nc.onTap }}" style="{{ nc.style }}">
+                  <span style="font-size:12px;color:{{ nc.nameColor }}">{{ nc.name }}</span>
+                  <span style="font-size:12px;font-weight:700;line-height:1">{{ nc.value }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{ dayDeals }}" as="d" hint-placeholder-count="5">
+          <div onClick="{{ d.onRowTap }}" style="{{ d.rowStyle }}">
+            <div style="width:52px;flex:none;font-size:17px;line-height:22px;font-weight:400;font-variant-numeric:tabular-nums;color:{{ d.timeColor }}">{{ d.timeLabel }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;height:22px">
+                <span style="font-size:17px;line-height:22px;font-weight:700;color:{{ d.nameColor }}">{{ d.name }}</span>
+                <sc-if value="{{ d.hasAmount }}" hint-placeholder-val="{{ false }}"><span style="font-size:17px;line-height:22px;font-weight:700;color:{{ d.nameColor }}">{{ d.amountLabel }}</span></sc-if>
+              </div>
+              <div style="font-size:12px;color:#8C8C8C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.sub }}</div>
+              <sc-if value="{{ d.hasNote }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12px;margin-top:2px;color:{{ d.noteColor }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.noteText }}</div>
+              </sc-if>
+            </div>
+            <div style="flex:none;display:flex;align-items:center;gap:7px;height:22px">
+              <span style="width:8px;height:8px;border-radius:8px;flex:none;background:{{ d.dotColor }}"></span>
+              <span style="font-size:12px;line-height:22px;font-weight:400;white-space:nowrap;color:{{ d.statusColor }}">{{ d.statusLabel }}</span>
+            </div>
+          </div>
+        </sc-for>
+
+
+        <sc-if value="{{ dayClosedSummary }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E9E9E9;border-radius:8px;padding:12px;margin-top:12px;background:#F6F6F6">
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:8px">День закрыт · факт сдан, изменить нельзя</div>
+            <div style="display:flex;gap:16px">
+              <div><span style="font-size:17px;font-weight:700;color:#0D7A46">{{ closedDone }}</span><span style="font-size:12px;color:#8C8C8C"> сделано</span></div>
+              <div><span style="font-size:17px;font-weight:700;color:#8C8C8C">{{ closedMoved }}</span><span style="font-size:12px;color:#8C8C8C"> перенос</span></div>
+              <div><span style="font-size:17px;font-weight:700;color:#E03A2F">{{ closedDeclined }}</span><span style="font-size:12px;color:#8C8C8C"> отказ</span></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ dayEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px dashed #E9E9E9;border-radius:8px;padding:24px 16px;text-align:center;margin-top:4px">
+            <div style="font-size:17px;font-weight:700;color:#0F0F0F;margin-bottom:4px">День пока свободен</div>
+            <div style="font-size:17px;color:#8C8C8C;margin-bottom:16px">Это нормально. Разложите то, чего не хватает до нормы недели.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+              <sc-for list="{{ deficits }}" as="df" hint-placeholder-count="2">
+                <button onClick="{{ df.onTapHere }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #F07C00;background:#fff;color:#F07C00;font-size:17px;font-weight:700;cursor:pointer">+ {{ df.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showLeads }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:24px;border:1px solid #E9E9E9;border-radius:8px;padding:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font-size:17px;font-weight:700;color:#0F0F0F">Заявки</div>
+              <div style="font-size:12px;color:#8C8C8C">За неделю пришло <span style="font-weight:700;color:{{ leadsWeekColor }}">{{ leadsWeek }}</span> из 10</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <sc-if value="{{ leadsAsk }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ confirmYLeads }}" style="display:flex;align-items:center;gap:7px;border:none;background:none;padding:0;cursor:pointer">
+                  <span style="width:8px;height:8px;border-radius:8px;background:#8C8C8C"></span>
+                  <span style="font-size:12px;color:#0F0F0F">Отметить</span>
+                </button>
+              </sc-if>
+              <sc-if value="{{ leadsEditable }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ leadsMinus }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E9E9E9;background:#fff;font-size:17px;color:#0F0F0F;cursor:pointer">−</button>
+              </sc-if>
+              <sc-if value="{{ leadsShowNum }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:28px;font-weight:700;color:{{ leadsColor }};min-width:32px;text-align:center">{{ leadsDay }}</div>
+              </sc-if>
+              <sc-if value="{{ leadsEditable }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ leadsPlus }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E9E9E9;background:#fff;font-size:17px;color:#0F0F0F;cursor:pointer">+</button>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ hasPool }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E9E9E9;border-radius:8px;padding:12px;margin-top:16px;background:#F6F6F6">
+            <div style="font-size:12px;color:#8C8C8C">На этой неделе · без дня · {{ poolCount }}</div>
+            <sc-for list="{{ poolRows }}" as="p" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0 0;margin-top:8px;border-top:1px solid #E9E9E9">
+                <div style="min-width:0">
+                  <span style="font-size:17px;font-weight:700;color:#0F0F0F">{{ p.name }}</span>
+                  <div style="font-size:12px;color:{{ p.subColor }}">{{ p.sub }}</div>
+                </div>
+                <button onClick="{{ p.onToday }}" style="flex:none;height:28px;padding:0 12px;border-radius:8px;border:1px solid #F07C00;background:#fff;color:#1A1A1A;font-size:12px;font-weight:700;cursor:pointer">{{ poolBtn }}</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isWeek }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="position:sticky;top:0;z-index:2;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:4px 0 12px">
+          <button onClick="{{ prevWeek }}" style="width:44px;height:44px;flex:none;border-radius:8px;border:1px solid #E9E9E9;background:#fff;color:#0F0F0F;font-size:28px;line-height:1;cursor:pointer">‹</button>
+          <div style="font-size:17px;font-weight:700;color:#0F0F0F">{{ weekLabel }}</div>
+          <button onClick="{{ nextWeek }}" style="width:44px;height:44px;flex:none;border-radius:8px;border:1px solid #E9E9E9;background:#fff;color:#0F0F0F;font-size:28px;line-height:1;cursor:pointer">›</button>
+        </div>
+        <div style="font-size:17px;font-weight:700;color:#0F0F0F;margin-bottom:2px">Наполненность дней</div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:8px;background:#AEEA00"></span><span style="font-size:12px;color:#8C8C8C">сделано</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:8px;background:#FFC400"></span><span style="font-size:12px;color:#8C8C8C">перенос</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:8px;background:#E03A2F"></span><span style="font-size:12px;color:#8C8C8C">отказ</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:8px;background:#E9E9E9"></span><span style="font-size:12px;color:#8C8C8C">в плане</span></div>
+        </div>
+        <sc-for list="{{ weekDays }}" as="w" hint-placeholder-count="7">
+          <button onClick="{{ w.onTap }}" style="{{ w.rowStyle }}">
+            <span style="width:68px;flex:none;text-align:left">
+              <span style="font-size:17px;font-weight:700;color:{{ w.numColor }}">{{ w.num }}</span>
+              <span style="font-size:12px;color:#8C8C8C;margin-left:4px">{{ w.dow }}</span>
+            </span>
+            <span style="flex:1;display:flex;gap:4px;align-items:center;min-width:0;overflow:hidden">
+              <sc-for list="{{ w.chips }}" as="ch" hint-placeholder-count="2">
+                <span style="{{ ch.style }}">{{ ch.text }}</span>
+              </sc-for>
+              <sc-if value="{{ w.isEmpty }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:#8C8C8C">пусто</span></sc-if>
+            </span>
+            <span style="flex:none;font-size:12px;color:#8C8C8C">{{ w.counts }}</span>
+          </button>
+        </sc-for>
+
+        <div style="margin-top:20px">
+          <div style="font-size:17px;font-weight:700;color:#0F0F0F;margin-bottom:6px">Исполняемость нормы</div>
+          <div style="border:1px solid #E9E9E9;border-radius:8px;overflow:hidden">
+            <div style="display:flex;padding:6px 10px;background:#F6F6F6;font-size:12px;color:#8C8C8C">
+              <span style="flex:1">Тип</span><span style="width:44px;text-align:right">норма</span><span style="width:44px;text-align:right">план</span><span style="width:44px;text-align:right">факт</span>
+            </div>
+            <sc-for list="{{ normRows }}" as="n" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;padding:6px 10px;border-top:1px solid #E9E9E9">
+                <span style="flex:1;font-size:17px;color:#0F0F0F">{{ n.name }}</span>
+                <span style="width:44px;text-align:right;font-size:17px;color:#8C8C8C">{{ n.norm }}</span>
+                <span style="width:44px;text-align:right;font-size:17px;color:{{ n.planColor }}">{{ n.plan }}</span>
+                <span style="width:44px;text-align:right;font-size:17px;color:{{ n.factColor }}">{{ n.fact }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:20px">
+          <div style="font-size:17px;font-weight:700;color:#0F0F0F;margin-bottom:6px">Задатки</div>
+          <div style="border:1px solid #E9E9E9;border-radius:8px;overflow:hidden">
+            <div style="display:flex;padding:6px 10px;background:#F6F6F6;font-size:12px;color:#8C8C8C">
+              <span style="flex:1">Статус</span><span style="width:44px;text-align:right">кол-во</span><span style="width:96px;text-align:right">сумма</span>
+            </div>
+            <sc-for list="{{ depRows }}" as="dr" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;padding:8px 10px;border-top:1px solid #E9E9E9">
+                <span style="flex:1;font-size:17px;color:{{ dr.nameColor }}">{{ dr.name }}</span>
+                <span style="width:44px;text-align:right;font-size:17px;color:{{ dr.color }}">{{ dr.count }}</span>
+                <span style="width:96px;text-align:right;font-size:17px;color:{{ dr.color }}">{{ dr.sum }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isMonth }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <div style="position:sticky;top:0;z-index:2;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:4px 0 12px">
+          <button onClick="{{ prevMonth }}" style="width:44px;height:44px;flex:none;border-radius:8px;border:1px solid #E9E9E9;background:#fff;color:#0F0F0F;font-size:28px;line-height:1;cursor:pointer">‹</button>
+          <div style="font-size:17px;font-weight:700;color:#0F0F0F">{{ monthLabel }}</div>
+          <button onClick="{{ nextMonth }}" style="width:44px;height:44px;flex:none;border-radius:8px;border:1px solid #E9E9E9;background:#fff;color:#0F0F0F;font-size:28px;line-height:1;cursor:pointer">›</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">
+          <sc-for list="{{ dows }}" as="dw" hint-placeholder-count="7">
+            <div style="text-align:left;padding-left:7px;font-size:12px;color:#8C8C8C">{{ dw.t }}</div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
+          <sc-for list="{{ monthCells }}" as="c" hint-placeholder-count="35">
+            <button onClick="{{ c.onTap }}" style="{{ c.style }}">
+              <span style="display:block;font-size:17px;font-weight:700;line-height:1;color:{{ c.numColor }}">{{ c.num }}</span>
+              <span style="display:flex;gap:2px;justify-content:flex-start;align-items:flex-end;height:6px;position:absolute;left:6px;right:4px;bottom:5px">
+                <sc-for list="{{ c.dots }}" as="dt" hint-placeholder-count="0">
+                  <span style="{{ dt.style }}"></span>
+                </sc-for>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px">
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:8px;background:#AEEA00"></span><span style="font-size:12px;color:#8C8C8C">сделано</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:8px;background:#FFC400"></span><span style="font-size:12px;color:#8C8C8C">перенос</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:8px;background:#E03A2F"></span><span style="font-size:12px;color:#8C8C8C">отказ</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:8px;background:#E9E9E9"></span><span style="font-size:12px;color:#8C8C8C">в плане</span></div>
+        </div>
+
+        <div style="margin-top:20px">
+          <div style="font-size:17px;font-weight:700;color:#0F0F0F;margin-bottom:6px">Исполняемость нормы</div>
+          <div style="border:1px solid #E9E9E9;border-radius:8px;overflow:hidden">
+            <div style="display:flex;padding:6px 10px;background:#F6F6F6;font-size:12px;color:#8C8C8C">
+              <span style="flex:1">Тип</span><span style="width:44px;text-align:right">норма</span><span style="width:44px;text-align:right">план</span><span style="width:44px;text-align:right">факт</span>
+            </div>
+            <sc-for list="{{ monthNormRows }}" as="n" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;padding:6px 10px;border-top:1px solid #E9E9E9">
+                <span style="flex:1;font-size:17px;color:#0F0F0F">{{ n.name }}</span>
+                <span style="width:44px;text-align:right;font-size:17px;color:#8C8C8C">{{ n.norm }}</span>
+                <span style="width:44px;text-align:right;font-size:17px;color:{{ n.planColor }}">{{ n.plan }}</span>
+                <span style="width:44px;text-align:right;font-size:17px;color:{{ n.factColor }}">{{ n.fact }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:20px">
+          <div style="font-size:17px;font-weight:700;color:#0F0F0F;margin-bottom:6px">Задатки</div>
+          <div style="border:1px solid #E9E9E9;border-radius:8px;overflow:hidden">
+            <div style="display:flex;padding:6px 10px;background:#F6F6F6;font-size:12px;color:#8C8C8C">
+              <span style="flex:1">Статус</span><span style="width:44px;text-align:right">кол-во</span><span style="width:96px;text-align:right">сумма</span>
+            </div>
+            <sc-for list="{{ monthDepRows }}" as="dr" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;padding:8px 10px;border-top:1px solid #E9E9E9">
+                <span style="flex:1;font-size:17px;color:{{ dr.nameColor }}">{{ dr.name }}</span>
+                <span style="width:44px;text-align:right;font-size:17px;color:{{ dr.color }}">{{ dr.count }}</span>
+                <span style="width:96px;text-align:right;font-size:17px;color:{{ dr.color }}">{{ dr.sum }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="flex:none;position:absolute;left:0;right:0;bottom:0;padding:12px 16px 34px;background:linear-gradient(to top,#fff 60%,rgba(255,255,255,0))">
+    <div style="display:flex;gap:8px">
+      <sc-if value="{{ showAddBtn }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ openAdd }}" style="{{ addBtnStyle }}">{{ addBtnLabel }}</button>
+      </sc-if>
+      <sc-if value="{{ showSubmitBtn }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ submitBtnTap }}" style="{{ submitBtnStyle }}">{{ submitBtnLabel }}</button>
+      </sc-if>
+      <sc-if value="{{ factClosed }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;height:44px;border-radius:8px;background:#F6F6F6;color:#8C8C8C;font-size:17px;display:flex;align-items:center;justify-content:center">{{ factSentLabel }}</div>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ sheetAdd }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:20;background:rgba(15,15,15,.4);display:flex;align-items:flex-end">
+      <div style="width:100%;height:calc(100% - 197px);background:#fff;border-radius:8px 8px 40px 40px;padding:16px 16px 34px;overflow:hidden;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-size:22px;font-weight:700;color:#0F0F0F;letter-spacing:-.4px">Новое дело</div>
+          <button onClick="{{ closeSheet }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E9E9E9;background:#fff;color:#8C8C8C;font-size:17px;cursor:pointer">✕</button>
+        </div>
+
+        <div style="flex:1 1 auto;min-height:0;overflow-y:auto;display:block">
+        <div style="font-size:12px;color:#8C8C8C;margin-bottom:8px">Тип</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+          <sc-for list="{{ classBtns }}" as="cb" hint-placeholder-count="6">
+            <button onClick="{{ cb.onTap }}" style="{{ cb.style }}">{{ cb.name }}</button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ showDatePick }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:12px;color:#8C8C8C;margin-bottom:8px">Дата</div>
+        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px">
+          <sc-for list="{{ dateChips }}" as="dc" hint-placeholder-count="7">
+            <button onClick="{{ dc.onTap }}" style="{{ dc.style }}"><span style="font-size:12px;color:{{ dc.dowColor }}">{{ dc.dow }}</span><span style="font-size:17px;font-weight:700">{{ dc.num }}</span></button>
+          </sc-for>
+          <button onClick="{{ toggleFar }}" style="{{ farStyle }}">дальше</button>
+        </div>
+        <button onClick="{{ setNoDate }}" style="{{ noDateStyle }}">{{ noDateLabel }}</button>
+        </sc-if>
+        <sc-if value="{{ formFact }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12px;color:#8C8C8C;margin-bottom:12px">Дело за вчера, {{ yesterdayShort }}</div>
+        </sc-if>
+        <sc-if value="{{ showFar }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #E9E9E9;border-radius:8px;padding:8px;margin-bottom:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <button onClick="{{ farPrev }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E9E9E9;background:#fff;cursor:pointer">‹</button>
+              <span style="font-size:17px;font-weight:700;color:#0F0F0F">{{ farLabel }}</span>
+              <button onClick="{{ farNext }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E9E9E9;background:#fff;cursor:pointer">›</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+              <sc-for list="{{ farCells }}" as="fc" hint-placeholder-count="35">
+                <button onClick="{{ fc.onTap }}" style="{{ fc.style }}">{{ fc.num }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <div>
+        <sc-if value="{{ isOther }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:4px">Время · не обязательно</div>
+            <input type="time" value="{{ form.time }}" onChange="{{ onFormTime }}" style="width:104px;height:44px;border:1px solid #E9E9E9;border-radius:8px;padding:0 12px;font-size:17px;color:#0F0F0F;outline:none">
+            <div style="font-size:12px;color:#8C8C8C;margin:12px 0 4px">Что нужно сделать</div>
+            <textarea value="{{ form.address }}" onChange="{{ onFormAddress }}" placeholder="Полить цветы в офисе, забрать ключи у собственника" style="width:100%;height:120px;border:1px solid #E9E9E9;border-radius:8px;padding:12px;font-size:17px;line-height:1.4;color:#0F0F0F;outline:none;resize:none"></textarea>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ notOther }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px">
+            <div style="width:104px">
+              <div style="font-size:12px;color:#8C8C8C;margin-bottom:4px">Время</div>
+              <input type="time" value="{{ form.time }}" onChange="{{ onFormTime }}" style="width:100%;height:44px;border:1px solid #E9E9E9;border-radius:8px;padding:0 12px;font-size:17px;color:#0F0F0F;outline:none">
+            </div>
+            <div style="flex:1">
+              <div style="font-size:12px;color:#8C8C8C;margin-bottom:4px">Адрес</div>
+              <input value="{{ form.address }}" onChange="{{ onFormAddress }}" placeholder="Строителей 11" style="width:100%;height:44px;border:1px solid #E9E9E9;border-radius:8px;padding:0 12px;font-size:17px;color:#0F0F0F;outline:none">
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ needsClient }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:4px">Клиент · имя без фамилии</div>
+            <input value="{{ form.client }}" onChange="{{ onFormClient }}" placeholder="Юлия" style="width:100%;height:44px;border:1px solid #E9E9E9;border-radius:8px;padding:0 12px;font-size:17px;color:#0F0F0F;outline:none">
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:4px">Сторона</div>
+            <div style="display:flex;gap:4px;background:#F6F6F6;border-radius:8px;padding:4px">
+              <button onClick="{{ setBuyer }}" style="{{ buyerStyle }}">Покупатель</button>
+              <button onClick="{{ setSeller }}" style="{{ sellerStyle }}">Продавец</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ needsAmount }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#F07C00;margin-bottom:4px">Сумма комиссии · обязательна</div>
+            <input value="{{ form.amount }}" onChange="{{ onFormAmount }}" placeholder="95 000" style="width:100%;height:44px;border:1px solid #F07C00;border-radius:8px;padding:0 12px;font-size:17px;color:#0F0F0F;outline:none">
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ formFact }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#F07C00;margin-bottom:4px">Итог · обязателен, дело уйдёт в факт за вчера</div>
+            <input value="{{ form.result }}" onChange="{{ onFormResult }}" placeholder="Заехал к клиенту, забрал документы" style="width:100%;height:44px;border:1px solid #F07C00;border-radius:8px;padding:0 12px;font-size:17px;color:#0F0F0F;outline:none">
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ formVague }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#F6F6F6;border-radius:8px;padding:12px;font-size:12px;color:#8C8C8C;margin-bottom:12px">Без объекта и клиента дело сохранится как самозадание: «объект пока не найден».</div>
+        </sc-if>
+        </div>
+        </div>
+
+        <div style="flex:none;background:#fff;padding-top:8px">
+          <button onClick="{{ saveDeal }}" style="{{ saveStyle }}">{{ saveLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ sheetOutcome }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:20;background:rgba(15,15,15,.4);display:flex;align-items:flex-end">
+      <div style="width:100%;height:calc(100% - 197px);background:#fff;border-radius:8px 8px 40px 40px;padding:16px 16px 34px;overflow:hidden;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:16px">
+          <div>
+            <div style="font-size:22px;font-weight:700;color:#0F0F0F;letter-spacing:-.4px">Результат</div>
+            <div style="font-size:17px;color:#8C8C8C">{{ outcomeSub }}</div>
+          </div>
+          <button onClick="{{ closeSheet }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E9E9E9;background:#fff;color:#8C8C8C;font-size:17px;cursor:pointer">✕</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button onClick="{{ tabDone }}" style="{{ oDoneStyle }}">Сделано</button>
+          <button onClick="{{ tabMove }}" style="{{ oMoveStyle }}">Перенос</button>
+          <button onClick="{{ tabDecline }}" style="{{ oDeclineStyle }}">Отказ</button>
+        </div>
+
+        <div style="flex:1 1 auto;min-height:0;overflow-y:auto;display:block">
+        <sc-if value="{{ oIsDone }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:4px">Короткий итог · обязателен</div>
+            <input value="{{ oc.result }}" onChange="{{ onOcResult }}" placeholder="Показал, думает до пятницы" style="width:100%;height:44px;border:1px solid #E9E9E9;border-radius:8px;padding:0 12px;font-size:17px;color:#0F0F0F;outline:none">
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ oIsMove }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:8px">Новая дата · обязательна</div>
+            <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px">
+              <sc-for list="{{ moveChips }}" as="mc" hint-placeholder-count="7">
+                <button onClick="{{ mc.onTap }}" style="{{ mc.style }}"><span style="font-size:12px;color:{{ mc.dowColor }}">{{ mc.dow }}</span><span style="font-size:17px;font-weight:700">{{ mc.num }}</span></button>
+              </sc-for>
+            </div>
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:8px">Причина переноса · обязательна</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+              <sc-for list="{{ moveReasons }}" as="mr" hint-placeholder-count="5">
+                <button onClick="{{ mr.onTap }}" style="{{ mr.style }}">{{ mr.text }}</button>
+              </sc-for>
+            </div>
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:4px">Пояснение · обязательно</div>
+            <input value="{{ oc.note }}" onChange="{{ onOcNote }}" placeholder="Клиент попросил на четверг, утром подтвердит" style="width:100%;height:44px;border:1px solid #E9E9E9;border-radius:8px;padding:0 12px;font-size:17px;color:#0F0F0F;outline:none">
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ oIsDecline }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:8px">Причина · обязательна</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+              <sc-for list="{{ reasons }}" as="r" hint-placeholder-count="5">
+                <button onClick="{{ r.onTap }}" style="{{ r.style }}">{{ r.text }}</button>
+              </sc-for>
+            </div>
+            <div style="font-size:12px;color:#8C8C8C;margin-bottom:4px">Пояснение · обязательно</div>
+            <input value="{{ oc.note }}" onChange="{{ onOcNote }}" placeholder="Заболел, вернётся на следующей неделе" style="width:100%;height:44px;border:1px solid #E9E9E9;border-radius:8px;padding:0 12px;font-size:17px;color:#0F0F0F;outline:none">
+          </div>
+        </sc-if>
+        </div>
+
+        <button onClick="{{ saveOutcome }}" style="{{ ocSaveStyle }}">{{ ocSaveLabel }}</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:440,&quot;height&quot;:900},&quot;showShortfall&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Поведение&quot;}}">
+class Component extends DCLogic {
+  TODAY = '2026-09-09';
+  CLS = [
+    { k: 'show', n: 'Показ', w: 5, m: 20, side: 'buyer', f: ['показ', 'показа', 'показов'] },
+    { k: 'apprais', n: 'Оценка', w: 5, m: 20, side: 'seller', f: ['оценка', 'оценки', 'оценок'] },
+    { k: 'meet', n: 'Встреча', w: 5, m: 20, side: 'seller', f: ['встреча', 'встречи', 'встреч'] },
+    { k: 'ads', n: 'Реклама', w: 2, m: 8, side: null, noClient: true, f: ['реклама', 'рекламы', 'реклам'] },
+    { k: 'deposit', n: 'Задаток', w: 1, m: 4, side: 'buyer', money: true, f: ['задаток', 'задатка', 'задатков'] },
+    { k: 'deal', n: 'Сделка', w: 1, m: 4, side: 'seller', f: ['сделка', 'сделки', 'сделок'] },
+    { k: 'other', n: 'Другое', w: 0, m: 0, side: null, noClient: true, other: true, f: ['дело', 'дела', 'дел'] }
+  ];
+  NORM_ORDER = ['deal', 'deposit', 'show', 'apprais', 'meet', 'ads'];
+  MOVE_REASONS = ['Клиент попросил', 'Не успел сам', 'Ждём документы', 'Собственник не пустил', 'Другое'];
+  REASONS = ['Клиент отменил', 'Объект продан', 'Не подошла цена', 'Не вышли на связь', 'Передумал', 'Другое'];
+  MON = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  MONN = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+  DOW = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье'];
+  DOWS = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];
+
+  state = {
+    mode: 'day',
+    sel: '2026-09-09',
+    monthAnchor: '2026-09-09',
+    farAnchor: '2026-09-09',
+    showFar: false,
+    sheet: null,
+    editId: null,
+    drafts: {},
+    form: { cls: null, date: '2026-09-09', time: '', address: '', client: '', side: 'buyer', amount: '', fact: false, result: '' },
+    oc: { tab: 'done', result: '', newDate: '', reason: '', note: '' },
+    leads: {},
+    leadsOk: {},
+    factSent: {},
+    planSent: {},
+    ritualDone: {},
+    pool: [
+      { id: 101, c: 'show', wk: '2026-09-07', a: '', cl: '' },
+      { id: 102, c: 'apprais', wk: '2026-09-07', a: 'Онежская 19', cl: 'Юлия' }
+    ],
+    deals: [
+      { id: 1, c: 'show', d: '2026-09-09', t: '09:30', a: 'Строителей 11', cl: 'Юлия', s: 'buyer', st: 'done', r: 'Понравилась планировка, думает до пятницы' },
+      { id: 2, c: 'apprais', d: '2026-09-09', t: '11:00', a: 'Мира 6', cl: 'Пётр', s: 'seller', st: 'done', r: 'Согласились выйти на 4,9 млн' },
+      { id: 3, c: 'ads', d: '2026-09-09', t: '12:30', a: 'Онежская 19', cl: '', s: null, st: 'done', r: 'Обновил фото, поднял объявление' },
+      { id: 4, c: 'show', d: '2026-09-09', t: '14:00', a: 'Тепличная 4', cl: 'Маргарита', s: 'buyer', st: 'plan' },
+      { id: 5, c: 'meet', d: '2026-09-09', t: '15:30', a: 'Попова 72', cl: 'Роза', s: 'seller', st: 'plan' },
+      { id: 6, c: 'deposit', d: '2026-09-09', t: '17:00', a: 'Ладожская 35', cl: 'Кондрева', s: 'buyer', am: 95000, st: 'plan' },
+      { id: 7, c: 'show', d: '2026-09-09', t: '18:30', a: 'Норвуд', cl: 'Сомова', s: 'buyer', st: 'plan' },
+
+      { id: 70, c: 'apprais', d: '2026-08-31', t: '10:00', a: 'Ладожская 35', cl: 'Кондрева', s: 'seller', st: 'done', r: 'Договор на 3 месяца, цена 7,1 млн' },
+      { id: 71, c: 'show', d: '2026-08-31', t: '13:30', a: 'Попова 72', cl: 'Гончаров', s: 'buyer', st: 'done', r: 'Понравился двор, ждёт одобрения ипотеки' },
+      { id: 72, c: 'ads', d: '2026-08-31', t: '16:00', a: 'Мира 6', cl: '', s: null, st: 'done', r: 'Собрал объявление, вышло вечером' },
+      { id: 73, c: 'show', d: '2026-09-01', t: '09:30', a: 'Строителей 11', cl: 'Юлия', s: 'buyer', st: 'done', r: 'Смотрели с мамой, вторая по списку' },
+      { id: 74, c: 'meet', d: '2026-09-01', t: '12:00', a: 'Онежская 19', cl: 'Сомова', s: 'seller', st: 'done', r: 'Согласовали снижение до 4,7 млн' },
+      { id: 75, c: 'show', d: '2026-09-01', t: '15:00', a: 'Тепличная 4', cl: 'Маргарита', s: 'buyer', st: 'declined', rs: 'Клиент отменил', nt: 'Не отпустили с работы, перенесли на среду' },
+      { id: 76, c: 'deposit', d: '2026-09-01', t: '18:00', a: 'Норвуд', cl: 'Пётр', s: 'buyer', am: 60000, st: 'done', r: 'Задаток 60 000, выходим на сделку' },
+      { id: 77, c: 'other', d: '2026-08-31', t: '', a: 'Отвезти документы в МФЦ', cl: '', s: null, st: 'done', r: 'Сдал, готово в четверг' },
+      { id: 78, c: 'show', d: '2026-09-06', t: '11:00', a: 'Кулакова 2', cl: 'Роза', s: 'buyer', st: 'done', r: 'Воскресный показ, думает' },
+      { id: 79, c: 'meet', d: '2026-09-02', t: '18:30', a: 'Ладожская 35', cl: 'Кондрева', s: 'seller', st: 'plan', from: '2026-09-01', mvR: 'Не успел сам', mvN: 'Задержался на показе, перенёс на завтра' },
+      { id: 50, c: 'apprais', d: '2026-09-02', t: '10:00', a: 'Мира 6', cl: 'Юлия', s: 'seller', st: 'done', r: 'Взял в работу, подписали договор' },
+      { id: 51, c: 'show', d: '2026-09-02', t: '13:00', a: 'Кулакова 2', cl: 'Сомова', s: 'buyer', st: 'done', r: 'Не понравился подъезд' },
+      { id: 52, c: 'show', d: '2026-09-02', t: '16:00', a: 'Онежская 19', cl: 'Гончаров', s: 'buyer', st: 'declined', rs: 'Объект продан', nt: 'Собственник продал сам за день до показа' },
+      { id: 53, c: 'meet', d: '2026-09-03', t: '11:00', a: 'Строителей 11', cl: 'Пётр', s: 'seller', st: 'done', r: 'Обсудили снижение цены, думает' },
+      { id: 54, c: 'ads', d: '2026-09-03', t: '15:00', a: 'Тепличная 4', cl: '', s: null, st: 'done', r: 'Новые фото, поднял в топ' },
+      { id: 55, c: 'show', d: '2026-09-03', t: '17:30', a: 'Норвуд', cl: 'Маргарита', s: 'buyer', st: 'plan' },
+      { id: 56, c: 'deposit', d: '2026-09-04', t: '12:00', a: 'Попова 72', cl: 'Роза', s: 'buyer', am: 80000, st: 'done', r: 'Задаток 80 000, сделка на конец месяца' },
+      { id: 57, c: 'show', d: '2026-09-04', t: '14:30', a: 'Ладожская 35', cl: 'Кондрева', s: 'buyer', st: 'done', r: 'Понравилось, поедут смотреть двор вечером' },
+      { id: 58, c: 'apprais', d: '2026-09-05', t: '10:30', a: 'Онежская 19', cl: 'Сомова', s: 'seller', st: 'done', r: 'Собственник хочет на 700к дороже рынка' },
+      { id: 59, c: 'meet', d: '2026-09-05', t: '13:00', a: 'Мира 6', cl: 'Юлия', s: 'seller', st: 'declined', rs: 'Передумал', nt: 'Решили пока не продавать, вернутся в октябре' },
+      { id: 60, c: 'show', d: '2026-09-07', t: '09:00', a: 'Попова 72', cl: 'Кондрева', s: 'buyer', st: 'done', r: 'Второй просмотр, торгуются на 200к' },
+      { id: 61, c: 'show', d: '2026-09-08', t: '09:00', a: 'Норвуд', cl: 'Пётр', s: 'buyer', st: 'done', r: 'Смотрели быстро, не подошла кухня' },
+      { id: 62, c: 'deal', d: '2026-09-05', t: '16:00', a: 'Кулакова 2', cl: 'Гончаров', s: 'seller', st: 'done', r: 'Сделка прошла, комиссия получена' },
+      { id: 63, c: 'other', d: '2026-09-04', t: '18:00', a: 'Забрать ключи у собственника', cl: '', s: null, st: 'done', r: 'Ключи в офисе' },
+      { id: 64, c: 'other', d: '2026-09-08', t: '', a: 'Полить цветы в офисе', cl: '', s: null, st: 'plan' },
+      { id: 65, c: 'show', d: '2026-09-04', t: '10:00', a: 'Строителей 11', cl: 'Роза', s: 'buyer', st: 'plan', from: '2026-09-03', mvR: 'Клиент попросил', mvN: 'Просила перенести на утро следующего дня' },
+      { id: 66, c: 'apprais', d: '2026-09-08', t: '15:00', a: 'Ладожская 35', cl: 'Маргарита', s: 'seller', st: 'plan', from: '2026-09-05', mvR: 'Ждём документы', mvN: 'Выписка будет только в понедельник' },
+      { id: 40, c: 'show', d: '2026-09-07', t: '10:00', a: 'Мира 6', cl: 'Гончаров', s: 'buyer', st: 'done', r: 'Показал две квартиры, выбирает' },
+      { id: 41, c: 'apprais', d: '2026-09-07', t: '12:00', a: 'Тепличная 4', cl: 'Роза', s: 'seller', st: 'done', r: 'Договорились о цене 5,4 млн' },
+      { id: 42, c: 'meet', d: '2026-09-07', t: '14:00', a: 'Норвуд', cl: 'Сомова', s: 'seller', st: 'declined', rs: 'Не вышли на связь', nt: 'Три звонка без ответа, перезвонит сама' },
+      { id: 43, c: 'ads', d: '2026-09-09', t: '', a: 'Кулакова 2', cl: '', s: null, st: 'plan', from: '2026-09-07', mvR: 'Не успел сам', mvN: 'Не успел снять фото, переношу' },
+      { id: 10, c: 'show', d: '2026-09-08', t: '10:00', a: 'Кулакова 2', cl: 'Гончаров', s: 'buyer', st: 'plan' },
+      { id: 11, c: 'apprais', d: '2026-09-08', t: '11:30', a: 'Попова 72', cl: 'Юлия', s: 'seller', st: 'done', r: 'Взял в работу за 6,3 млн' },
+      { id: 12, c: 'show', d: '2026-09-08', t: '13:00', a: 'Мира 6', cl: 'Роза', s: 'buyer', st: 'declined', rs: 'Клиент отменил', nt: 'Заболел, вернётся на следующей неделе' },
+      { id: 13, c: 'meet', d: '2026-09-10', t: '15:00', a: 'Строителей 11', cl: 'Пётр', s: 'seller', st: 'plan', from: '2026-09-08', mvR: 'Клиент попросил', mvN: 'Просил передвинуть на четверг' },
+      { id: 14, c: 'show', d: '2026-09-08', t: '16:30', a: 'Онежская 19', cl: 'Маргарита', s: 'buyer', st: 'done', r: 'Смотрели с мужем, торгуются' },
+      { id: 15, c: 'ads', d: '2026-09-08', t: '18:00', a: 'Тепличная 4', cl: '', s: null, st: 'plan' },
+
+      { id: 20, c: 'show', d: '2026-09-10', t: '', a: '', cl: '', s: 'buyer', st: 'plan' },
+      { id: 21, c: 'show', d: '2026-09-10', t: '12:00', a: 'Ладожская 35', cl: 'Сомова', s: 'buyer', st: 'plan' },
+      { id: 22, c: 'deposit', d: '2026-09-11', t: '11:00', a: 'Кулакова 2', cl: 'Гончаров', s: 'buyer', am: 120000, st: 'plan' },
+      { id: 23, c: 'show', d: '2026-09-11', t: '13:00', a: 'Мира 6', cl: 'Юлия', s: 'buyer', st: 'plan' },
+      { id: 24, c: 'apprais', d: '2026-09-11', t: '15:00', a: 'Норвуд', cl: 'Сомова', s: 'seller', st: 'plan' },
+      { id: 25, c: 'show', d: '2026-09-13', t: '12:00', a: 'Тепличная 4', cl: 'Роза', s: 'buyer', st: 'plan' },
+      { id: 26, c: 'apprais', d: '2026-09-14', t: '10:30', a: 'Строителей 11', cl: 'Пётр', s: 'seller', st: 'plan' },
+      { id: 27, c: 'show', d: '2026-09-14', t: '14:00', a: 'Попова 72', cl: 'Маргарита', s: 'buyer', st: 'plan' },
+      { id: 28, c: 'meet', d: '2026-09-15', t: '11:00', a: 'Ладожская 35', cl: 'Кондрева', s: 'seller', st: 'plan' },
+      { id: 29, c: 'ads', d: '2026-09-15', t: '', a: 'Норвуд', cl: '', s: null, st: 'plan' },
+      { id: 30, c: 'deal', d: '2026-09-16', t: '12:00', a: 'Онежская 19', cl: 'Юлия', s: 'seller', st: 'plan' },
+      { id: 31, c: 'deposit', d: '2026-09-22', t: '13:00', a: 'Мира 6', cl: 'Роза', s: 'buyer', am: 150000, st: 'plan' },
+      { id: 32, c: 'show', d: '2026-09-24', t: '17:00', a: 'Норвуд', cl: 'Гончаров', s: 'buyer', st: 'plan' },
+      { id: 33, c: 'apprais', d: '2026-09-29', t: '11:00', a: 'Кулакова 2', cl: 'Сомова', s: 'seller', st: 'plan' },
+      { id: 34, c: 'deal', d: '2026-09-30', t: '15:00', a: 'Ладожская 35', cl: 'Пётр', s: 'seller', st: 'plan' }
+    ]
+  };
+
+  // ---- date helpers -------------------------------------------------
+  dt(iso) { return new Date(iso + 'T00:00:00'); }
+  iso(d) { const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); }
+  add(iso, n) { const d = this.dt(iso); d.setDate(d.getDate() + n); return this.iso(d); }
+  dowIdx(iso) { return (this.dt(iso).getDay() + 6) % 7; }
+  monday(iso) { return this.add(iso, -this.dowIdx(iso)); }
+  short(iso) { const d = this.dt(iso); const p = n => String(n).padStart(2, '0'); return p(d.getDate()) + '.' + p(d.getMonth() + 1); }
+  cls(k) { return this.CLS.find(c => c.k === k) || this.CLS[0]; }
+  plural(n, f) { const a = n % 10, b = n % 100; if (a === 1 && b !== 11) return f[0]; if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return f[1]; return f[2]; }
+  money(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  factColor(fact, norm) { if (fact < norm) return '#F07C00'; if (fact === norm) return '#0D7A46'; return '#6FA800'; }
+
+  // ---- mutations ----------------------------------------------------
+  patch(id, obj) { this.setState(s => ({ deals: s.deals.map(d => d.id === id ? Object.assign({}, d, obj) : d) })); }
+  setForm(o) { this.setState(s => ({ form: Object.assign({}, s.form, o) })); }
+  setOc(o) { this.setState(s => ({ oc: Object.assign({}, s.oc, o) })); }
+
+  openAdd(cls, date, opts) {
+    const o = opts || {};
+    this.setState(s => ({
+      sheet: 'add',
+      showFar: !!date && (date < this.TODAY || date > this.add(this.TODAY, 6)),
+      farAnchor: date || this.TODAY,
+      form: { cls: cls || null, date: o.noDate ? '' : (date || this.TODAY), time: '', address: '', client: '', side: cls ? (this.cls(cls).side || 'buyer') : 'buyer', amount: '', fact: !!o.fact, result: '' }
+    }));
+  }
+  addAbstract(k) {
+    this.setState(s => ({ pool: s.pool.concat([{ id: Date.now(), c: k, wk: this.monday(s.sel), a: '', cl: '' }]) }));
+  }
+  poolToDay(p, iso) {
+    this.setState(s => ({
+      pool: s.pool.filter(x => x.id !== p.id),
+      deals: s.deals.concat([{ id: p.id, c: p.c, d: iso, t: '', a: p.a, cl: p.cl, s: this.cls(p.c).side, st: 'plan' }])
+    }));
+  }
+
+  renderVals() {
+    const st = this.state;
+    const sel = st.sel;
+    const today = this.TODAY;
+    const M = st.mode;
+    const deals = st.deals;
+    const wStart = this.monday(sel), wEnd = this.add(wStart, 6);
+    const inRange = (d, a, b) => d >= a && d <= b;
+    const weekDeals = deals.filter(d => inRange(d.d, wStart, wEnd));
+
+    // --- day
+    const dayList = deals.filter(d => d.d === sel).sort((a, b) => (a.t || '99') < (b.t || '99') ? -1 : 1);
+    const rowList = dayList.concat(deals.filter(d => d.from === sel && d.d !== sel).map(g => Object.assign({}, g, { _ghost: true })))
+      .sort((a, b) => (a.t || '99') < (b.t || '99') ? -1 : 1);
+    const ghosts = deals.filter(d => d.from === sel && d.d !== sel).map(g => ({
+      timeLabel: g.t || '—',
+      name: this.cls(g.c).n,
+      sub: [g.a || 'без объекта', g.cl].filter(Boolean).join(' · '),
+      moveLabel: 'Уехало на ' + this.short(g.d) + ' · ' + (g.mvR || 'причина не указана') + (g.mvN ? ' · ' + g.mvN : ''),
+      onOutcome: () => this.setState({ sheet: 'outcome', editId: g.id, oc: { tab: 'done', result: '', newDate: '', reason: '', note: '' } })
+    }));
+
+    const dayDeals = rowList.map(d => {
+      const c = this.cls(d.c);
+      const dayClosed = sel < this.add(this.TODAY, -1) || (sel === this.add(this.TODAY, -1) && !!this.state.factSent[this.TODAY]);
+      const future = sel > this.TODAY;
+      const isMoved = !!d._ghost;
+      const isPlan = d.st === 'plan' && !dayClosed && !isMoved, isDone = d.st === 'done' && !isMoved, isDecl = d.st === 'declined' && !isMoved;
+      const vague = !d.a && !d.cl && !c.other;
+      const needsResult = isDone && !d.r;
+      const sub = vague ? 'тип и дата поставлены' : [d.a || '—', d.cl].filter(Boolean).join(' · ') + (d.from && !isMoved ? ' · перенесено с ' + this.short(d.from) : '');
+      let pillLabel = '', pillStyle = '';
+      const pillEditable = !dayClosed && (sel === this.TODAY || !this.state.factSent[this.TODAY]);
+      const OUTLINE = c => 'height:28px;padding:0 12px;border-radius:8px;background:#fff;border:1px solid ' + c + ';font-size:12px;font-weight:700;line-height:26px;white-space:nowrap;color:#1A1A1A;cursor:' + (pillEditable ? 'pointer' : 'default');
+      const tag = (label, col, glyph) => {
+        pillLabel = label;
+        pillGlyph = glyph;
+        pillChip = 'height:28px;padding:0 12px;border-radius:8px;border:none;font-size:12px;font-weight:700;line-height:28px;white-space:nowrap;cursor:' + (pillEditable ? 'pointer' : 'default') + ';color:#1A1A1A;background:' + col;
+        pillStyle = 'padding:0;border:none;background:none;font-size:17px;line-height:20px;font-weight:400;white-space:nowrap;display:flex;align-items:center;text-decoration:underline;text-underline-offset:3px;cursor:' + (pillEditable ? 'pointer' : 'default') + ';color:' + col;
+        pillDot = col;
+      };
+      var pillDot = '', pillGlyph = '', pillChip = '';
+      if (isDone) tag('Сделано', '#AEEA00', '✓');
+      if (isDecl) { tag('Отказ', '#E03A2F', '✕'); pillChip = OUTLINE('#E03A2F'); }
+      if (isMoved) { tag('Перенос', '#F07C00', '›'); pillChip = OUTLINE('#F07C00'); }
+      if (dayClosed && d.st === 'plan') tag('Не отмечено', '#E9E9E9', '—');
+      const stColor = future ? '#E9E9E9' : isDone ? '#AEEA00' : isDecl ? '#E03A2F' : isMoved ? '#FFC400' : '#8C8C8C';
+      const waiting = isPlan && !future;
+      const muted = !waiting && !future;
+      const ink = muted ? '#8C8C8C' : '#0F0F0F';
+      const noteText = isMoved ? ('Уехало на ' + this.short(d.d) + ' · ' + (d.mvR || 'причина не указана') + (d.mvN ? ' · ' + d.mvN : ''))
+        : isDecl ? (d.rs + ' · ' + (d.nt || '')) : isDone ? (d.r || '') : vague ? 'объект пока не найден · самозадание' : '';
+      return {
+        name: c.n,
+        sub, isVague: vague,
+        onRowTap: () => { if (!future) this.setState({ sheet: 'outcome', editId: d.id, oc: { tab: isDone ? 'done' : isDecl ? 'decline' : 'done', result: d.r || '', newDate: '', reason: d.rs || '', note: d.nt || '' } }); },
+        rowStyle: 'display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border-bottom:1px solid #E9E9E9;border-left:3px solid ' + stColor + ';background:#fff;cursor:' + (future ? 'default' : 'pointer'),
+        timeWeight: muted ? '400' : '700',
+        dotColor: waiting ? '#0F0F0F' : stColor,
+        statusLabel: future ? 'В плане' : isDone ? 'Сделано' : isDecl ? 'Отказ' : isMoved ? 'Перенос' : dayClosed ? 'Не отмечено' : 'Отметить',
+        statusColor: waiting ? '#0F0F0F' : '#8C8C8C',
+        hasNote: !!noteText, noteText,
+        noteColor: '#8C8C8C',
+        timeLabel: d.t || '—',
+        timeColor: ink,
+        nameColor: ink,
+        hasAmount: !!d.am, amountLabel: d.am ? this.money(d.am) + ' ₽' : '',
+        isPlan, isDeclined: isDecl, isMoved,
+        showPill: !isPlan, pillLabel, pillStyle: pillChip, pillDot, pillGlyph,
+        hasResult: isDone && !!d.r, result: d.r || '',
+        resultBtnStyle: 'height:28px;padding:0 12px;border-radius:8px;border:none;font-size:12px;font-weight:700;line-height:28px;white-space:nowrap;cursor:pointer;background:#E9E9E9;color:' + (d.d <= this.TODAY ? '#1A1A1A' : '#8C8C8C'),
+        declineLabel: isDecl ? d.rs + ' · ' + d.nt : '',
+        movedLabel: isMoved ? 'Уехало на ' + this.short(d.to || '') : '',
+        onOutcome: () => this.setState({ sheet: 'outcome', editId: d.id, oc: { tab: 'done', result: '', newDate: '', reason: '', note: '' } }),
+        onPillTap: () => { if (pillEditable) this.setState({ sheet: 'outcome', editId: d.id, oc: { tab: isDone ? 'done' : isDecl ? 'decline' : 'move', result: d.r || '', newDate: '', reason: d.rs || '', note: d.nt || '' } }); }
+      };
+    });
+
+    // --- deficits (norm − done − remaining plan) for the week of sel
+    const addTarget = sel < today ? today : sel;
+    const deficits = [];
+    this.NORM_ORDER.forEach(k => {
+      const c = this.cls(k);
+      const covered = weekDeals.filter(d => d.c === k && (d.st === 'done' || d.st === 'plan')).length + st.pool.filter(p => p.wk === wStart && p.c === k).length;
+      const gap = c.w - covered;
+      if (gap > 0) deficits.push({
+        label: gap + ' ' + this.plural(gap, c.f).toLowerCase(),
+        onTap: () => this.openAdd(k, addTarget),
+        onTapHere: () => this.openAdd(k, addTarget)
+      });
+    });
+
+    const normChips = this.NORM_ORDER.map(k => {
+      const c = this.cls(k);
+      const covered = weekDeals.filter(d => d.c === k && (d.st === 'done' || d.st === 'plan')).length + st.pool.filter(p => p.wk === wStart && p.c === k).length;
+      const gap = Math.max(0, c.w - covered);
+      const ok = gap === 0;
+      return {
+        name: c.n, value: ok ? covered + '/' + c.w : '+' + gap,
+        nameColor: ok ? '#8C8C8C' : '#F07C00',
+        style: 'height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;background:#fff;border:1px solid ' + (ok ? '#E9E9E9' : '#F07C00') + ';color:' + (ok ? '#6FA800' : '#F07C00'),
+        onTap: () => this.openAdd(k, addTarget)
+      };
+    });
+    const unclosedList = deals.filter(d => d.d === this.add(today, -1) && d.st === 'plan');
+    const isToday = sel === today;
+    const isMonday = this.dowIdx(sel) === 0;
+    const wk = wStart;
+    const factAt = st.factSent[today], planAt = st.planSent[today];
+    const ritualNeeded = isMonday && isToday && !st.ritualDone[wk];
+    const yst = this.add(today, -1);
+    const msYesterday = isToday && !factAt;
+    const msRitual = isToday && !!factAt && ritualNeeded;
+    const msPlanToday = isToday && !!factAt && !msRitual && !planAt;
+    const msSubmitted = isToday && !!factAt && !!planAt;
+    const addedYesterday = deals.filter(d => d.d === yst && d.late).map(d => ({
+      timeLabel: d.t || '—', name: this.cls(d.c).n, result: d.r || ''
+    }));
+    const yLeadsOk = !!st.leadsOk[yst];
+    const factReady = unclosedList.length === 0;
+    const unclosedRows = unclosedList.map(d => ({
+      timeLabel: (d.t || '—') + ' ' + this.short(d.d).slice(0, 5),
+      name: this.cls(d.c).n,
+      sub: [d.a || 'без объекта', d.cl].filter(Boolean).join(' · '),
+      onDone: () => this.setState({ sheet: 'outcome', editId: d.id, oc: { tab: 'done', result: '', newDate: '', reason: '', note: '' } }),
+      onOutcome: () => this.setState({ sheet: 'outcome', editId: d.id, oc: { tab: 'done', result: '', newDate: '', reason: '', note: '' } })
+    }));
+    const poolWeek = st.pool.filter(p => p.wk === wk);
+    const ritualRows = ['show', 'apprais', 'meet', 'ads'].map(k => {
+      const c = this.cls(k);
+      const inDays = weekDeals.filter(d => d.c === k && d.st !== 'declined').length;
+      const inPool = poolWeek.filter(p => p.c === k).length;
+      const total = inDays + inPool;
+      return {
+        q: c.n + ' · норма ' + c.w,
+        progress: total + ' / ' + c.w,
+        color: total < c.w ? '#F07C00' : '#0D7A46',
+        have: inDays + ' по дням, ' + inPool + ' без дня',
+        abstractLabel: this.plural(1, c.f).toLowerCase() + ' без дня',
+        onConcrete: () => this.openAdd(k, sel),
+        onAbstract: () => this.addAbstract(k)
+      };
+    });
+    const ritualThin = ritualRows.some(r => r.color === '#F07C00');
+    const todayPlanCount = dayList.filter(d => d.st === 'plan' || d.st === 'done').length;
+    const poolRows = poolWeek.map(p => ({
+      name: this.cls(p.c).n,
+      sub: p.a || p.cl ? [p.a, p.cl].filter(Boolean).join(' · ') : 'объект пока не найден',
+      subColor: p.a || p.cl ? '#8C8C8C' : '#F07C00',
+      onToday: () => this.poolToDay(p, sel)
+    }));
+
+    // --- week rows
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      const iso = this.add(wStart, i);
+      const list = deals.filter(d => d.d === iso);
+      const done = list.filter(d => d.st === 'done').length;
+      const plan = list.filter(d => d.st === 'plan').length;
+      const declined = list.filter(d => d.st === 'declined').length;
+      const moved = deals.filter(d => d.from === iso && d.d !== iso).length;
+      const chipS = 'flex:none;height:24px;padding:0 8px;border-radius:8px;font-size:12px;font-weight:700;white-space:nowrap;display:flex;align-items:center;';
+      const isSel = iso === sel, isToday = iso === today;
+      const closed = iso < this.add(today, -1) || (iso === this.add(today, -1) && !!st.factSent[today]);
+      const chips = [];
+      if (done) chips.push({ text: String(done), style: chipS + 'min-width:28px;justify-content:center;background:#AEEA00;color:#1A1A1A' });
+      if (moved) chips.push({ text: String(moved), style: chipS + 'min-width:28px;justify-content:center;background:#FFC400;color:#1A1A1A' });
+      if (declined) chips.push({ text: String(declined), style: chipS + 'min-width:28px;justify-content:center;background:#E03A2F;color:#1A1A1A' });
+      if (plan) chips.push({ text: String(plan), style: chipS + 'min-width:28px;justify-content:center;background:#E9E9E9;color:#1A1A1A' });
+      weekDays.push({
+        num: this.dt(iso).getDate(), dow: this.DOWS[i],
+        numColor: isToday ? '#0D7A46' : closed ? '#8C8C8C' : '#0F0F0F',
+        isEmpty: list.length === 0 && moved === 0,
+        chips, counts: closed ? 'закрыт' : (list.length + moved) ? (list.length + moved) + ' дел' : '',
+        rowStyle: 'width:100%;display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:4px;border-radius:8px;cursor:pointer;text-align:left;background:' + (closed ? '#F6F6F6' : isSel ? '#F6F6F6' : '#fff') + ';border:1px solid ' + (isToday ? '#0F0F0F' : '#E9E9E9'),
+        onTap: () => this.setState({ sel: iso, mode: 'day' })
+      });
+    }
+
+    const normRows = this.NORM_ORDER.map(k => {
+      const c = this.cls(k);
+      const list = weekDeals.filter(d => d.c === k);
+      const fact = list.filter(d => d.st === 'done').length;
+      const plan = list.filter(d => d.st !== 'declined').length + st.pool.filter(p => p.wk === wStart && p.c === k).length;
+      return {
+        name: c.n, norm: c.w, plan, fact,
+        planColor: plan < c.w ? '#F07C00' : '#6FA800',
+        factColor: fact < c.w ? '#F07C00' : '#6FA800'
+      };
+    });
+
+    // --- month
+    const mAnchor = st.monthAnchor;
+    const mDate = this.dt(mAnchor);
+    const first = new Date(mDate.getFullYear(), mDate.getMonth(), 1);
+    const lead = (first.getDay() + 6) % 7;
+    const gridStart = this.add(this.iso(first), -lead);
+    const monthCells = [];
+    const lastIso = this.iso(new Date(mDate.getFullYear(), mDate.getMonth() + 1, 0));
+    const cellCount = Math.ceil((lead + this.dt(lastIso).getDate()) / 7) * 7;
+    for (let i = 0; i < cellCount; i++) {
+      const iso = this.add(gridStart, i);
+      const dd = this.dt(iso);
+      const inMonth = dd.getMonth() === mDate.getMonth();
+      const list = deals.filter(d => d.d === iso);
+      const done = list.filter(d => d.st === 'done').length;
+      const plan = list.filter(d => d.st === 'plan').length;
+      const dots = [];
+      const decl = list.filter(d => d.st === 'declined').length;
+      const dotS = 'width:6px;height:6px;border-radius:8px;display:inline-block;background:';
+      const moved = deals.filter(d => d.from === iso && d.d !== iso).length;
+      const seg = (n, col) => { for (let j = 0; j < n && dots.length < 4; j++) dots.push({ style: dotS + col }); };
+      seg(done, '#AEEA00'); seg(moved, '#FFC400'); seg(decl, '#E03A2F'); seg(plan, '#E9E9E9');
+      const isToday = iso === today, isSel = iso === sel;
+      monthCells.push({
+        num: inMonth ? dd.getDate() : '', dots,
+        count: inMonth && list.length ? list.length : '',
+        countColor: plan ? '#F07C00' : '#6FA800',
+        numColor: !inMonth ? '#E9E9E9' : isToday ? '#0D7A46' : '#0F0F0F',
+        style: 'position:relative;aspect-ratio:1;border-radius:8px;padding:5px 0 0 6px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left;cursor:pointer;background:' + (isSel && inMonth ? '#F6F6F6' : '#fff') + ';border:1px solid ' + (isToday ? '#0F0F0F' : '#E9E9E9'),
+        onTap: () => { if (inMonth) this.setState({ sel: iso, mode: 'day' }); }
+      });
+    }
+    const mFrom = this.iso(first), mTo = this.iso(new Date(mDate.getFullYear(), mDate.getMonth() + 1, 0));
+    const mDeals = deals.filter(d => inRange(d.d, mFrom, mTo));
+    const deps = mDeals.filter(d => d.c === 'deposit');
+    const moneyFact = deps.filter(d => d.st === 'done').reduce((a, b) => a + (b.am || 0), 0);
+    const moneyPlan = deps.filter(d => d.st === 'plan').reduce((a, b) => a + (b.am || 0), 0);
+    const depFact = deps.filter(d => d.st === 'done').length;
+    const dealsM = mDeals.filter(d => d.c === 'deal');
+
+    // --- add form
+    const form = st.form;
+    const fc = form.cls ? this.cls(form.cls) : null;
+    const classBtns = this.CLS.map(c => ({
+      name: c.n,
+      style: 'height:44px;border-radius:8px;font-size:17px;font-weight:700;cursor:pointer;color:#0F0F0F;border:1px solid ' + (form.cls === c.k ? '#AEEA00' : '#E9E9E9') + ';background:' + (form.cls === c.k ? '#AEEA00' : '#fff'),
+      onTap: () => this.setForm({ cls: c.k, side: c.side || 'buyer', amount: '' })
+    }));
+    const chip = (iso, active, onTap) => ({
+      dow: this.DOWS[this.dowIdx(iso)], num: this.dt(iso).getDate(),
+      dowColor: active ? '#0F0F0F' : '#8C8C8C',
+      style: 'flex:none;width:52px;height:44px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:#0F0F0F;border:1px solid ' + (active ? '#AEEA00' : '#E9E9E9') + ';background:' + (active ? '#AEEA00' : '#fff'),
+      onTap
+    });
+    const dateChips = [];
+    for (let i = 0; i < 7; i++) { const iso = this.add(today, i); dateChips.push(chip(iso, form.date === iso, () => this.setForm({ date: iso }))); }
+
+    const fa = this.dt(st.farAnchor);
+    const fFirst = new Date(fa.getFullYear(), fa.getMonth(), 1);
+    const fLead = (fFirst.getDay() + 6) % 7;
+    const fStart = this.add(this.iso(fFirst), -fLead);
+    const farCells = [];
+    for (let i = 0; i < 42; i++) {
+      const iso = this.add(fStart, i);
+      const dd = this.dt(iso);
+      const inM = dd.getMonth() === fa.getMonth();
+      const active = form.date === iso;
+      farCells.push({
+        num: inM ? dd.getDate() : '',
+        style: 'height:36px;border-radius:8px;font-size:17px;cursor:pointer;border:none;background:' + (active ? '#0F0F0F' : 'transparent') + ';color:' + (!inM ? '#E9E9E9' : active ? '#fff' : '#0F0F0F'),
+        onTap: () => { if (inM) this.setForm({ date: iso }); }
+      });
+    }
+
+    const amountOk = !fc || !fc.money || String(form.amount).trim().length > 0;
+    const noDate = form.date === '';
+    const resultOk = !form.fact || form.result.trim().length > 0;
+    const canSave = !!form.cls && amountOk && resultOk && !(noDate && fc && fc.money);
+
+    // --- outcome sheet
+    const ed = deals.find(d => d.id === st.editId);
+    const oc = st.oc;
+    const moveChips = [];
+    const moveBase = ed && ed.d < today ? today : (ed ? ed.d : sel);
+    for (let i = 0; i < 7; i++) { const iso = this.add(moveBase, i); if (ed && iso === ed.d) continue; moveChips.push(chip(iso, oc.newDate === iso, () => this.setOc({ newDate: iso }))); }
+    const mkReason = (list, color) => list.map(r => ({
+      text: r,
+      style: 'height:36px;padding:0 12px;border-radius:8px;font-size:17px;cursor:pointer;border:1px solid ' + (oc.reason === r ? color : '#E9E9E9') + ';background:' + (oc.reason === r ? color : '#fff') + ';color:' + (oc.reason === r ? '#fff' : '#0F0F0F'),
+      onTap: () => this.setOc({ reason: r })
+    }));
+    const moveReasons = mkReason(this.MOVE_REASONS, '#F07C00');
+    const reasons = this.REASONS.map(r => ({
+      text: r,
+      style: 'height:36px;padding:0 12px;border-radius:8px;font-size:17px;cursor:pointer;border:1px solid ' + (oc.reason === r ? '#E03A2F' : '#E9E9E9') + ';background:' + (oc.reason === r ? '#E03A2F' : '#fff') + ';color:' + (oc.reason === r ? '#fff' : '#0F0F0F'),
+      onTap: () => this.setOc({ reason: r })
+    }));
+    const ocOk = oc.tab === 'done' ? oc.result.trim().length > 0
+      : oc.tab === 'move' ? (!!oc.newDate && !!oc.reason && oc.note.trim().length > 0)
+      : (!!oc.reason && oc.note.trim().length > 0);
+    const ocLabels = { done: 'Отметить сделанным', move: 'Перенести дело', decline: 'Отметить отказ' };
+    const ocBg = { done: '#AEEA00', move: '#F07C00', decline: '#E03A2F' };
+    const ocFg = { done: '#0F0F0F', move: '#fff', decline: '#fff' };
+    const otab = (k, label) => 'flex:1;height:44px;border-radius:8px;font-size:17px;font-weight:700;cursor:pointer;border:1px solid ' + (oc.tab === k ? ocBg[k] : '#E9E9E9') + ';background:' + (oc.tab === k ? ocBg[k] : '#fff') + ';color:' + (oc.tab === k ? ocFg[k] : '#0F0F0F');
+
+    const tabS = k => 'flex:1;height:30px;border-radius:8px;border:none;font-size:17px;font-weight:700;cursor:pointer;color:' + (M === k ? '#0F0F0F' : '#8C8C8C') + ';background:' + (M === k ? '#fff' : 'transparent') + (M === k ? ';box-shadow:0 1px 3px rgba(15,15,15,.12)' : '');
+    const segTop = a => 'height:28px;padding:0 10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;color:' + (a ? '#0F0F0F' : '#8C8C8C') + ';background:' + (a ? '#fff' : 'transparent') + (a ? ';box-shadow:0 1px 3px rgba(15,15,15,.12)' : '');
+    const segS = a => 'flex:1;height:32px;border-radius:8px;border:none;font-size:17px;cursor:pointer;color:' + (a ? '#0F0F0F' : '#8C8C8C') + ';background:' + (a ? '#fff' : 'transparent') + (a ? ';box-shadow:0 1px 3px rgba(15,15,15,.12)' : '');
+
+    const leadsWeek = Object.keys(st.leads).filter(k => inRange(k, wStart, wEnd)).reduce((a, k) => a + st.leads[k], 0);
+    const selD = this.dt(sel);
+
+    return {
+      isDay: M === 'day', isWeek: M === 'week', isMonth: M === 'month',
+      headTitle: M === 'day' ? 'День' : M === 'week' ? 'Неделя' : 'Месяц',
+      tabDayStyle: tabS('day'), tabWeekStyle: tabS('week'), tabMonthStyle: tabS('month'),
+      setDay: () => this.setState({ mode: 'day' }),
+      setWeek: () => this.setState({ mode: 'week' }),
+      setMonth: () => this.setState({ mode: 'month', monthAnchor: sel }),
+      goToday: () => this.setState({ sel: today, mode: 'day', monthAnchor: today }),
+      factDotColor: st.factSent[today] ? '#AEEA00' : '#F07C00',
+      planDotColor: st.planSent[today] ? '#AEEA00' : '#F07C00',
+      addBtnLabel: M === 'day' && sel === yst && !factAt ? '+ Дело за вчера' : '+ Дело',
+      addBtnStyle: 'flex:1 1 0;min-width:0;height:44px;border-radius:8px;border:none;background:#AEEA00;color:#0F0F0F;font-size:17px;font-weight:700;cursor:pointer',
+      showSubmitBtn: M === 'day' && ((sel === yst && !factAt) || (isToday && !!factAt && !planAt)),
+      submitBtnLabel: sel === yst ? 'Сдать факт' : 'Сдать план',
+      submitBtnStyle: (() => {
+        const ready = sel === yst ? factReady : todayPlanCount > 0;
+        return 'flex:1 1 0;min-width:0;height:44px;border-radius:8px;font-size:17px;font-weight:700;cursor:' + (ready ? 'pointer' : 'default') + ';background:#fff;border:1px solid ' + (ready ? '#0F0F0F' : '#E9E9E9') + ';color:' + (ready ? '#0F0F0F' : '#8C8C8C');
+      })(),
+      submitBtnTap: () => {
+        if (sel === yst) { if (factReady) this.setState(s => ({ factSent: Object.assign({}, s.factSent, { [today]: '9:41' }) })); }
+        else if (todayPlanCount > 0) this.setState(s => ({ planSent: Object.assign({}, s.planSent, { [today]: '9:52' }) }));
+      },
+      anyPending: !st.factSent[today] || !st.planSent[today],
+      pendingLabel: !st.factSent[today] ? 'Факт за вчера не сдан · до 10:00'
+        : !st.planSent[today] ? 'План на сегодня не отправлен · до 10:00' : '',
+      btnTodayStyle: segTop(M === 'day' && sel === today),
+      btnYesterdayStyle: segTop(M === 'day' && sel === this.add(today, -1)),
+      prevDay: () => this.setState({ sel: this.add(sel, -1) }),
+      nextDay: () => this.setState({ sel: this.add(sel, 1) }),
+      goYesterday: () => this.setState({ sel: this.add(today, -1), mode: 'day' }),
+      prevWeek: () => this.setState({ sel: this.add(sel, -7) }),
+      nextWeek: () => this.setState({ sel: this.add(sel, 7) }),
+      prevMonth: () => this.setState({ monthAnchor: this.iso(new Date(mDate.getFullYear(), mDate.getMonth() - 1, 1)) }),
+      nextMonth: () => this.setState({ monthAnchor: this.iso(new Date(mDate.getFullYear(), mDate.getMonth() + 1, 1)) }),
+
+      dayLabel: (() => {
+        const dm = selD.getDate() + ' ' + this.MON[selD.getMonth()];
+        if (sel === today) return 'сегодня, ' + dm;
+        if (sel === this.add(today, -1)) return 'вчера, ' + dm;
+        if (sel === this.add(today, 1)) return 'завтра, ' + dm;
+        return dm + ', ' + this.DOWS[this.dowIdx(sel)];
+      })(),
+      daySub: sel < today ? 'факт' : sel === today ? 'план' : '',
+      msYesterday, msRitual, msPlanToday, msSubmitted, unclosedRows, ritualRows, ritualThin, addedYesterday,
+      dimStyle: '',
+      yesterdaySub: unclosedList.length
+        ? unclosedList.length + ' ' + this.plural(unclosedList.length, ['дело', 'дела', 'дел']) + ' без результата.'
+        : 'Всё закрыто. Осталось нажать «Сдать факт».',
+      yLeads: st.leads[yst] || 0, yLeadsOpen: !yLeadsOk,
+      yLeadsHint: yLeadsOk ? 'подтверждено' : 'пришло за день — проверьте число',
+      yLeadsHintColor: yLeadsOk ? '#6FA800' : '#F07C00',
+      yLeadsPlus: () => this.setState(s => ({ leads: Object.assign({}, s.leads, { [yst]: (s.leads[yst] || 0) + 1 }) })),
+      yLeadsMinus: () => this.setState(s => ({ leads: Object.assign({}, s.leads, { [yst]: Math.max(0, (s.leads[yst] || 0) - 1) }) })),
+      confirmYLeads: () => this.setState(s => ({ leadsOk: Object.assign({}, s.leadsOk, { [yst]: true }) })),
+      addYesterday: () => this.openAdd(null, yst, { fact: true }),
+      factBtnLabel: factReady ? 'Сдать факт за вчера' : unclosedList.length ? 'Сначала закройте вчерашние дела' : 'Подтвердите заявки за вчера',
+      factBtnStyle: 'width:100%;height:44px;border-radius:8px;border:none;font-size:17px;font-weight:700;margin-top:8px;cursor:' + (factReady ? 'pointer' : 'default') + ';background:' + (factReady ? '#AEEA00' : '#F6F6F6') + ';color:' + (factReady ? '#0F0F0F' : '#8C8C8C'),
+      submitFact: () => { if (factReady) this.setState(s => ({ factSent: Object.assign({}, s.factSent, { [sel]: '9:41' }) })); },
+      addToday: () => this.openAdd(null, sel),
+      planBtnLabel: todayPlanCount > 0 ? 'Сдать план на день' : 'Добавьте хотя бы одно дело',
+      planBtnStyle: 'width:100%;height:44px;border-radius:8px;border:none;font-size:17px;font-weight:700;cursor:' + (todayPlanCount > 0 ? 'pointer' : 'default') + ';background:' + (todayPlanCount > 0 ? '#AEEA00' : '#F6F6F6') + ';color:' + (todayPlanCount > 0 ? '#0F0F0F' : '#8C8C8C'),
+      submitPlan: () => { if (todayPlanCount > 0) this.setState(s => ({ planSent: Object.assign({}, s.planSent, { [sel]: '9:52' }) })); },
+      factAt: factAt || '', planAt: planAt || '',
+      todayPlanLabel: todayPlanCount + ' ' + this.plural(todayPlanCount, ['дело', 'дела', 'дел']) + ' на сегодня',
+      finishRitual: () => this.setState(s => ({ ritualDone: Object.assign({}, s.ritualDone, { [wk]: true }) })),
+      hasPool: poolWeek.length > 0 && M === 'day' && sel >= today, poolCount: poolWeek.length, poolRows,
+      poolBtn: isToday ? 'на сегодня' : 'на этот день',
+      setNoDate: () => this.setForm({ date: '' }),
+      noDateLabel: noDate ? 'Без дня · попадёт в пул недели' : 'Пока без дня — в пул недели',
+      noDateStyle: 'width:100%;height:44px;border-radius:8px;font-size:17px;cursor:pointer;margin-bottom:16px;border:1px solid ' + (noDate ? '#F07C00' : '#E9E9E9') + ';background:' + (noDate ? '#F07C00' : '#fff') + ';color:' + (noDate ? '#fff' : '#8C8C8C'),
+      unclosedLabel: unclosedList.length + ' ' + this.plural(unclosedList.length, ['дело', 'дела', 'дел']),
+      showShortfall: this.props.showShortfall !== false && sel === today && !msRitual,
+      showShortfallTop: false,
+      planRows: dayList.filter(d => d.st !== 'declined').map(d => ({
+        timeLabel: d.t || '—', name: this.cls(d.c).n,
+        sub: [d.a || 'объект пока не найден', d.cl].filter(Boolean).join(' · ')
+      })),
+      normChips,
+      shortfallTitle: 'До нормы недели не хватает',
+      deficits, hasDeficit: deficits.length > 0, noDeficit: deficits.length === 0,
+      dayDeals, dayGhosts: ghosts,
+      dayEmpty: dayList.length === 0 && ghosts.length === 0 && sel >= today,
+      dayClosedSummary: sel < this.add(today, -1) || (sel === yst && !!factAt),
+      closedDone: dayList.filter(d => d.st === 'done').length,
+      closedMoved: ghosts.length,
+      closedDeclined: dayList.filter(d => d.st === 'declined').length,
+      leadsDay: st.leads[sel] || 0,
+      leadsColor: (sel === yst && !factAt) ? '#0F0F0F' : '#8C8C8C',
+      showLeads: sel < today,
+      leadsAsk: sel === yst && !factAt && !yLeadsOk,
+      leadsEditable: sel === yst && !factAt && yLeadsOk,
+      leadsShowNum: !(sel === yst && !factAt && !yLeadsOk),
+      leadsNeedConfirm: false,
+      leadsHint: sel === yst && !factAt ? (yLeadsOk ? 'сколько пришло за день' : 'сколько пришло за вчера — отметьте') : 'факт за день',
+      leadsWeek, leadsWeekColor: this.factColor(leadsWeek, 10),
+      leadsPlus: () => this.setState(s => ({ leads: Object.assign({}, s.leads, { [yst]: (s.leads[yst] || 0) + 1 }) })),
+      leadsMinus: () => this.setState(s => ({ leads: Object.assign({}, s.leads, { [yst]: Math.max(0, (s.leads[yst] || 0) - 1) }) })),
+
+      weekLabel: this.dt(wStart).getDate() + '–' + this.dt(wEnd).getDate() + ' ' + this.MON[this.dt(wEnd).getMonth()],
+      weekDays, normRows,
+      depRows: (() => {
+        const dp = weekDeals.filter(d => d.c === 'deposit');
+        const moved = deals.filter(d => d.c === 'deposit' && d.from && inRange(d.from, wStart, wEnd) && d.d !== d.from);
+        const mk = (name, list, color) => ({
+          name, color, nameColor: '#0F0F0F',
+          count: list.length,
+          sum: this.money(list.reduce((a, b) => a + (b.am || 0), 0)) + ' ₽'
+        });
+        return [
+          { name: 'Норма', nameColor: '#8C8C8C', color: '#8C8C8C', count: this.cls('deposit').w, sum: '—' },
+          mk('Получено', dp.filter(d => d.st === 'done'), '#6FA800'),
+          mk('Планируется', dp.filter(d => d.st === 'plan'), '#8C8C8C'),
+          mk('Отмены', dp.filter(d => d.st === 'declined'), '#E03A2F'),
+          mk('Переносы', moved, '#F07C00')
+        ];
+      })(),
+
+      monthLabel: this.MONN[mDate.getMonth()] + ' ' + mDate.getFullYear(),
+      dows: this.DOWS.map(t => ({ t })), monthCells,
+      monthNormRows: this.NORM_ORDER.map(k => {
+        const c = this.cls(k);
+        const list = mDeals.filter(d => d.c === k);
+        const fact = list.filter(d => d.st === 'done').length;
+        const plan = list.filter(d => d.st !== 'declined').length;
+        return { name: c.n, norm: c.m, plan, fact, planColor: plan < c.m ? '#F07C00' : '#6FA800', factColor: fact < c.m ? '#F07C00' : '#6FA800' };
+      }),
+      monthDepRows: (() => {
+        const moved = deals.filter(d => d.c === 'deposit' && d.from && inRange(d.from, mFrom, mTo) && d.d !== d.from);
+        const mk = (name, list, color) => ({
+          name, color, nameColor: '#0F0F0F', count: list.length,
+          sum: this.money(list.reduce((a, b) => a + (b.am || 0), 0)) + ' ₽'
+        });
+        return [
+          { name: 'Норма', nameColor: '#8C8C8C', color: '#8C8C8C', count: this.cls('deposit').m, sum: '—' },
+          mk('Получено', deps.filter(d => d.st === 'done'), '#6FA800'),
+          mk('Планируется', deps.filter(d => d.st === 'plan'), '#8C8C8C'),
+          mk('Отмены', deps.filter(d => d.st === 'declined'), '#E03A2F'),
+          mk('Переносы', moved, '#F07C00')
+        ];
+      })(),
+      moneyFact: this.money(moneyFact) + ' ₽', moneyPlan: this.money(moneyPlan) + ' ₽',
+      depFact, depPlan: deps.length, depColor: this.factColor(depFact, 4),
+      dealFact: dealsM.filter(d => d.st === 'done').length, dealPlan: dealsM.length,
+      dealColor: this.factColor(dealsM.filter(d => d.st === 'done').length, 4),
+
+      openAdd: () => (M === 'day' && sel === yst && !factAt) ? this.openAdd(null, yst, { fact: true }) : this.openAdd(null, today),
+      closeSheet: () => this.setState({ sheet: null, editId: null }),
+      sheetAdd: st.sheet === 'add', sheetOutcome: st.sheet === 'outcome',
+      form, classBtns, dateChips,
+      showFar: st.showFar && !form.fact, toggleFar: () => this.setState(s => ({ showFar: !s.showFar })),
+      farStyle: 'flex:none;height:44px;padding:0 12px;border-radius:8px;font-size:17px;cursor:pointer;border:1px solid ' + (st.showFar ? '#0F0F0F' : '#E9E9E9') + ';background:#fff;color:#8C8C8C',
+      farLabel: this.MONN[fa.getMonth()], farCells,
+      farPrev: () => this.setState({ farAnchor: this.iso(new Date(fa.getFullYear(), fa.getMonth() - 1, 1)) }),
+      farNext: () => this.setState({ farAnchor: this.iso(new Date(fa.getFullYear(), fa.getMonth() + 1, 1)) }),
+      needsClient: !fc || !fc.noClient, needsAmount: !!(fc && fc.money),
+      isOther: !!(fc && fc.other), notOther: !fc || !fc.other,
+      formVague: !!form.cls && !(fc && fc.other) && !form.address.trim() && !form.client.trim(),
+      onFormTime: e => this.setForm({ time: e.target.value }),
+      onFormAddress: e => this.setForm({ address: e.target.value }),
+      onFormClient: e => this.setForm({ client: e.target.value }),
+      onFormAmount: e => this.setForm({ amount: e.target.value.replace(/[^0-9]/g, '') }),
+      setBuyer: () => this.setForm({ side: 'buyer' }), setSeller: () => this.setForm({ side: 'seller' }),
+      buyerStyle: segS(form.side === 'buyer'), sellerStyle: segS(form.side === 'seller'),
+      formFact: !!form.cls && form.fact,
+      showDatePick: !form.fact,
+      yesterdayShort: this.short(this.add(today, -1)),
+      showAddBtn: M !== 'day' || !(sel === yst && !!factAt),
+      factClosed: M === 'day' && sel === yst && !!factAt,
+      factSentLabel: 'Факт за вчера сдан в ' + (factAt || ''),
+      onFormResult: e => this.setForm({ result: e.target.value }),
+      saveLabel: canSave ? (form.fact ? 'Добавить в факт за вчера' : noDate ? 'В пул недели' : 'Сохранить')
+        : (!form.cls ? 'Выберите тип' : !resultOk ? 'Нужен итог' : noDate && fc && fc.money ? 'Задатку нужен день' : 'Нужна сумма комиссии'),
+      saveStyle: 'width:100%;height:44px;border-radius:8px;border:none;font-size:17px;font-weight:700;cursor:' + (canSave ? 'pointer' : 'default') + ';background:' + (canSave ? '#AEEA00' : '#F6F6F6') + ';color:' + (canSave ? '#0F0F0F' : '#8C8C8C'),
+      saveDeal: () => {
+        if (!canSave) return;
+        if (noDate) {
+          this.setState(s => ({ pool: s.pool.concat([{ id: Date.now(), c: form.cls, wk: this.monday(s.sel), a: form.address.trim(), cl: form.client.trim() }]), sheet: null }));
+          return;
+        }
+        const nd = {
+          id: Date.now(), c: form.cls, d: form.date, t: form.time.trim(),
+          a: form.address.trim(), cl: form.client.trim(), s: form.side,
+          am: fc && fc.money ? Number(form.amount) : undefined,
+          st: form.fact ? 'done' : 'plan',
+          r: form.fact ? form.result.trim() : undefined,
+          late: form.fact || undefined
+        };
+        if (form.fact) { this.setState(s => ({ deals: s.deals.concat([nd]), sheet: null })); return; }
+        this.setState(s => ({ deals: s.deals.concat([nd]), sheet: null }));
+      },
+
+      oc, oIsDone: oc.tab === 'done', oIsMove: oc.tab === 'move', oIsDecline: oc.tab === 'decline',
+      outcomeSub: ed ? this.cls(ed.c).n + ' · ' + (ed.a || 'объект пока не найден') : '',
+      oDoneStyle: otab('done'), oMoveStyle: otab('move'), oDeclineStyle: otab('decline'),
+      tabDone: () => this.setOc({ tab: 'done' }), tabMove: () => this.setOc({ tab: 'move' }), tabDecline: () => this.setOc({ tab: 'decline' }),
+      onOcResult: e => this.setOc({ result: e.target.value }),
+      onOcNote: e => this.setOc({ note: e.target.value }),
+      moveChips, reasons, moveReasons,
+      ocSaveLabel: ocOk ? ocLabels[oc.tab] : (oc.tab === 'done' ? 'Нужен итог' : oc.tab === 'move' ? (!oc.newDate ? 'Нужна новая дата' : 'Нужна причина и пояснение') : 'Нужна причина и пояснение'),
+      ocSaveStyle: 'width:100%;height:44px;border-radius:8px;border:none;font-size:17px;font-weight:700;cursor:' + (ocOk ? 'pointer' : 'default') + ';background:' + (ocOk ? ocBg[oc.tab] : '#F6F6F6') + ';color:' + (ocOk ? ocFg[oc.tab] : '#8C8C8C'),
+      saveOutcome: () => {
+        if (!ocOk || !ed) return;
+        if (oc.tab === 'done') this.patch(ed.id, { st: 'done', r: oc.result.trim() });
+        else if (oc.tab === 'move') {
+          this.setState(s => ({
+            deals: s.deals.map(d => d.id === ed.id ? Object.assign({}, d, { d: oc.newDate, from: d.from || ed.d, mvR: oc.reason, mvN: oc.note.trim() }) : d)
+          }));
+        } else this.patch(ed.id, { st: 'declined', rs: oc.reason, nt: oc.note.trim() });
+        this.setState({ sheet: null, editId: null });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
